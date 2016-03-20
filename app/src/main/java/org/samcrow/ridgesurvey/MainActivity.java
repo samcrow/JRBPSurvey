@@ -1,6 +1,7 @@
 package org.samcrow.ridgesurvey;
 
 import android.app.AlertDialog.Builder;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -87,7 +88,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private void setUpMap() throws IOException {
         mMap = (MapView) findViewById(R.id.map);
-        mMap.setBuiltInZoomControls(false);
+        // Disable built-in zoom controls, unless running in an emulator
+        mMap.setBuiltInZoomControls(Build.HARDWARE.equals("goldfish"));
 
         final Model model = mMap.getModel();
         model.init(mPreferences);
