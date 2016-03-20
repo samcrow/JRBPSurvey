@@ -1,6 +1,6 @@
 package org.samcrow.ridgesurvey;
 
-import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -48,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setTitle(getString(R.string.map));
+
         // Set up map graphics
         if (AndroidGraphicFactory.INSTANCE == null) {
             AndroidGraphicFactory.createInstance(getApplication());
@@ -59,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             setUpMap();
         } catch (IOException e) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Failed to load map")
+            new Builder(this)
+                    .setTitle(R.string.failed_to_load_map)
                     .setMessage(e.getLocalizedMessage())
                     .show();
             Log.e(TAG, "Failed to set up map", e);
