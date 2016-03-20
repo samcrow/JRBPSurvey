@@ -10,7 +10,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <!-- Purpose of configChanges: Don't restart when these things change
+         (A bug, probably a memory leak, triggers an OutOfMemoryError when the activity
+         is restarted too often) -->
+        <activity android:name=".MainActivity"
+                  android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

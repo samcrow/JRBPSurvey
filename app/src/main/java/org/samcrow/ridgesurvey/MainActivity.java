@@ -97,18 +97,13 @@ public class MainActivity extends AppCompatActivity {
                 metrics.widthPixels, metrics.heightPixels,
                 model.frameBufferModel.getOverdrawFactor(), true);
 
-//        TileRendererLayer tileRendererLayer = AndroidUtil.createTileRendererLayer(
-//                cache,
-//                initializePosition(model.mapViewPosition),
-//                new MapFile(Storage.getResourceAsFile(this, R.raw.jasper_ridge_map)),
-//                InternalRenderTheme.OSMARENDER,
-//                false,
-//                true);
-        final TileRendererLayer tileRendererLayer = new TileRendererLayer(cache,
-                new MapFile(Storage.getResourceAsFile(this, R.raw.jasper_ridge_map)),
+        TileRendererLayer tileRendererLayer = AndroidUtil.createTileRendererLayer(
+                cache,
                 initializePosition(model.mapViewPosition),
-                false, true, AndroidGraphicFactory.INSTANCE);
-        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.OSMARENDER);
+                new MapFile(Storage.getResourceAsFile(this, R.raw.jasper_ridge_map)),
+                InternalRenderTheme.OSMARENDER,
+                false,
+                true);
 
         mMap.getLayerManager().getLayers().add(tileRendererLayer);
     }
