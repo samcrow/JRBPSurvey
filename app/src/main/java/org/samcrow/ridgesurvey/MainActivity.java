@@ -1,12 +1,18 @@
 package org.samcrow.ridgesurvey;
 
 import android.app.AlertDialog.Builder;
+import android.graphics.Picture;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+
+import com.caverock.androidsvg.SVG;
+import com.caverock.androidsvg.SVGParseException;
+import com.caverock.androidsvg.SVGParser;
 
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
@@ -48,6 +54,11 @@ public class MainActivity extends AppCompatActivity {
      */
     private PreferencesFacade mPreferences;
 
+    /**
+     * The layer that displays the user's location
+     */
+    private MyLocationLayer mLocationLayer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,12 +88,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         mMap.getModel().save(mPreferences);
+        mLocationLayer.pause();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-
+    protected void onResume() {
+        super.onResume();
+        mLocationLayer.resume();
     }
 
     /**
@@ -130,6 +142,10 @@ public class MainActivity extends AppCompatActivity {
                     .show();
             Log.e(TAG, "Failed to load sites", e);
         }
+
+        // Location layer
+        mLocationLayer = new MyLocationLayer(getMyLocationDrawable(), this);
+        mMap.getLayerManager().getLayers().add(mLocationLayer);
     }
 
     /**
@@ -145,5 +161,19 @@ public class MainActivity extends AppCompatActivity {
             mvp.setMapPosition(START_POSITION);
         }
         return mvp;
+    }
+
+    /**
+     * Returns a drawable that represents an icon used to display the user's location
+     * @return an icon drawable
+     */
+    private Drawable getMyLocationDrawable() {
+        try {
+            final SVG svg = SVG.getFromResource(getResources(), R.raw.my_location_icon);
+            final Picture picture = svg.renderToPicture();
+            return new PictureDrawable(picture);
+        } catch (SVGParseException e) {
+            throw new RuntimeException("Could not load my location image", e);
+        }
     }
 }
