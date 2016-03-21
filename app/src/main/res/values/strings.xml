@@ -2,4 +2,5 @@
     <string name="app_name">RidgeSurvey</string>
     <string name="map">Map</string>
     <string name="failed_to_load_map">Failed to load map</string>
+    <string name="failed_to_load_sites">Failed to load sites</string>
 </resources>

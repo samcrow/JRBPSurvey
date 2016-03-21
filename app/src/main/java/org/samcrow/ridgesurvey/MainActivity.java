@@ -1,6 +1,7 @@
 package org.samcrow.ridgesurvey;
 
 import android.app.AlertDialog.Builder;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
 
 import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -111,6 +113,23 @@ public class MainActivity extends AppCompatActivity {
                 true);
 
         mMap.getLayerManager().getLayers().add(tileRendererLayer);
+
+
+
+        // Try to load sites
+        try {
+            final List<Site> sites = SiteStorage.readFromStream(getResources().openRawResource(R.raw.sites));
+            final Drawable marker = getResources().getDrawable(R.drawable.ic_gps_fixed_black_18dp);
+            for (Site site : sites) {
+                mMap.getLayerManager().getLayers().add(new SiteLayer(site, marker));
+            }
+        } catch (IOException e) {
+            new Builder(this)
+                    .setTitle(R.string.failed_to_load_sites)
+                    .setMessage(e.getLocalizedMessage())
+                    .show();
+            Log.e(TAG, "Failed to load sites", e);
+        }
     }
 
     /**
