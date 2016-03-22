@@ -3,4 +3,8 @@
     <string name="map">Map</string>
     <string name="failed_to_load_map">Failed to load map</string>
     <string name="failed_to_load_sites">Failed to load sites</string>
+    <string name="location">Location</string>
+    <string name="species">Species</string>
+    <string name="notes">Notes</string>
+    <string name="edit">Edit</string>
 </resources>

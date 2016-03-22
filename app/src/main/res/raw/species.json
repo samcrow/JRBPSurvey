@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Dolichoderinae",
+    "species": [
+      {
+        "name": "Linepithema humile (Argentine ant)",
+        "image": null
+      },
+      "Tapinoma sessile",
+      "Liometopum occidentale"
+    ]
+  },
+  {
+    "name": "Myrmicinae",
+    "species": [
+      "Cremtogaster coarctata (acrobat ant)",
+      "Messor andrei (harvester ant)",
+      "Temnothrax sp.",
+      "Aphenogaster occidentalis",
+      "Pheidole californica",
+      "Cardiocondyla mauritanica (introduced)",
+      "Psedomyremex apache (rare)"
+    ]
+  },
+  {
+    "name": "Formicinae",
+    "species": [
+      "Prenolepis imparis (winter ant)",
+      "Formica sp. (field ant)",
+      "Formica moki",
+      "Formica subpoleta",
+      "Camponotus sp. (carpenter ant)"
+    ]
+  },
+  {
+    "name": "Subterranean",
+    "species": [
+      "Solenopsis molesta",
+      "Stenamman sp."
+    ]
+  }
+]

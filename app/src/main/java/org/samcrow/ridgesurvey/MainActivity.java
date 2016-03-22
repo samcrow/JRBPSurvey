@@ -1,6 +1,7 @@
 package org.samcrow.ridgesurvey;
 
 import android.app.AlertDialog.Builder;
+import android.content.Intent;
 import android.graphics.Picture;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
@@ -9,17 +10,21 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
-import com.caverock.androidsvg.SVGParser;
 
+import org.mapsforge.core.graphics.Color;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.util.AndroidPreferences;
 import org.mapsforge.map.android.util.AndroidUtil;
 import org.mapsforge.map.android.view.MapView;
+import org.mapsforge.map.layer.Layer;
 import org.mapsforge.map.layer.cache.TileCache;
 import org.mapsforge.map.layer.renderer.TileRendererLayer;
 import org.mapsforge.map.model.MapViewPosition;
@@ -30,6 +35,7 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -130,10 +136,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Try to load sites
         try {
-            final List<Site> sites = SiteStorage.readFromStream(getResources().openRawResource(R.raw.sites));
-            final Drawable marker = getResources().getDrawable(R.drawable.ic_gps_fixed_black_18dp);
-            for (Site site : sites) {
-                mMap.getLayerManager().getLayers().add(new SiteLayer(site, marker));
+            final List<Route> routes = SiteStorage.readRoutes(
+                    getResources().openRawResource(R.raw.sites));
+            for (Route route : routes) {
+                final Layer routeLayer = new RouteLayer(route);
+                mMap.getLayerManager().getLayers().add(routeLayer);
             }
         } catch (IOException e) {
             new Builder(this)
@@ -161,6 +168,23 @@ public class MainActivity extends AppCompatActivity {
             mvp.setMapPosition(START_POSITION);
         }
         return mvp;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.home_menu, menu);
+
+        final MenuItem editItem = menu.findItem(R.id.edit_item);
+        editItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                startActivity(new Intent(MainActivity.this, DataEntryActivity.class));
+                return true;
+            }
+        });
+
+        return true;
     }
 
     /**

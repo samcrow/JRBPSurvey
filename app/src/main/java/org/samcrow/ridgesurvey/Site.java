@@ -36,7 +36,6 @@ public class Site {
     public static Site fromUtm(char latZone, int longZone, double easting, double northing) {
         final UTMRef utm = new UTMRef(easting, northing, latZone, longZone);
         final LatLng ll = utm.toLatLng();
-//        ll.toWGS84();
         return new Site(new LatLong(ll.getLat(), ll.getLng()));
     }
 
@@ -53,5 +52,25 @@ public class Site {
         return "Site{" +
                 "mPosition=" + mPosition +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Site site = (Site) o;
+
+        return !(mPosition != null ? !mPosition.equals(site.mPosition) : site.mPosition != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return mPosition != null ? mPosition.hashCode() : 0;
     }
 }

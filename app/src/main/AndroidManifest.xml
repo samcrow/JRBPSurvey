@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:tools="http://schemas.android.com/tools"
-          package="org.samcrow.ridgesurvey"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest package="org.samcrow.ridgesurvey"
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Write external storage for tile cache -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <!-- Location for navigation -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:allowBackup="true"
@@ -15,16 +15,22 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <!-- Purpose of configChanges: Don't restart when these things change
+
+        <!--
+         Purpose of configChanges: Don't restart when these things change
          (A bug, probably a memory leak, triggers an OutOfMemoryError when the activity
-         is restarted too often) -->
-        <activity android:name=".MainActivity"
-                  android:configChanges="orientation|keyboardHidden|screenSize">
+         is restarted too often)
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".DataEntryActivity">
         </activity>
     </application>
 
