@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.View;
 
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
@@ -32,6 +33,7 @@ import org.mapsforge.map.model.Model;
 import org.mapsforge.map.model.common.PreferencesFacade;
 import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
+import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
 
 import java.io.IOException;
 import java.util.List;
@@ -64,18 +66,38 @@ public class MainActivity extends AppCompatActivity {
      */
     private MyLocationLayer mLocationLayer;
 
+    /**
+     * The heading calculator that gathers heading information
+     */
+    private HeadingCalculator mHeadingCalculator;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setTitle(getString(R.string.map));
 
         // Set up map graphics
-        if (AndroidGraphicFactory.INSTANCE == null) {
+        if (AndroidGraphicFactory.INSTANCE == null || new View(this).isInEditMode()) {
             AndroidGraphicFactory.createInstance(getApplication());
         }
 
         setContentView(R.layout.activity_main);
+
+
+        final Compass compass = (Compass) findViewById(R.id.compass);
+        mHeadingCalculator = new HeadingCalculator(this);
+        if (mHeadingCalculator.isAvailable()) {
+            Log.d(TAG, "Heading available");
+        } else {
+            Log.d(TAG, "Heading not available");
+        }
+        mHeadingCalculator.setHeadingListener(new HeadingListener() {
+            @Override
+            public void headingUpdated(double heading) {
+                compass.setHeading(heading);
+            }
+        });
+
 
         mPreferences = new AndroidPreferences(getSharedPreferences(TAG, MODE_PRIVATE));
         try {
@@ -94,11 +116,13 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         mMap.getModel().save(mPreferences);
         mLocationLayer.pause();
+        mHeadingCalculator.pause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        mHeadingCalculator.resume();
         mLocationLayer.resume();
     }
 

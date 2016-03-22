@@ -13,4 +13,13 @@
         android:id="@+id/map"
         android:clickable="true"/>
 
+    <org.samcrow.ridgesurvey.Compass
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/compass"
+        android:layout_margin="32dp"/>
+
 </RelativeLayout>
