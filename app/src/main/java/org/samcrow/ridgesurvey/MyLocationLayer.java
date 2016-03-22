@@ -127,6 +127,7 @@ public class MyLocationLayer extends Marker {
         public void onLocationChanged(Location location) {
             setVisible(true);
             setLatLong(new LatLong(location.getLatitude(), location.getLongitude()));
+            requestRedraw();
         }
 
         @Override

@@ -88,15 +88,16 @@ public class MainActivity extends AppCompatActivity {
         mHeadingCalculator = new HeadingCalculator(this);
         if (mHeadingCalculator.isAvailable()) {
             Log.d(TAG, "Heading available");
+            mHeadingCalculator.setHeadingListener(new HeadingListener() {
+                @Override
+                public void headingUpdated(double heading) {
+                    compass.setHeading(heading);
+                }
+            });
         } else {
             Log.d(TAG, "Heading not available");
+            compass.setVisibility(View.INVISIBLE);
         }
-        mHeadingCalculator.setHeadingListener(new HeadingListener() {
-            @Override
-            public void headingUpdated(double heading) {
-                compass.setHeading(heading);
-            }
-        });
 
 
         mPreferences = new AndroidPreferences(getSharedPreferences(TAG, MODE_PRIVATE));
@@ -222,6 +223,10 @@ public class MainActivity extends AppCompatActivity {
     private Drawable getMyLocationDrawable() {
         try {
             final SVG svg = SVG.getFromResource(getResources(), R.raw.my_location_icon);
+            // Resize based on screen density
+            final float density = getResources().getDisplayMetrics().density;
+            svg.setDocumentWidth(svg.getDocumentWidth() * density);
+            svg.setDocumentHeight(svg.getDocumentHeight() * density);
             final Picture picture = svg.renderToPicture();
             return new PictureDrawable(picture);
         } catch (SVGParseException e) {
