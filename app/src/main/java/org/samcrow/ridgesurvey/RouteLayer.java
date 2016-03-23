@@ -1,6 +1,7 @@
 package org.samcrow.ridgesurvey;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.mapsforge.core.graphics.Canvas;
 import org.mapsforge.core.graphics.Color;
@@ -36,6 +37,11 @@ public class RouteLayer extends Layer {
     private static final float SITE_LABEL_HEIGHT = 20;
 
     /**
+     * Latitude/longitude distance, in degrees, that is the tolerance for clicking to select a site
+     */
+    private static final double CLICK_DISTANCE_THRESHOLD = 0.0005;
+
+    /**
      * The route to display
      */
     @NonNull
@@ -59,10 +65,22 @@ public class RouteLayer extends Layer {
     private final Paint mIdBackgroundPaint;
 
     /**
+     * A paint used to indicate the selected site
+     */
+    @NonNull
+    private final Paint mSelectedPaint;
+
+    /**
      * The sites in the route
      */
     @NonNull
     private final List<Site> mSites;
+
+    /**
+     * The currently selected site, or null if none is selected
+     */
+    @Nullable
+    private Site mSelectedSite;
 
     /**
      * Creates a new route layer
@@ -75,6 +93,8 @@ public class RouteLayer extends Layer {
         mRoute = route;
         mSites = mRoute.getSites();
 
+        mSelectedSite = mSites.get(0);
+
         mPaint = AndroidGraphicFactory.INSTANCE.createPaint();
         mPaint.setColor(color);
 
@@ -84,6 +104,22 @@ public class RouteLayer extends Layer {
         mIdBackgroundPaint = AndroidGraphicFactory.INSTANCE.createPaint();
         mIdBackgroundPaint.setColor(Color.WHITE);
         mIdBackgroundPaint.setStyle(Style.STROKE);
+
+        mSelectedPaint = AndroidGraphicFactory.INSTANCE.createPaint();
+        mSelectedPaint.setColor(android.graphics.Color.argb(0x40, 0xFF, 0x0, 0x0));
+    }
+
+    @Override
+    public boolean onTap(LatLong tapLatLong, Point layerXY, Point tapXY) {
+        for (Site site : mSites) {
+            final double distance = tapLatLong.distance(site.getPosition());
+            if (distance < CLICK_DISTANCE_THRESHOLD) {
+                mSelectedSite = site;
+                requestRedraw();
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -106,6 +142,12 @@ public class RouteLayer extends Layer {
                     mapSize) - topLeftPoint.x;
             final double pixelY = MercatorProjection.latitudeToPixelY(ll.latitude,
                     mapSize) - topLeftPoint.y;
+
+
+            // Indicate selected site
+            if (site == mSelectedSite) {
+                canvas.drawCircle((int) pixelX, (int) pixelY, 20, mSelectedPaint);
+            }
 
 
             final int left = (int) (pixelX - markerRadius);
