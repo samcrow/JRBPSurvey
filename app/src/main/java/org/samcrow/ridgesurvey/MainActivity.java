@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-                    final OrderedRoute solution = new Genetic(0.6, 32, 200).solve(route, start);
+                    final OrderedRoute solution = new Nearest().solve(route, start);
                     final Layer routeLayer = new RouteLayer(solution,
                             Color.HSVToColor(new float[]{hue, saturation, value}));
                     mMap.getLayerManager().getLayers().add(routeLayer);
