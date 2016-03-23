@@ -1,5 +1,7 @@
 package org.samcrow.ridgesurvey;
 
+import android.support.annotation.NonNull;
+
 import org.mapsforge.core.model.LatLong;
 
 import uk.me.jstott.jcoord.LatLng;
@@ -10,19 +12,27 @@ import uk.me.jstott.jcoord.UTMRef;
  *
  * Instances of this class are immutable.
  */
-public class Site {
+public final class Site {
+
+    /**
+     * The numerical ID of this site
+     */
+    private final int mId;
 
     /**
      * The position of this site
      */
+    @NonNull
     private final LatLong mPosition;
 
     /**
      * Creates a new site at a position
      * @param position the position
      */
-    public Site(LatLong position) {
+    public Site(@NonNull LatLong position, int id) {
+        Objects.requireNonNull(position);
         mPosition = position;
+        mId = id;
     }
 
     /**
@@ -33,24 +43,34 @@ public class Site {
      * @param northing the west coordinate, in meters
      * @return a Site at the provided location
      */
-    public static Site fromUtm(char latZone, int longZone, double easting, double northing) {
+    public static Site fromUtm(char latZone, int longZone, double easting, double northing, int id) {
         final UTMRef utm = new UTMRef(easting, northing, latZone, longZone);
         final LatLng ll = utm.toLatLng();
-        return new Site(new LatLong(ll.getLat(), ll.getLng()));
+        return new Site(new LatLong(ll.getLat(), ll.getLng()), id);
     }
 
     /**
      * Returns the position of this site
      * @return the position
      */
+    @NonNull
     public LatLong getPosition() {
         return mPosition;
+    }
+
+    /**
+     * Returns the ID of this site
+     * @return the ID
+     */
+    public int getId() {
+        return mId;
     }
 
     @Override
     public String toString() {
         return "Site{" +
-                "mPosition=" + mPosition +
+                "mId=" + mId +
+                ", mPosition=" + mPosition +
                 '}';
     }
 
@@ -65,12 +85,17 @@ public class Site {
 
         Site site = (Site) o;
 
-        return !(mPosition != null ? !mPosition.equals(site.mPosition) : site.mPosition != null);
+        if (mId != site.mId) {
+            return false;
+        }
+        return mPosition.equals(site.mPosition);
 
     }
 
     @Override
     public int hashCode() {
-        return mPosition != null ? mPosition.hashCode() : 0;
+        int result = mId;
+        result = 31 * result + mPosition.hashCode();
+        return result;
     }
 }

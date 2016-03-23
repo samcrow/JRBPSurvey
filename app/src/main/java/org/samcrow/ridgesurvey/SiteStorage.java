@@ -38,10 +38,11 @@ public class SiteStorage {
             final String[] parts = line.split("\\s*,\\s*");
             if (parts.length >= 3) {
                 try {
+                    final int id = Integer.valueOf(parts[0]);
                     final double easting = Double.valueOf(parts[1]);
                     final double northing = Double.valueOf(parts[2]);
 
-                    final Site site = Site.fromUtm('N', 10, easting, northing);
+                    final Site site = Site.fromUtm('N', 10, easting, northing, id);
                     sites.add(site);
                 } catch (NumberFormatException e) {
                     // Continue
@@ -80,6 +81,7 @@ public class SiteStorage {
             final String[] parts = line.split("\\s*,\\s*");
             if (parts.length >= 4) {
                 try {
+                    final int id = Integer.valueOf(parts[0]);
                     final double easting = Double.valueOf(parts[1]);
                     final double northing = Double.valueOf(parts[2]);
                     final String route = parts[3];
@@ -89,7 +91,7 @@ public class SiteStorage {
                             routes.put(route, new ArrayList<Site>());
                         }
 
-                        final Site site = Site.fromUtm('N', 10, easting, northing);
+                        final Site site = Site.fromUtm('N', 10, easting, northing, id);
                         routes.get(route).add(site);
                     }
                 } catch (NumberFormatException e) {

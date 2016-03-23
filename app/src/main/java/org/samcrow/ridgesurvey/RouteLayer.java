@@ -3,7 +3,9 @@ package org.samcrow.ridgesurvey;
 import android.support.annotation.NonNull;
 
 import org.mapsforge.core.graphics.Canvas;
+import org.mapsforge.core.graphics.Color;
 import org.mapsforge.core.graphics.Paint;
+import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.Point;
@@ -28,6 +30,10 @@ public class RouteLayer extends Layer {
      * The width of site-connecting lines, in meters
      */
     private static final float LINE_WIDTH = 3;
+    /**
+     * The height of site label text, in meters
+     */
+    private static final float SITE_LABEL_HEIGHT = 20;
 
     /**
      * The route to display
@@ -40,6 +46,17 @@ public class RouteLayer extends Layer {
      */
     @NonNull
     private final Paint mPaint;
+
+    /**
+     * The paint used to draw site IDs
+     */
+    @NonNull
+    private final Paint mIdPaint;
+    /**
+     * The paint used to draw contrasting backgrounds of site IDs
+     */
+    @NonNull
+    private final Paint mIdBackgroundPaint;
 
     /**
      * The sites in the route
@@ -60,6 +77,13 @@ public class RouteLayer extends Layer {
 
         mPaint = AndroidGraphicFactory.INSTANCE.createPaint();
         mPaint.setColor(color);
+
+        mIdPaint = AndroidGraphicFactory.INSTANCE.createPaint();
+        mIdPaint.setColor(Color.BLACK);
+
+        mIdBackgroundPaint = AndroidGraphicFactory.INSTANCE.createPaint();
+        mIdBackgroundPaint.setColor(Color.WHITE);
+        mIdBackgroundPaint.setStyle(Style.STROKE);
     }
 
     @Override
@@ -78,11 +102,14 @@ public class RouteLayer extends Layer {
             final int markerRadius = (int) Math.ceil(
                     MercatorProjection.metersToPixels(MARKER_RADIUS, ll.latitude, mapSize));
 
-            final double pixelX = MercatorProjection.longitudeToPixelX(ll.longitude, mapSize);
-            final double pixelY = MercatorProjection.latitudeToPixelY(ll.latitude, mapSize);
+            final double pixelX = MercatorProjection.longitudeToPixelX(ll.longitude,
+                    mapSize) - topLeftPoint.x;
+            final double pixelY = MercatorProjection.latitudeToPixelY(ll.latitude,
+                    mapSize) - topLeftPoint.y;
 
-            final int left = (int) (pixelX - topLeftPoint.x - markerRadius);
-            final int top = (int) (pixelY - topLeftPoint.y - markerRadius);
+
+            final int left = (int) (pixelX - markerRadius);
+            final int top = (int) (pixelY - markerRadius);
             final int right = left + 2 * markerRadius;
             final int bottom = top + 2 * markerRadius;
 
@@ -93,10 +120,41 @@ public class RouteLayer extends Layer {
 
             // Draw a line from the previous site to this one
             if (lastPoint != null) {
-                canvas.drawLine((int) lastPoint.x, (int) lastPoint.y, left + markerRadius,
-                        top + markerRadius, mPaint);
+                canvas.drawLine((int) lastPoint.x, (int) lastPoint.y, (int) pixelX,
+                        (int) pixelY, mPaint);
             }
-            lastPoint = new Point(left + markerRadius, top + markerRadius);
+            lastPoint = new Point(pixelX, pixelY);
+        }
+
+        for (Site site : mSites) {
+            final LatLong ll = site.getPosition();
+
+            // Update paint
+            final float textSize = (float) MercatorProjection.metersToPixels(SITE_LABEL_HEIGHT,
+                    ll.latitude,
+                    mapSize);
+            mIdPaint.setTextSize(textSize);
+            mIdBackgroundPaint.setTextSize(textSize);
+            mIdBackgroundPaint.setStrokeWidth(0.2f * textSize);
+
+            final int markerRadius = (int) Math.ceil(
+                    MercatorProjection.metersToPixels(MARKER_RADIUS, ll.latitude, mapSize));
+
+            final double pixelX = MercatorProjection.longitudeToPixelX(ll.longitude,
+                    mapSize) - topLeftPoint.x;
+            final double pixelY = MercatorProjection.latitudeToPixelY(ll.latitude,
+                    mapSize) - topLeftPoint.y;
+
+
+            // Draw the site ID centered below the marker
+            final String idString = String.format("%d", site.getId());
+            final int textWidth = mIdPaint.getTextWidth(idString);
+            final int textHeight = mIdPaint.getTextHeight(idString);
+            // Stroke with a contrasting background and then fill
+            final int textX = (int) (pixelX - textWidth / 2.0f);
+            final int textY = (int) (pixelY + 1.5 * markerRadius + textHeight);
+            canvas.drawText(idString, textX, textY, mIdBackgroundPaint);
+            canvas.drawText(idString, textX, textY, mIdPaint);
         }
     }
 
