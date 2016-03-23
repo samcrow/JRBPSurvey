@@ -12,7 +12,6 @@ import org.mapsforge.core.util.MercatorProjection;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.layer.Layer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,7 +33,7 @@ public class RouteLayer extends Layer {
      * The route to display
      */
     @NonNull
-    private final Route mRoute;
+    private final OrderedRoute mRoute;
 
     /**
      * The paint used to draw site markers
@@ -54,10 +53,10 @@ public class RouteLayer extends Layer {
      * @param route the route to display. Must not be null.
      * @param color the color to use for this route, in the format used by {@link android.graphics.Color}
      */
-    public RouteLayer(@NonNull Route route, int color) {
+    public RouteLayer(@NonNull OrderedRoute route, int color) {
         Objects.requireNonNull(route);
         mRoute = route;
-        mSites = new ArrayList<>(mRoute.getSites());
+        mSites = mRoute.getSites();
 
         mPaint = AndroidGraphicFactory.INSTANCE.createPaint();
         mPaint.setColor(color);

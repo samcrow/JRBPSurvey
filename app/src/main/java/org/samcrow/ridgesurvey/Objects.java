@@ -8,6 +8,17 @@ import android.support.annotation.Nullable;
 public class Objects {
 
     /**
+     * Throws a NullPointerException if any value is null
+     * @param values one or more values to check
+     * @throws NullPointerException if any argument is null
+     */
+    public static void requireAllNonNull(@Nullable Object... values) {
+        for (Object value : values) {
+            requireNonNull(value);
+        }
+    }
+
+    /**
      * Throws a NullPointerException if value is null
      * @param value the value to check
      * @param <T> the value type

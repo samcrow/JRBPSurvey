@@ -119,7 +119,7 @@ public class HeadingCalculator {
                     float orientation[] = new float[3];
                     SensorManager.getOrientation(R, orientation);
                     final float azimuth = orientation[0];
-                    final double headingDegrees = (Math.toDegrees(azimuth + Math.PI / 2.0) + 360.0) % 360.0;
+                    final double headingDegrees = (Math.toDegrees(azimuth) + 360.0) % 360.0;
                     if (mHeadingListener != null) {
                         mHeadingListener.headingUpdated(headingDegrees);
                     }

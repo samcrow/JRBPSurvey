@@ -166,9 +166,28 @@ public class MainActivity extends AppCompatActivity {
             final float value = 1.0f;
             int i = 0;
             for (Route route : routes) {
-                final float hue = 360.0f * (i / (float) routes.size());
-                final Layer routeLayer = new RouteLayer(route, Color.HSVToColor(new float[]{ hue, saturation, value }));
-                mMap.getLayerManager().getLayers().add(routeLayer);
+                if (!route.getSites().isEmpty()) {
+                    final float hue = 360.0f * (i / (float) routes.size());
+
+                    // Solve the traveling salesman problem, starting at the southwesternmost point
+                    double minLatitude = Double.MAX_VALUE;
+                    double minLongitude = Double.MAX_VALUE;
+                    Site start = null;
+                    for (Site site : route.getSites()) {
+                        final double latitude = site.getPosition().latitude;
+                        final double longitude = site.getPosition().longitude;
+                        if (latitude < minLatitude && longitude < minLongitude) {
+                            minLatitude = latitude;
+                            minLongitude = longitude;
+                            start = site;
+                        }
+                    }
+
+                    final OrderedRoute solution = new Genetic(0.6, 32, 200).solve(route, start);
+                    final Layer routeLayer = new RouteLayer(solution,
+                            Color.HSVToColor(new float[]{hue, saturation, value}));
+                    mMap.getLayerManager().getLayers().add(routeLayer);
+                }
                 i++;
             }
         } catch (IOException e) {
