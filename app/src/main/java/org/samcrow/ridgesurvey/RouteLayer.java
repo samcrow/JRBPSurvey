@@ -40,6 +40,10 @@ public class RouteLayer extends Layer {
      * Latitude/longitude distance, in degrees, that is the tolerance for clicking to select a site
      */
     private static final double CLICK_DISTANCE_THRESHOLD = 0.0005;
+    /**
+     * Radius of the selected site marker, in meters
+     */
+    private static final float SELECTED_RADIUS = 20;
 
     /**
      * The paint used to draw site markers
@@ -65,6 +69,12 @@ public class RouteLayer extends Layer {
     private final Paint mSelectedPaint;
 
     /**
+     * The route to display (not ordered)
+     */
+    @NonNull
+    private final Route mRoute;
+
+    /**
      * The sites in the route
      */
     @NonNull
@@ -79,13 +89,16 @@ public class RouteLayer extends Layer {
     /**
      * Creates a new route layer
      *
-     * @param route the route to display. Must not be null.
-     * @param color the color to use for this route, in the format used by {@link android.graphics.Color}
+     * @param baseRoute        the route to display. Must not be null.
+     * @param route            the route to display, with its points in a valid order. Must not be null.
+     * @param color            the color to use for this route, in the format used by {@link android.graphics.Color}
      * @param selectionManager A selection manager to track the selected site. Must not be null.
      */
-    public RouteLayer(@NonNull OrderedRoute route, int color, @NonNull SelectionManager selectionManager) {
+    public RouteLayer(@NonNull Route baseRoute, @NonNull OrderedRoute route, int color,
+                      @NonNull SelectionManager selectionManager) {
         Objects.requireAllNonNull(route, selectionManager);
 
+        mRoute = baseRoute;
         mSites = route.getSites();
 
         mSelectionManager = selectionManager;
@@ -105,11 +118,11 @@ public class RouteLayer extends Layer {
     }
 
     @Override
-    public boolean onTap(LatLong tapLatLong, Point layerXY, Point tapXY) {
+    public synchronized boolean onTap(LatLong tapLatLong, Point layerXY, Point tapXY) {
         for (Site site : mSites) {
             final double distance = tapLatLong.distance(site.getPosition());
             if (distance < CLICK_DISTANCE_THRESHOLD) {
-                mSelectionManager.setSelectedSite(site);
+                mSelectionManager.setSelectedSite(site, mRoute);
                 requestRedraw();
                 return true;
             }
@@ -118,7 +131,8 @@ public class RouteLayer extends Layer {
     }
 
     @Override
-    public void draw(BoundingBox boundingBox, byte zoomLevel, Canvas canvas, Point topLeftPoint) {
+    public synchronized void draw(BoundingBox boundingBox, byte zoomLevel, Canvas canvas,
+                                  Point topLeftPoint) {
         final long mapSize = MercatorProjection.getMapSize(zoomLevel, displayModel.getTileSize());
         final Rectangle canvasRect = new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight());
 
@@ -141,7 +155,9 @@ public class RouteLayer extends Layer {
 
             // Indicate selected site
             if (site == mSelectionManager.getSelectedSite()) {
-                canvas.drawCircle((int) pixelX, (int) pixelY, 20, mSelectedPaint);
+                final double selectedRadius = MercatorProjection.metersToPixels(SELECTED_RADIUS,
+                        ll.latitude, mapSize);
+                canvas.drawCircle((int) pixelX, (int) pixelY, (int) selectedRadius, mSelectedPaint);
             }
 
 

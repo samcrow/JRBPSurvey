@@ -3,6 +3,7 @@ package org.samcrow.ridgesurvey;
 import android.app.AlertDialog;
 import android.database.SQLException;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -10,8 +11,10 @@ import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
@@ -36,11 +39,11 @@ public class DataEntryActivity extends AppCompatActivity {
     /**
      * The argument key used to provide a site
      */
-    private static final String ARG_SITE = DataEntryActivity.class.getName() + ".ARG_SITE";
+    public static final String ARG_SITE = DataEntryActivity.class.getName() + ".ARG_SITE";
     /**
      * The argument key used to provide the name of the route that the site is on
      */
-    private static final String ARG_ROUTE = DataEntryActivity.class.getName() + ".ARG_ROUTE";
+    public static final String ARG_ROUTE = DataEntryActivity.class.getName() + ".ARG_ROUTE";
     /**
      * The group that contains the SpeciesViews and potentially other views
      */
@@ -63,6 +66,10 @@ public class DataEntryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_entry);
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         // Unpack site from intent
         mSite = getIntent().getParcelableExtra(ARG_SITE);
@@ -74,8 +81,7 @@ public class DataEntryActivity extends AppCompatActivity {
             throw new IllegalStateException("DataEntryActivity must be started with a route extra");
         }
 
-        final TextView siteView = (TextView) findViewById(R.id.location_field);
-        siteView.setText(String.format(getString(R.string.format_site_id), mSite.getId()));
+        setTitle(String.format(getString(R.string.format_site_id), mSite.getId()));
 
         mNotesField = (EditText) findViewById(R.id.notes_field);
 
@@ -101,6 +107,12 @@ public class DataEntryActivity extends AppCompatActivity {
         } finally {
             IOUtils.closeQuietly(source);
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 
     @Override
@@ -139,6 +151,7 @@ public class DataEntryActivity extends AppCompatActivity {
         try {
             final ObservationDatabase db = new ObservationDatabase(this);
             db.insertObservation(observation);
+            Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
             finish();
         } catch (SQLException e) {
             new AlertDialog.Builder(this)

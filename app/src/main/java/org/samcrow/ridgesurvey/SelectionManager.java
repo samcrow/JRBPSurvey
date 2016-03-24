@@ -18,6 +18,12 @@ public class SelectionManager {
     private Site mSelectedSite;
 
     /**
+     * The route that contains the selected site, or null if no site is selected
+     */
+    @Nullable
+    private Route mSelectedSiteRoute;
+
+    /**
      * The listeners that will be notified when the selected site changes
      */
     @NonNull
@@ -27,8 +33,10 @@ public class SelectionManager {
         /**
          * Called when the selected site is changed
          * @param newSelection the new selected site, which may be null
+         * @param siteRoute the route that contains the new selected site, or null if newSelection
+         *                  is null
          */
-        void selectionChanged(@Nullable Site newSelection);
+        void selectionChanged(@Nullable Site newSelection, @Nullable Route siteRoute);
     }
 
     /**
@@ -36,6 +44,7 @@ public class SelectionManager {
      */
     public SelectionManager() {
         mSelectedSite = null;
+        mSelectedSiteRoute = null;
         mListeners = new LinkedHashSet<>();
     }
 
@@ -49,15 +58,31 @@ public class SelectionManager {
     }
 
     /**
+     * Returns the route that contains the currently selected site
+     * @return
+     */
+    @Nullable
+    public Route getSelectedSiteRoute() {
+        return mSelectedSiteRoute;
+    }
+
+    /**
      * Sets the selected site
      * @param selectedSite the site to set
+     * @param siteRoute the route that contains the site. Must be null if and only if selectedSite
+     *                  is null.
      */
-    public void setSelectedSite(@Nullable Site selectedSite) {
-        final boolean changed = selectedSite != mSelectedSite;
+    public void setSelectedSite(@Nullable Site selectedSite, @Nullable Route siteRoute) {
+        if ((selectedSite == null) ^ (siteRoute == null)) {
+            throw new IllegalArgumentException("selectedSite and siteRoute must be both null or " +
+                    "both non-null");
+        }
+        final boolean changed = selectedSite != mSelectedSite || siteRoute != mSelectedSiteRoute;
         mSelectedSite = selectedSite;
+        mSelectedSiteRoute = siteRoute;
         if (changed) {
             for (SelectionListener listener : mListeners) {
-                listener.selectionChanged(mSelectedSite);
+                listener.selectionChanged(mSelectedSite, mSelectedSiteRoute);
             }
         }
     }

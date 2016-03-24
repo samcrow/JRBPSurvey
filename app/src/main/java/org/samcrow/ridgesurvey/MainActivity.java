@@ -1,5 +1,6 @@
 package org.samcrow.ridgesurvey;
 
+import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.graphics.Color;
@@ -36,6 +37,7 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme;
 import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -72,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
     private HeadingCalculator mHeadingCalculator;
 
     /**
+     * The location finder that gets heading information
+     */
+    private LocationFinder mLocationFinder;
+
+    /**
      * The selection manager
      */
     private SelectionManager mSelectionManager;
@@ -81,8 +88,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setTitle(getString(R.string.map));
 
-        mSelectionManager = new SelectionManager();
-
         // Set up map graphics
         if (AndroidGraphicFactory.INSTANCE == null || new View(this).isInEditMode()) {
             AndroidGraphicFactory.createInstance(getApplication());
@@ -90,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        mSelectionManager = new SelectionManager();
+
+        mLocationFinder = new LocationFinder(this);
 
         final Compass compass = (Compass) findViewById(R.id.compass);
         mHeadingCalculator = new HeadingCalculator(this);
@@ -123,15 +131,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         mMap.getModel().save(mPreferences);
-        mLocationLayer.pause();
+        mLocationFinder.pause();
         mHeadingCalculator.pause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        mLocationFinder.resume();
         mHeadingCalculator.resume();
-        mLocationLayer.resume();
     }
 
     /**
@@ -161,10 +169,8 @@ public class MainActivity extends AppCompatActivity {
                 false,
                 true);
 
-        mMap.getLayerManager().getLayers().add(tileRendererLayer);
 
-
-
+        final List<Layer> routeLayers = new ArrayList<>();
         // Try to load sites
         try {
             final List<Route> routes = SiteStorage.readRoutes(
@@ -192,8 +198,8 @@ public class MainActivity extends AppCompatActivity {
 
                     final OrderedRoute solution = new Nearest().solve(route, start);
                     final int color = Color.HSVToColor(new float[]{hue, saturation, value});
-                    final Layer routeLayer = new RouteLayer(solution, color, mSelectionManager);
-                    mMap.getLayerManager().getLayers().add(routeLayer);
+                    final Layer routeLayer = new RouteLayer(route, solution, color, mSelectionManager);
+                    routeLayers.add(routeLayer);
                 }
                 i++;
             }
@@ -205,9 +211,19 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Failed to load sites", e);
         }
 
-        // Location layer
-        mLocationLayer = new MyLocationLayer(getMyLocationDrawable(), this);
-        mMap.getLayerManager().getLayers().add(mLocationLayer);
+        // Location layers
+        final RouteLineLayer routeLineLayer = new RouteLineLayer();
+        mLocationLayer = new MyLocationLayer(getMyLocationDrawable());
+        mSelectionManager.addSelectionListener(routeLineLayer);
+        mLocationFinder.addListener(routeLineLayer);
+        final MyLocationLayer locationLayer = new MyLocationLayer(getMyLocationDrawable());
+        mLocationFinder.addListener(locationLayer);
+
+        // Add layers to the map
+        mMap.getLayerManager().getLayers().add(tileRendererLayer);
+        mMap.getLayerManager().getLayers().add(routeLineLayer);
+        mMap.getLayerManager().getLayers().addAll(routeLayers);
+        mMap.getLayerManager().getLayers().add(locationLayer);
     }
 
     /**
@@ -234,7 +250,19 @@ public class MainActivity extends AppCompatActivity {
         editItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                startActivity(new Intent(MainActivity.this, DataEntryActivity.class));
+                final Site selectedSite = mSelectionManager.getSelectedSite();
+                final Route selectedSiteRoute = mSelectionManager.getSelectedSiteRoute();
+                if (selectedSite != null && selectedSiteRoute != null) {
+                    final Intent intent = new Intent(MainActivity.this, DataEntryActivity.class);
+                    intent.putExtra(DataEntryActivity.ARG_SITE, selectedSite);
+                    intent.putExtra(DataEntryActivity.ARG_ROUTE, selectedSiteRoute.getName());
+                    startActivity(intent);
+                } else {
+                    new Builder(MainActivity.this)
+                            .setTitle(R.string.no_site_selected)
+                            .setMessage(R.string.select_a_site)
+                            .show();
+                }
                 return true;
             }
         });

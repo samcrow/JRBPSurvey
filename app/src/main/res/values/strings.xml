@@ -9,4 +9,7 @@
     <string name="edit">Edit</string>
     <string name="save">Save</string>
     <string name="format_site_id">Site %d</string>
+    <string name="no_site_selected">No site selected</string>
+    <string name="select_a_site">Select a site by tapping on it</string>
+    <string name="saved">Saved</string>
 </resources>
