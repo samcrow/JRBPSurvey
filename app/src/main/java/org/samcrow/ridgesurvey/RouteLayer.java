@@ -42,12 +42,6 @@ public class RouteLayer extends Layer {
     private static final double CLICK_DISTANCE_THRESHOLD = 0.0005;
 
     /**
-     * The route to display
-     */
-    @NonNull
-    private final OrderedRoute mRoute;
-
-    /**
      * The paint used to draw site markers
      */
     @NonNull
@@ -77,23 +71,24 @@ public class RouteLayer extends Layer {
     private final List<Site> mSites;
 
     /**
-     * The currently selected site, or null if none is selected
+     * The selection manager that tracks the selected site
      */
-    @Nullable
-    private Site mSelectedSite;
+    @NonNull
+    private final SelectionManager mSelectionManager;
 
     /**
      * Creates a new route layer
      *
      * @param route the route to display. Must not be null.
      * @param color the color to use for this route, in the format used by {@link android.graphics.Color}
+     * @param selectionManager A selection manager to track the selected site. Must not be null.
      */
-    public RouteLayer(@NonNull OrderedRoute route, int color) {
-        Objects.requireNonNull(route);
-        mRoute = route;
-        mSites = mRoute.getSites();
+    public RouteLayer(@NonNull OrderedRoute route, int color, @NonNull SelectionManager selectionManager) {
+        Objects.requireAllNonNull(route, selectionManager);
 
-        mSelectedSite = mSites.get(0);
+        mSites = route.getSites();
+
+        mSelectionManager = selectionManager;
 
         mPaint = AndroidGraphicFactory.INSTANCE.createPaint();
         mPaint.setColor(color);
@@ -114,7 +109,7 @@ public class RouteLayer extends Layer {
         for (Site site : mSites) {
             final double distance = tapLatLong.distance(site.getPosition());
             if (distance < CLICK_DISTANCE_THRESHOLD) {
-                mSelectedSite = site;
+                mSelectionManager.setSelectedSite(site);
                 requestRedraw();
                 return true;
             }
@@ -145,7 +140,7 @@ public class RouteLayer extends Layer {
 
 
             // Indicate selected site
-            if (site == mSelectedSite) {
+            if (site == mSelectionManager.getSelectedSite()) {
                 canvas.drawCircle((int) pixelX, (int) pixelY, 20, mSelectedPaint);
             }
 

@@ -71,10 +71,17 @@ public class MainActivity extends AppCompatActivity {
      */
     private HeadingCalculator mHeadingCalculator;
 
+    /**
+     * The selection manager
+     */
+    private SelectionManager mSelectionManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(getString(R.string.map));
+
+        mSelectionManager = new SelectionManager();
 
         // Set up map graphics
         if (AndroidGraphicFactory.INSTANCE == null || new View(this).isInEditMode()) {
@@ -184,8 +191,8 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     final OrderedRoute solution = new Nearest().solve(route, start);
-                    final Layer routeLayer = new RouteLayer(solution,
-                            Color.HSVToColor(new float[]{hue, saturation, value}));
+                    final int color = Color.HSVToColor(new float[]{hue, saturation, value});
+                    final Layer routeLayer = new RouteLayer(solution, color, mSelectionManager);
                     mMap.getLayerManager().getLayers().add(routeLayer);
                 }
                 i++;

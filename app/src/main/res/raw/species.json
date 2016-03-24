@@ -4,39 +4,87 @@
     "species": [
       {
         "name": "Linepithema humile (Argentine ant)",
-        "image": null
+        "column": "Linepithem",
+        "description": "Triangular head, brown. Moves fast, can forage in big groups."
       },
-      "Tapinoma sessile",
-      "Liometopum occidentale"
+      {
+        "name": "Tapinoma sessile",
+        "column": "Tapinoma",
+        "description": "Black, not shiny. Moves slower than L. humile. Can forage in groups."
+      },
+      {
+        "name": "Liometopum occidentale",
+        "column": "Liometopum",
+        "description": "Not shiny, 2 colors, short legs and antennae. Walks slowly. Can forage in groups. Smells good."
+      }
     ]
   },
   {
     "name": "Myrmicinae",
     "species": [
-      "Cremtogaster coarctata (acrobat ant)",
-      "Messor andrei (harvester ant)",
-      "Temnothrax sp.",
-      "Aphenogaster occidentalis",
-      "Pheidole californica",
-      "Cardiocondyla mauritanica (introduced)",
-      "Psedomyremex apache (rare)"
+      {
+        "name": "Cremtogaster coarctata (acrobat ant)",
+        "column": "Crematogas",
+        "description": "Black and shiny. The abdomen is flat and heart shaped. Head is big and round. Can forage in groups."
+      },
+      {
+        "name": "Messor andrei (harvester ant)",
+        "column": "Messor"
+      },
+      {
+        "name": "Temnothrax sp.",
+        "column": "Temnothora",
+        "description": "Round abdomen. Moves slowly, usually found alone."
+      },
+      {
+        "name": "Aphenogaster occidentalis",
+        "column": "Aphaenogas"
+      },
+      {
+        "name": "Pheidole californica",
+        "column": "Pheidole"
+      },
+      {
+        "name": "Cardiocondyla mauritanica (introduced)",
+        "column": "Cardiocond"
+      },
+      {
+        "name": "Pseudomyremex apache (rare)",
+        "column": "Pseudomyrm"
+      }
     ]
   },
   {
     "name": "Formicinae",
     "species": [
-      "Prenolepis imparis (winter ant)",
-      "Formica sp. (field ant)",
-      "Formica moki",
-      "Formica subpoleta",
-      "Camponotus sp. (carpenter ant)"
+      {
+        "name": "Prenolepis imparis (winter ant)",
+        "column": "Prenolepis",
+        "description": "Black and shiny, legs and antennae lighter. Small head. Can forage in big groups."
+      },
+      {
+        "name": "Formica",
+        "column": "Formica",
+        "description": "Not shiny, 2 colors, 2 humps on the thorax, long legs and antennae. Run fast, very hard to catch. Usually 1-2 workers."
+      },
+      {
+        "name": "Camponotus sp. (carpenter ant)",
+        "column": "Camponotus",
+        "description": "Very big, different sizes of workers. Brown/ amber/ or black, shiny. One hump on the thorax. Can forage in small groups."
+      }
     ]
   },
   {
     "name": "Subterranean",
     "species": [
-      "Solenopsis molesta",
-      "Stenamman sp."
+      {
+        "name": "Solenopsis molesta",
+        "column": "Solenopsis"
+      },
+      {
+        "name": "Stenamman sp.",
+        "column": "Stenamma"
+      }
     ]
   }
 ]

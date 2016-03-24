@@ -7,4 +7,6 @@
     <string name="species">Species</string>
     <string name="notes">Notes</string>
     <string name="edit">Edit</string>
+    <string name="save">Save</string>
+    <string name="format_site_id">Site %d</string>
 </resources>

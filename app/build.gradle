@@ -17,11 +17,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
 }
 
 dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
+    // Joda time (Apache 2.0) http://www.joda.org/joda-time/
+    compile 'joda-time:joda-time:2.9.2'
     // Mapsforge (LGPLv3) https://github.com/mapsforge/mapsforge
     compile 'org.mapsforge:mapsforge-core:0.6.0'
     compile 'org.mapsforge:mapsforge-map:0.6.0'

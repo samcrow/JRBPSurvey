@@ -1,5 +1,7 @@
 package org.samcrow.ridgesurvey;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import org.mapsforge.core.model.LatLong;
@@ -12,7 +14,7 @@ import uk.me.jstott.jcoord.UTMRef;
  *
  * Instances of this class are immutable.
  */
-public final class Site {
+public final class Site implements Parcelable {
 
     /**
      * The numerical ID of this site
@@ -98,4 +100,29 @@ public final class Site {
         result = 31 * result + mPosition.hashCode();
         return result;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mId);
+        dest.writeSerializable(mPosition);
+    }
+
+    public static Parcelable.Creator<Site> CREATOR = new Creator<Site>() {
+        @Override
+        public Site createFromParcel(Parcel source) {
+            final int id = source.readInt();
+            final LatLong position = (LatLong) source.readSerializable();
+            return new Site(position, id);
+        }
+
+        @Override
+        public Site[] newArray(int size) {
+            return new Site[size];
+        }
+    };
 }

@@ -25,39 +25,37 @@ public class SpeciesStorage {
 
     /**
      * Reads zero or more species groups, containing zero or more species, from a stream
-     *
+     * <p/>
      * The stream must provide JSON-formatted data.
-     *
+     * <p/>
      * The root of the data must be a JSON array of groups.
-     *
+     * <p/>
      * Each group must be a JSON object. It must have a "name" key corresponding to a string value
      * containing the name of the species group. It must have a "species" key corresponding to a
      * JSON array of species.
-     *
-     * A species may be either a string or a JSON object.
-     *
-     * If a species is a string, the string will be interpreted as the species name. The species
-     * will have no image.
-     *
-     * If the species is a JSON object, it must have a "name" key corresponding to a string value
+     * <p/>
+     * A species must be a JSON object. It must have a "name" key corresponding to a string value
      * containing the name of the species. It may have an "image" key corresponding to a string
-     * or null value.
-     *
-     * If the "image" value is not null, it must be a string in the form package:type/name.
+     * value. It may have a "description" key corresponding to a string that describes the species.
+     * It must have a "column" key corresponding to a string that contains the column name used
+     * to submit data on the species.
+     * <p/>
+     * If the "image" value is present, it must be a string in the form package:type/name.
      * package must be the name of a package that contains resources. type must be "drawable"
      * or "mipmap". name must be the name of a drawable or mipmap resource in the package.
      *
      * @param context a context. Must not be null.
-     * @param source the stream to read from. Must not be null. The stream will not be closed.
+     * @param source  the stream to read from. Must not be null. The stream will not be closed.
      * @return the species groups that were read
      * @throws java.io.IOException if a read or parse error occurs
      */
-    public static List<SpeciesGroup> loadSpeciesGroups(Context context, InputStream source) throws IOException {
+    public static List<SpeciesGroup> loadSpeciesGroups(Context context, InputStream source)
+            throws IOException {
         Objects.requireNonNull(context);
         Objects.requireNonNull(source);
 
         final InputStreamReader reader = new InputStreamReader(source);
-            final String jsonText = IOUtils.toString(reader);
+        final String jsonText = IOUtils.toString(reader);
         try {
             final JSONArray groups = new JSONArray(jsonText);
             final List<SpeciesGroup> groupList = new ArrayList<>(groups.length());
@@ -71,27 +69,19 @@ public class SpeciesStorage {
                     final List<Species> speciesList = new ArrayList<>(species.length());
                     for (int j = 0; j < species.length(); j++) {
                         try {
-                            // The entry in the species array may be either a name string or an object
-                            // containing a name and a resource identifier
-                            final Object speciesObject = species.get(j);
-                            String speciesName;
+                            final JSONObject speciesJsonObject = species.getJSONObject(j);
+                            final String speciesName = speciesJsonObject.getString("name");
+                            final String column = speciesJsonObject.getString("column");
+                            final String description = speciesJsonObject.optString("description",
+                                    null);
+                            final String resourceName = speciesJsonObject.optString("image", null);
                             Drawable speciesImage = null;
-                            if (speciesObject instanceof String) {
-                                speciesName = (String) speciesObject;
-                            } else if (speciesObject instanceof JSONObject) {
-                                final JSONObject speciesJsonObject = (JSONObject) speciesObject;
-                                speciesName = speciesJsonObject.getString("name");
-                                final String resourceName = speciesJsonObject.optString("image",
-                                        null);
-                                if (resourceName != null && !resourceName.equals(JSONObject.NULL)) {
-                                    speciesImage = getDrawableResource(context.getResources(),
-                                            resourceName);
-                                }
-                            } else {
-                                throw new JSONException(
-                                        "Species entry is neither string nor object");
+                            if (resourceName != null && !resourceName.equals(JSONObject.NULL)) {
+                                speciesImage = getDrawableResource(context.getResources(),
+                                        resourceName);
                             }
-                            speciesList.add(new Species(speciesName, speciesImage));
+                            speciesList.add(
+                                    new Species(speciesName, column, description, speciesImage));
                         } catch (JSONException e) {
                             // Proceed to the next species
                         }
@@ -111,6 +101,7 @@ public class SpeciesStorage {
 
     /**
      * Finds and returns a drawable resource
+     *
      * @param name a resource name, in the form package:type/name. The type must be drawable
      *             or mipmap.
      * @return the drawable resource, or null if none could be found
@@ -125,5 +116,6 @@ public class SpeciesStorage {
         }
     }
 
-    private SpeciesStorage() {}
+    private SpeciesStorage() {
+    }
 }

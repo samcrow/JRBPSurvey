@@ -89,4 +89,19 @@ public class SpeciesView extends LinearLayout {
         }
     }
 
+    /**
+     * Returns the species associated with this view
+     * @return the species
+     */
+    public Species getSpecies() {
+        return mSpecies;
+    }
+
+    /**
+     * Returns true if the user has checked the checkbox
+     * @return
+     */
+    public boolean isChecked() {
+        return mCheckBox.isChecked();
+    }
 }
