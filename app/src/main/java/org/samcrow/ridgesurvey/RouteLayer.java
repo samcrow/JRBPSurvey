@@ -1,7 +1,6 @@
 package org.samcrow.ridgesurvey;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import org.mapsforge.core.graphics.Canvas;
 import org.mapsforge.core.graphics.Color;
@@ -10,7 +9,6 @@ import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.Point;
-import org.mapsforge.core.model.Rectangle;
 import org.mapsforge.core.util.MercatorProjection;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.layer.Layer;
@@ -134,7 +132,6 @@ public class RouteLayer extends Layer {
     public synchronized void draw(BoundingBox boundingBox, byte zoomLevel, Canvas canvas,
                                   Point topLeftPoint) {
         final long mapSize = MercatorProjection.getMapSize(zoomLevel, displayModel.getTileSize());
-        final Rectangle canvasRect = new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight());
 
         // Draw sites
         Point lastPoint = null;
@@ -160,16 +157,7 @@ public class RouteLayer extends Layer {
                 canvas.drawCircle((int) pixelX, (int) pixelY, (int) selectedRadius, mSelectedPaint);
             }
 
-
-            final int left = (int) (pixelX - markerRadius);
-            final int top = (int) (pixelY - markerRadius);
-            final int right = left + 2 * markerRadius;
-            final int bottom = top + 2 * markerRadius;
-
-            final Rectangle markerRect = new Rectangle(left, top, right, bottom);
-            if (canvasRect.intersects(markerRect)) {
-                canvas.drawCircle(left + markerRadius, top + markerRadius, markerRadius, mPaint);
-            }
+            canvas.drawCircle((int) pixelX, (int) pixelY, markerRadius, mPaint);
 
             // Draw a line from the previous site to this one
             if (lastPoint != null) {
