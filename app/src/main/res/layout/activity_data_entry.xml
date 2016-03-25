@@ -35,6 +35,6 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="@string/notes"
-            android:inputType="textMultiLine"/>
+            android:inputType="textMultiLine|textCapSentences"/>
     </LinearLayout>
 </ScrollView>

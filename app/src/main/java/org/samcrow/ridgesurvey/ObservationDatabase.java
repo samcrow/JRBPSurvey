@@ -26,6 +26,7 @@ import java.util.Map;
  */
 public final class ObservationDatabase {
     private static final String TAG = ObservationDatabase.class.getSimpleName();
+    public static final String TABLE_NAME = "observations";
     /*
      * Schema:
      * site: Site ID, INTEGER
@@ -58,6 +59,16 @@ public final class ObservationDatabase {
      * @throws SQLException if an error occurs
      */
     public void insertObservation(@NonNull Observation observation) throws SQLException {
+        final ContentValues values = createContentValues(observation);
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        try {
+            db.insertOrThrow("observations", null, values);
+        } finally {
+            db.close();
+        }
+    }
+
+    private static ContentValues createContentValues(@NonNull Observation observation) {
         final ContentValues values = new ContentValues();
         values.put("site", observation.getSiteId());
         values.put("route", observation.getRouteName());
@@ -79,13 +90,7 @@ public final class ObservationDatabase {
         }
 
         values.put("notes", observation.getNotes());
-
-        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        try {
-            db.insertOrThrow("observations", null, values);
-        } finally {
-            db.close();
-        }
+        return values;
     }
 
     /**
@@ -100,7 +105,7 @@ public final class ObservationDatabase {
         final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         try {
             // Select one
-            final Cursor result = db.query("observations", null, null, null, null, null, null, "1");
+            final Cursor result = db.query(TABLE_NAME, null, null, null, null, null, null, "1");
             try {
                 if (result.moveToNext()) {
                     return createObservation(result);
@@ -126,7 +131,7 @@ public final class ObservationDatabase {
 
         final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         try {
-            final Cursor result = db.query("observations", null, null, null, null, null, null);
+            final Cursor result = db.query(TABLE_NAME, null, null, null, null, null, null);
             try {
                 while (result.moveToNext()) {
                     try {
@@ -189,6 +194,29 @@ public final class ObservationDatabase {
         return new Observation(time, site, route, speciesPresent, notes);
     }
 
+    /**
+     * Deletes an observation from the database. Has no effect if the database does not have an
+     * observation equal to the provided observation.
+     *
+     * @param observation the observation to delete
+     * @return true if the observation was deleted, otherwise false
+     */
+    public boolean delete(Observation observation) {
+        final ContentValues values = createContentValues(observation);
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        try {
+            // Only use the time as a criterion (assume that no two observations were made
+            // in the same millisecond)
+            // Using all the fields as critera resulted in no rows being deleted.
+            final int count = db.delete(TABLE_NAME,
+                    "time = ?",
+                    new String[]{values.getAsString("time")});
+            return count > 0;
+        } finally {
+            db.close();
+        }
+    }
+
     private static class ObservationOpenHelper extends SQLiteOpenHelper {
 
         private static final String NAME = "observations";
@@ -201,7 +229,7 @@ public final class ObservationDatabase {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE observations (" +
+            db.execSQL("CREATE TABLE " + TABLE_NAME + " (" +
                     "site INTEGER NOT NULL, " +
                     "route TEXT NOT NULL, " +
                     "time TEXT NOT NULL, " +

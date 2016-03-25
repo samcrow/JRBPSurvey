@@ -10,6 +10,8 @@ import android.util.Log;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -34,19 +36,22 @@ public class UploadService extends IntentService {
     /**
      * Performs an action provided in an intent. This method runs on a separate thread from the
      * application.
+     *
      * @param intent an intent describing the action to perform. This implementation ignores the
      *               intent.
      */
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d(TAG, "Starting");
         final ObservationDatabase db = new ObservationDatabase(this);
         try {
-            final Observation observation = db.getOneObservation();
-            if (observation != null) {
+            Observation observation;
+            while ((observation = db.getOneObservation()) != null) {
                 upload(observation);
-            } else {
-                Log.i(TAG, "No observations to upload");
+                // Success, now delete it
+                final boolean deleteResult = db.delete(observation);
+                if (!deleteResult) {
+                    Log.w(TAG, "Failed to delete uploaded result");
+                }
             }
         } catch (SQLException e) {
             Log.e(TAG, "Failed to load an observation", e);
@@ -58,20 +63,25 @@ public class UploadService extends IntentService {
             Log.e(TAG, "Do not have permission to upload", e);
         } catch (ParseException e) {
             Log.e(TAG, "Failed to parse page", e);
+        } catch (UploadException e) {
+            Log.e(TAG, "Upload server error", e);
         }
     }
 
     /**
      * Uploads an observation
+     *
      * @param observation the observation to upload
      */
-    private void upload(@NonNull Observation observation) throws IOException, ParseException {
+    private void upload(@NonNull Observation observation)
+            throws IOException, ParseException, UploadException {
         Objects.requireNonNull(observation);
         final Map<String, String> formData = formatObservation(observation);
         Log.v(TAG, "Formatted observation: " + formData);
 
         // The URL of the script macro that enters data
-        final URL macroUrl = new URL("https://script.google.com/macros/s/AKfycbyQqLKAlEcK9BqSAZ3r6El4T5w7fIs6SwEljTlSENKalYD7NRD7/exec");
+        final URL macroUrl = new URL(
+                "https://script.google.com/macros/s/AKfycbyQqLKAlEcK9BqSAZ3r6El4T5w7fIs6SwEljTlSENKalYD7NRD7/exec");
         final HttpURLConnection connection = (HttpURLConnection) macroUrl.openConnection();
         try {
             // POST
@@ -82,7 +92,23 @@ public class UploadService extends IntentService {
             out.flush();
 
             final String response = IOUtils.toString(connection.getInputStream());
-            Log.v(TAG, response);
+            // Check for valid JSON
+            final JSONObject json = new JSONObject(response);
+
+            final String result = json.optString("result", "");
+            if (!result.equals("success")) {
+                final String message = json.optString("message", null);
+                if (message != null) {
+                    throw new UploadException(message);
+                } else {
+                    throw new UploadException("Unknown server error");
+                }
+            }
+
+        } catch (JSONException e) {
+            final ParseException e1 = new ParseException("Failed to parse response JSON", 0);
+            e1.initCause(e);
+            throw e1;
         } finally {
             connection.disconnect();
         }
@@ -90,10 +116,12 @@ public class UploadService extends IntentService {
 
     /**
      * Writes URL-encoded form data to a PrintStream
+     *
      * @param data the key-value pairs to write, not URL encoded
-     * @param out the stream to write to
+     * @param out  the stream to write to
      */
-    private static void writeFormEncodedData(@NonNull Map<String, String> data, @NonNull PrintStream out) {
+    private static void writeFormEncodedData(@NonNull Map<String, String> data,
+                                             @NonNull PrintStream out) {
         Objects.requireAllNonNull(data, out);
         int i = 0;
         for (Map.Entry<String, String> entry : data.entrySet()) {
@@ -110,6 +138,7 @@ public class UploadService extends IntentService {
 
     /**
      * Converts an Observation into a set of key-value pairs suitable for uploading
+     *
      * @param observation the observation
      * @return a form-compatible representation of the observation
      */
@@ -145,5 +174,22 @@ public class UploadService extends IntentService {
         map.put("NOTES", observation.getNotes());
 
         return map;
+    }
+
+    public static class UploadException extends Exception {
+        public UploadException() {
+        }
+
+        public UploadException(String detailMessage) {
+            super(detailMessage);
+        }
+
+        public UploadException(String detailMessage, Throwable throwable) {
+            super(detailMessage, throwable);
+        }
+
+        public UploadException(Throwable throwable) {
+            super(throwable);
+        }
     }
 }

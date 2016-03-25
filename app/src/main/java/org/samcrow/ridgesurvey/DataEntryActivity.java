@@ -1,6 +1,7 @@
 package org.samcrow.ridgesurvey;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -152,6 +153,8 @@ public class DataEntryActivity extends AppCompatActivity {
             final ObservationDatabase db = new ObservationDatabase(this);
             db.insertObservation(observation);
             Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
+            // Start a service to upload the observation
+            startService(new Intent(this, UploadService.class));
             finish();
         } catch (SQLException e) {
             new AlertDialog.Builder(this)
