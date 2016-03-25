@@ -267,6 +267,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final MenuItem uploadItem = menu.findItem(R.id.upload_item);
+        uploadItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                // Start the upload service
+                startService(new Intent(MainActivity.this, UploadService.class));
+                return true;
+            }
+        });
+
         return true;
     }
 
