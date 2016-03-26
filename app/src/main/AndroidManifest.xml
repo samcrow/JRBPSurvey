@@ -10,6 +10,11 @@
     <!-- Internet access for data upload -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
+    <uses-feature android:name="android.hardware.sensor.compass" android:required="false"/>
+    <uses-feature android:name="android.hardware.touchscreen.multitouch	" android:required="false"/>
+    
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"

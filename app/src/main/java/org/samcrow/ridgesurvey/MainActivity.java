@@ -3,6 +3,7 @@ package org.samcrow.ridgesurvey;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Picture;
 import android.graphics.drawable.Drawable;
@@ -162,8 +163,14 @@ public class MainActivity extends AppCompatActivity {
      */
     private void setUpMap() throws IOException {
         mMap = (MapView) findViewById(R.id.map);
-        // Disable built-in zoom controls, unless running in an emulator
-        mMap.setBuiltInZoomControls(Build.HARDWARE.equals("goldfish"));
+        // Disable built-in zoom controls, unless running in an emulator or if the device
+        // does not support basic multi-touch
+        if (Build.HARDWARE.equals("goldfish") || !(getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH))) {
+            mMap.setBuiltInZoomControls(true);
+        } else {
+            mMap.setBuiltInZoomControls(false);
+        }
 
         final Model model = mMap.getModel();
         model.init(mPreferences);
