@@ -37,7 +37,6 @@ function doPost(e) {
     var sheet = SpreadsheetApp.openById(sheetID).getSheets()[0];
     // Get headers from row 1 of the sheet
     var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-
     // Add the data
     var column = [];
     var row = [];
@@ -48,18 +47,32 @@ function doPost(e) {
     for (var keys in e.parameter) {
       input[keys] = e.parameter[keys];
     }
+
+    // Find the record number from the last data row, or set to 1 if no data are present
+    var recordNumber = 1;
+    var lastRowNumber = sheet.getLastRow();
+    if (lastRowNumber != 1) {
+      var lastRecord = parseInt(sheet.getRange(lastRowNumber, 1).getValue());
+      recordNumber = lastRecord + 1;
+    }
+    input["RECORD NUMBER"] = recordNumber;
+
     // For each parameter that matches a heading, add the value to the row
     // If no parameter matches, add an emtpy string
     for (i in headers) {
       column = headers[i];
       row.push(input[column] || "");
     }
+    Logger.log('Record number: ' + recordNumber);
+    // Add the record number
+    row[0] = recordNumber;
 
     if (row.length) {
       sheet.appendRow(row);
       status = {
         result: "success",
-        message: "Row added at position " + sheet.getLastRow()
+        message: "Row added at position " + sheet.getLastRow(),
+        values: row
       };
 
     } else {
