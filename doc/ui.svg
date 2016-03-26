@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 744.09448819 1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="ui.svg">
+  <defs
+     id="defs4">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath4802">
+      <rect
+         style="opacity:1;fill:#3f51b5;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect4804"
+         width="201.02036"
+         height="144.45181"
+         x="86.873116"
+         y="186.66147" />
+    </clipPath>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="290.10302"
+     inkscape:cy="516.25855"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1680"
+     inkscape:window-height="1002"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-nodes="true"
+     showguides="false"
+     inkscape:snap-global="true" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:45px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       x="371.12476"
+       y="83.258514"
+       id="text4136"
+       sodipodi:linespacing="100%"><tspan
+         sodipodi:role="line"
+         id="tspan4138"
+         x="371.12476"
+         y="83.258514"
+         style="text-align:center;text-anchor:middle;-inkscape-font-specification:'Myriad Pro Semi-Bold';font-family:'Myriad Pro';font-weight:600;font-style:normal;font-stretch:normal;font-variant:normal;">JRBP Survey User Interface</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="9.7453461"
+       y="463.44327"
+       id="text4240"
+       sodipodi:linespacing="100%"><tspan
+         sodipodi:role="line"
+         x="9.7453461"
+         y="463.44327"
+         id="tspan4244"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.5px;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold'">Upload status bar</tspan></text>
+    <text
+       sodipodi:linespacing="100%"
+       id="text4248"
+       y="897.8089"
+       x="11.76565"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.5px;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold'"
+         id="tspan4250"
+         y="897.8089"
+         x="11.76565"
+         sodipodi:role="line">Compass</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="712.12177"
+       y="165.44829"
+       id="text4252"
+       sodipodi:linespacing="100%"><tspan
+         sodipodi:role="line"
+         x="712.12177"
+         y="165.44829"
+         id="tspan4254"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.5px;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';text-align:end;text-anchor:end">Upload status icon</tspan></text>
+    <text
+       sodipodi:linespacing="100%"
+       id="text4256"
+       y="423.03717"
+       x="733.33496"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.5px;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';text-align:end;text-anchor:end"
+         id="tspan4258"
+         y="423.03717"
+         x="733.33496"
+         sodipodi:role="line">Data entry button</tspan></text>
+    <rect
+       style="opacity:1;fill:none;fill-opacity:0.26751595;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4268"
+       width="371.42856"
+       height="660.3175"
+       x="181.66409"
+       y="367.70978" />
+    <image
+       sodipodi:absref="/Users/samcrow/Desktop/JasperRidge/RidgeSurvey/doc/screenshots/main.png"
+       xlink:href="screenshots/main.png"
+       width="371.42856"
+       height="660.3175"
+       preserveAspectRatio="none"
+       style="fill:none;stroke:none;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:optimizeQuality"
+       id="image4237"
+       x="181.66409"
+       y="367.70978" />
+    <path
+       style="opacity:1;fill:none;fill-opacity:0.26751595;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 147.63116,459.40266 33.33504,0"
+       id="path4270"
+       inkscape:connector-curvature="0" />
+    <path
+       style="opacity:1;fill:none;fill-opacity:0.26751595;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 566.84447,160.39751 -87.88327,0 0,249.0026"
+       id="path4272"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccc" />
+    <path
+       style="opacity:1;fill:none;fill-opacity:0.26751595;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 593.61351,417.98641 -53.53808,0"
+       id="path4274"
+       inkscape:connector-curvature="0" />
+    <path
+       style="opacity:1;fill:none;fill-opacity:0.26751595;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 84.49664,893.76829 127.27921,0"
+       id="path4276"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="671.71564"
+       y="660.42303"
+       id="text4278"
+       sodipodi:linespacing="100%"><tspan
+         sodipodi:role="line"
+         x="671.71564"
+         y="660.42303"
+         id="tspan4280"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.5px;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';text-align:end;text-anchor:end">Map view</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       id="path4282"
+       d="m 591.59318,656.3824 -39.39594,0"
+       style="opacity:1;fill:none;fill-opacity:0.26751595;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.25px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       x="600.03064"
+       y="280.60565"
+       id="text4284"
+       sodipodi:linespacing="100%"><tspan
+         sodipodi:role="line"
+         id="tspan4286"
+         x="600.03064"
+         y="280.60565" /></text>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4292"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       transform="translate(1.6641248,165.66502)"><flowRegion
+         id="flowRegion4294"><rect
+           id="rect4296"
+           width="139.40105"
+           height="145.46196"
+           x="595.98999"
+           y="265.45337" /></flowRegion><flowPara
+         id="flowPara4298"
+         style="font-size:15px">Tap to record an observation at the selected site</flowPara></flowRoot>    <flowRoot
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="flowRoot4302"
+       xml:space="preserve"
+       transform="translate(1.6641248,406.08133)"><flowRegion
+         id="flowRegion4304"><rect
+           y="265.45337"
+           x="595.98999"
+           height="145.46196"
+           width="139.40105"
+           id="rect4306" /></flowRegion><flowPara
+         style="font-size:15px"
+         id="flowPara4308">Tap on a site to select it. A line will appear between your location and the selected site.</flowPara></flowRoot>    <flowRoot
+       transform="translate(-583.59708,641.44688)"
+       xml:space="preserve"
+       id="flowRoot4312"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"><flowRegion
+         id="flowRegion4314"><rect
+           id="rect4316"
+           width="139.40105"
+           height="145.46196"
+           x="595.98999"
+           y="265.45337" /></flowRegion><flowPara
+         id="flowPara4318"
+         style="font-size:15px">Points toward magnetic north. Not available on all devices.</flowPara></flowRoot>    <flowRoot
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="flowRoot4320"
+       xml:space="preserve"
+       transform="translate(-583.59708,241.42647)"><flowRegion
+         id="flowRegion4322"><rect
+           y="265.45337"
+           x="595.98999"
+           height="43.436569"
+           width="139.40106"
+           id="rect4324" /></flowRegion><flowPara
+         style="font-size:15px"
+         id="flowPara4326">Green: All observations are uploaded</flowPara></flowRoot>    <flowRoot
+       transform="translate(-19.93196,-84.852796)"
+       xml:space="preserve"
+       id="flowRoot4328"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"><flowRegion
+         id="flowRegion4330"><rect
+           id="rect4332"
+           width="139.40106"
+           height="187.88838"
+           x="595.98999"
+           y="265.45337" /></flowRegion><flowPara
+         id="flowPara4334"
+         style="font-size:15px">Check mark: All observations are uploaded</flowPara><flowPara
+         style="font-size:15px"
+         id="flowPara4336" /><flowPara
+         style="font-size:15px"
+         id="flowPara4338">Up arrow: Some observations need to be uploaded. Tap to upload.</flowPara><flowPara
+         style="font-size:15px"
+         id="flowPara4340" /><flowPara
+         style="font-size:15px"
+         id="flowPara4342">Outline: Upload in progress</flowPara></flowRoot>    <rect
+       style="opacity:1;fill:#3f51b5;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4344"
+       width="45.456863"
+       height="45.456863"
+       x="516.18793"
+       y="177.5701" />
+    <rect
+       y="240.19955"
+       x="516.18793"
+       height="45.456863"
+       width="45.456863"
+       id="rect4346"
+       style="opacity:1;fill:#3f51b5;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <rect
+       style="opacity:1;fill:#3f51b5;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4348"
+       width="45.456863"
+       height="45.456863"
+       x="516.18793"
+       y="302.82901" />
+    <image
+       y="184.29852"
+       x="522.91638"
+       id="image4444"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAADHklEQVR4Ae3aS0hEVRzH8f/gK6FM
+M7Vxok3UwrVUQkRluAgCQ0hcuAsCkejJbMa6k65aWIpurG0kioWLgh4iWBRDD2NaJpG4CJnKx8zE
+KKPfFndzJecyc+ecc++F8z374fcZZjP3HrHZbDabzWaz2Ww2VdHFs2RYJ8cRRapccsIR3/MRGZ7h
+LkTtUflhD/AG31HFryp7vEIqeoAxPuOKeqvyKaPRATxNjiB9yxPhA1J8QjNtMBAmYJpTmu0fJsMB
+dPABqlqh3TSghz1UtkOXSUAfv6K6fe41Beghj45+pMsEoIM9dLVLq37Ah+hsSTdgGt29oBNwP6fo
+rkC/PsA2JlrXBRjFVCNqASmmWWGHE0z1jSpAH6/zE2H0ePOAFKv8S1htNQdoZ44SYVZlIDhgiH10
+d8pT7ODXTFDA85QNzH8UodOXsBsMMMu1ofmC0MnX1KrCHY0DZsDU/DoITzYKGDf47XsJX3F7f7LL
+Gi/yYH2AIYro7swz30v4Hf/yvMbd/oA2fg5pvjBPPRVxuLM2IBPx+W6HjN0OSFKKwXyAa+ZJ/B+w
+GpP5bh/TehNwD+UYzQfYIOEFvKp5/mOK5wO86wXkCN4a5yHMB3gOF8AgwcsgjHDe8Px3aL5jul3A
+FEGbQxCXYHw+wKILWG5yvpdgcj5UGECELwnSWwjiQzhjRPN8gHlEOKDx3kYQH4KZ+fAHCeGExnMQ
+H4Kp+QCPCJeglFBrfhYdpV2ASoLJ+bAl/A1KCSbnQ144AM2ELPr6S/gCtBKy6OxCWAKNhCzoBkyB
+NkIW3RWE+0ATwUF/eUH4QQvBwUSbgvAyKCc4mCktCL2UFRMcTDUsCML7qMkxPP+QhAsYpKSM4GCu
+BURwT5r4VSHpfbT4C3Fr+ebD3YcpEp88f+q972auiE8Tt73geClOPx8vwEu4Ivpt01ILIIxzHvn5
+nf6vWR9in+i2TAviDxDaeJMS0euYifqvGiRZpEx0qrBEd6OXPXqZJcc1YXfIAsng1236meQ9Puc3
+ClxgqgsK5NkkzTAJ/bfXNR8LsAALsAALsAALsAALsAAL0HD+AwcgO1wa/RR3AAAAAElFTkSuQmCC
+
+"
+       style="image-rendering:optimizeQuality"
+       preserveAspectRatio="none"
+       height="32"
+       width="32" />
+    <image
+       y="246.92798"
+       x="522.91638"
+       id="image4508"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAACyUlEQVR4Ae3aTUhUXxyH8TP49g/K
+NFMbJ9pELVxLEEREhosgMITEhbsgEIlecWMwoKsWlqKbahuJYuGioEAEi2LoxZiWtUhchMy/Rhon
+Rhl9WgzRlXybM+d35x44z91fvh9xHLznKpfL5XK5XC6Xy+UyFZWcpZdRYsyTIssKSeZ5w0N6OcMe
+lNnL5M0OcYPXZNmqLDNcIRI8QAtPWWWnZXlCc3AAp4mh0ytOFh8Q4TGFNEZ9MQGdLFJoP2gvDqCC
++5hqmHK/AdXMYLIpKv0E1PIJ082y3y9ANXEkekelH4AKZpBqmlJ5wAMkG5QGdCLdBUnAQRaRLkGd
+HGASPxqVAjTjV8fNAiJ0MswUSfIvSpT8e2kKUMt13qNfFIXSIpwoHBBhhF9Q8Hw9wkRhgHJusQSG
+5usQstTrAxqZBaPzdQhduoDzpM3P1yBM6wG6WZOYr0HI8F/+gC6Qmq9BOJUvoFXyp69B+MY097jI
+4Z0BGkkJz9f/oxrnGnu3BpTxwcx8IQKkiLJ7c0CvmfmiBJijZWNA2NDXljxhjT5C/wJGBOZLEeAR
+pesB+0gLzJckjBHyAq4KzJcm3PYCYgLz5Qnn/gAaRObLExaoygE6hObLEwZygCGh+fKEDPUoxQuM
+tu1Uk/WhFF8sBnwlpEhaDIBjihWrAT22AyYU360GxO3+EMP/iudWA5YVg7YDOqwGJBQHbP8QK95a
+DBhXKC7b/UWmqCFtLaApd9O7lgLmCOVu2sCSlYD+vw+2erCvDGHvo8WP2NbQ+oe7R0lhTd5/6r1n
+M6vYU9tGBxyXbPr18QK8hFWC3yQlmwEUrfwM/PxdWx+zHmGW4DZEyfYH3WXcZIngtUDbzl81CDNA
+muCUYZCqfF/2qKGbGGsUuzn6Ceu/blNHO3d4xmcSLONXyySIM04PTYSE316XvxxA4HIAB3AAB3AA
+B3AAB3AAB/gNH7k1e/TaMcEAAAAASUVORK5CYII=
+"
+       style="image-rendering:optimizeQuality"
+       preserveAspectRatio="none"
+       height="32"
+       width="32" />
+    <image
+       y="309.55743"
+       x="522.91638"
+       id="image4570"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAAD0klEQVR4Ae3BX2iVdQDH4e9p2zmu
+zTndH9sfuomsJnqlURAVzmREhUtqjNiFNBiIRGW6hAWBQqCgbehNdSXMOZeFkZaBCCuKUTlZV267
+cJsQsmq2na1NtvOJEaK/933P2dnOe875Be/zSIFAIBAIBAKBQCDgE4p4kTbO0McYU8xzhwnG+IlO
+2tjOatmLh3mPH5knkXl6eZsq2YYdXGCBZM3zJbWyBdvoYyV+4FllG1V8QSrOsl7ZQxO3SdVfNCgb
+iPApfjlBWJnFWnrx02WKlDmU8RvxRfmKg9TxGGvII8w6NvASrVxkivj6KVVmsJYBvC3wNfVEFAcR
+XuMCMbz9QpHSjwi9eOvmCSWBTfTg7Qq5Sjc+w8sQz2kZqGUQL+1KL5rwcooCLROFdOLldaUP1dzG
+KcYBrRDv4zZOudKF8zjFaFEKaMHtjNKDWtxalSIO4va0/EQVTZzgMhM4nZIP6MTpe/mDMvbxK/EM
+USAfUMgQTs8oVVRxkhkS2SafsB2nc0oFYT4gSmKfy0ecwzTPeq0UNfSzlBg18hGbiWHao5WhnmmW
+9q18xjeYrmgl2EuMZLwqn9GAaZZVWi72kJwo+fIZq4hiel7Lw05ieJvkNM1spYSw0oZLmH7nCp/Q
+zCNKBjVM4eU6u8lXBnCQeAZ4lzVKhDyu4jbDPnKVIbxCIlN8SKHioQ23QTYqg3icpYywQ16oIIrT
+VcqUUZSytBiHCMmJkzgNUqYMI0JyusjV/VjHNKZpNioLSNZZQrqHd3Dap6wgeUd0D32YrpOrrCNM
+JS/wETfw9rL+QyVOu2URHqCRUdxuUaxFNGL6m3xZhkK6cDumRXRgOi0rcRynWdZL4jtMzbISIbpx
+OiSJYUxbZSlWM4bpBiExgalE1uINnJ4UdzCFZS1yGMHUKu5gCstiHMF0TvyJqVQWow7TgBjGtFUW
+oxrTH+ISpmZZjAimOdGOqUsWI4JpTjRimuRBWYtqTOPiIZzelLWowzQgiZ8xDZEnS3EUU48k3sJp
+v6xEDqOYWiVRwjSmGTbJQjThtEWL+BinYcplGYq4iWmEkBZRSRSna5TLIoTowemw7qIVt2E2yxKE
+aMdplgrdRR7XcPuHA+Qp6yiiB7cO3Y8NTOFlmGYKlDXk0MRN3G5RLBP1LOBtim5aeIpyIsoQIlRT
+x1FG8bZLbrTwf9Ehb7SwgP3Ok6N42MkkdjtPvhLhUfqxVwc5Wgp57CeKfW6xS8migmNMY49Z2inW
+8lDCXvqIkW0jHKZCK0U5DRznIkOMM0emzDHOAD20soWQAoFAIBAIBAKBQMDlXyp4jou8klRBAAAA
+AElFTkSuQmCC
+"
+       style="image-rendering:optimizeQuality"
+       preserveAspectRatio="none"
+       height="32"
+       width="32" />
+    <image
+       sodipodi:absref="/Users/samcrow/Desktop/JasperRidge/RidgeSurvey/doc/screenshots/bar-ok-only.png"
+       xlink:href="screenshots/bar-ok-only.png"
+       width="100"
+       height="20"
+       preserveAspectRatio="none"
+       style="image-rendering:optimizeQuality"
+       id="image4667"
+       x="12.933154"
+       y="477.0098" />
+    <flowRoot
+       transform="translate(-583.59708,321.22852)"
+       xml:space="preserve"
+       id="flowRoot4670"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"><flowRegion
+         id="flowRegion4672"><rect
+           id="rect4674"
+           width="139.40106"
+           height="43.436569"
+           x="595.98999"
+           y="265.45337" /></flowRegion><flowPara
+         id="flowPara4676"
+         style="font-size:15px">Amber with stripes: Some observations need to be uploaded</flowPara></flowRoot>    <image
+       sodipodi:absref="/Users/samcrow/Desktop/JasperRidge/RidgeSurvey/doc/screenshots/bar-needs-upload-only.png"
+       xlink:href="screenshots/bar-needs-upload-only.png"
+       y="556.81183"
+       x="12.933154"
+       id="image4678"
+       style="image-rendering:optimizeQuality"
+       preserveAspectRatio="none"
+       height="20"
+       width="100" />
+    <flowRoot
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30px;line-height:100%;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="flowRoot4680"
+       xml:space="preserve"
+       transform="translate(-583.59708,399.01027)"><flowRegion
+         id="flowRegion4682"><rect
+           y="265.45337"
+           x="595.98999"
+           height="43.436569"
+           width="139.40106"
+           id="rect4684" /></flowRegion><flowPara
+         style="font-size:15px"
+         id="flowPara4686">Blue with circles: Upload in progress</flowPara></flowRoot>    <image
+       sodipodi:absref="/Users/samcrow/Desktop/JasperRidge/RidgeSurvey/doc/screenshots/bar-uploading-only.png"
+       xlink:href="screenshots/bar-uploading-only.png"
+       width="100"
+       height="20"
+       preserveAspectRatio="none"
+       style="image-rendering:optimizeQuality"
+       id="image4688"
+       x="12.933154"
+       y="634.59357" />
+  </g>
+</svg>

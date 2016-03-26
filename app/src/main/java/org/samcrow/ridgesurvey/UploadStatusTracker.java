@@ -3,6 +3,7 @@ package org.samcrow.ridgesurvey;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.SQLException;
 import android.support.annotation.NonNull;
 
 import org.samcrow.ridgesurvey.UploadStatusListener.UploadState;
@@ -97,7 +98,11 @@ public class UploadStatusTracker extends BroadcastReceiver {
      */
     private boolean hasObservationWaiting() {
         final ObservationDatabase db = new ObservationDatabase(mContext);
-        final Observation observation = db.getOneObservation();
-        return observation != null;
+        try {
+            final Observation observation = db.getOneObservation();
+            return observation != null;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 }

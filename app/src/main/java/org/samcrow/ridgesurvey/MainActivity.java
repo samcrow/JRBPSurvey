@@ -176,14 +176,19 @@ public class MainActivity extends AppCompatActivity {
                 metrics.widthPixels, metrics.heightPixels,
                 model.frameBufferModel.getOverdrawFactor(), true);
 
+        final MapFile mapFile = new MapFile(
+                Storage.getResourceAsFile(this, R.raw.jasper_ridge_map));
         TileRendererLayer tileRendererLayer = AndroidUtil.createTileRendererLayer(
                 cache,
                 initializePosition(model.mapViewPosition),
-                new MapFile(Storage.getResourceAsFile(this, R.raw.jasper_ridge_map)),
+                mapFile,
                 InternalRenderTheme.OSMARENDER,
                 false,
                 true);
 
+        // Limit view to the bounds of the map file
+        mMap.getModel().mapViewPosition.setMapLimit(mapFile.boundingBox());
+        mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
 
         final List<Layer> routeLayers = new ArrayList<>();
         // Try to load sites
