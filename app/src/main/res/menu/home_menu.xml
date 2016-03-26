@@ -6,7 +6,7 @@
         android:icon="@drawable/ic_cloud_upload_white_24dp"
         android:title="@string/upload"
         android:id="@+id/upload_item"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
     <item
         android:icon="@drawable/ic_edit_white_24dp"
         android:title="@string/edit"

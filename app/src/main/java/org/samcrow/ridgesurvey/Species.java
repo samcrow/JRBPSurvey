@@ -82,11 +82,7 @@ public class Species {
      */
     @Nullable
     public Drawable getImage() {
-        if (mImage != null) {
-            return mImage.mutate();
-        } else {
-            return null;
-        }
+        return mImage;
     }
 
     @Override

@@ -2,12 +2,14 @@ package org.samcrow.ridgesurvey;
 
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.Picture;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -77,6 +79,11 @@ public class MainActivity extends AppCompatActivity {
      */
     private SelectionManager mSelectionManager;
 
+    /**
+     * The upload status tracker
+     */
+    private UploadStatusTracker mUploadStatusTracker;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +99,18 @@ public class MainActivity extends AppCompatActivity {
         mSelectionManager = new SelectionManager();
 
         mLocationFinder = new LocationFinder(this);
+
+        // Set up upload status tracker
+        mUploadStatusTracker = new UploadStatusTracker(this);
+        mUploadStatusTracker.addListener((UploadStatusListener) findViewById(R.id.upload_status_bar));
+
+        final LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(UploadStatusTracker.ACTION_OBSERVATION_MADE);
+        filter.addAction(UploadStatusTracker.ACTION_UPLOAD_STARTED);
+        filter.addAction(UploadStatusTracker.ACTION_UPLOAD_SUCCESS);
+        filter.addAction(UploadStatusTracker.ACTION_UPLOAD_FAILED);
+        manager.registerReceiver(mUploadStatusTracker, filter);
 
         final Compass compass = (Compass) findViewById(R.id.compass);
         mHeadingCalculator = new HeadingCalculator(this);
@@ -253,6 +272,9 @@ public class MainActivity extends AppCompatActivity {
                     // Deselect the site so that the user does not accidentally enter an observation
                     // for it after moving to another site
                     mSelectionManager.setSelectedSite(null, null);
+                    // Update the status bar
+                    LocalBroadcastManager.getInstance(MainActivity.this)
+                            .sendBroadcast(new Intent(UploadStatusTracker.ACTION_OBSERVATION_MADE));
                 } else {
                     new Builder(MainActivity.this)
                             .setTitle(R.string.no_site_selected)
@@ -272,6 +294,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+        final UploadMenuItemController controller = new UploadMenuItemController(this, uploadItem);
+        mUploadStatusTracker.addListener(controller);
 
         return true;
     }

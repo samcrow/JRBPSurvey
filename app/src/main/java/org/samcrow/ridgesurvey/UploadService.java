@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.SQLException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
@@ -42,6 +43,8 @@ public class UploadService extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent intent) {
+        LocalBroadcastManager.getInstance(this)
+                .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_STARTED));
         final ObservationDatabase db = new ObservationDatabase(this);
         try {
             Observation observation;
@@ -52,19 +55,33 @@ public class UploadService extends IntentService {
                 if (!deleteResult) {
                     Log.w(TAG, "Failed to delete uploaded result");
                 }
+                LocalBroadcastManager.getInstance(this)
+                        .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_SUCCESS));
             }
         } catch (SQLException e) {
             Log.e(TAG, "Failed to load an observation", e);
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_FAILED));
         } catch (MalformedURLException e) {
             Log.e(TAG, "Invalid form URL", e);
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_FAILED));
         } catch (IOException e) {
             Log.e(TAG, "Upload IO exception", e);
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_FAILED));
         } catch (SecurityException e) {
             Log.e(TAG, "Do not have permission to upload", e);
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_FAILED));
         } catch (ParseException e) {
             Log.e(TAG, "Failed to parse page", e);
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_FAILED));
         } catch (UploadException e) {
             Log.e(TAG, "Upload server error", e);
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_FAILED));
         }
     }
 
