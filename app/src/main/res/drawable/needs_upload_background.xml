@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tiles the diagonal_stripe drawable -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <color android:color="@color/status_bar_need_upload" />
+    </item>
+    <item>
+        <bitmap
+            android:src="@drawable/diagonal_stripe"
+            android:tileMode="repeat">
+        </bitmap>
+    </item>
+</layer-list>

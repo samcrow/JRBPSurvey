@@ -17,17 +17,6 @@ public class UploadStatusBar extends View implements UploadStatusListener {
     @ColorInt
     private int COLOR_OK;
 
-    /**
-     * The color that indicates that an observation needs to be uploaded
-     */
-    @ColorInt
-    private int COLOR_NEEDS_UPLOAD;
-    /**
-     * The color that indicates that an upload is in progress
-     */
-    @ColorInt
-    private int COLOR_IN_PROGRESS;
-
     public UploadStatusBar(Context context) {
         super(context);
         init();
@@ -45,8 +34,6 @@ public class UploadStatusBar extends View implements UploadStatusListener {
 
     private void init() {
         COLOR_OK = getContext().getResources().getColor(R.color.status_bar_ok);
-        COLOR_NEEDS_UPLOAD = getContext().getResources().getColor(R.color.status_bar_need_upload);
-        COLOR_IN_PROGRESS = getContext().getResources().getColor(R.color.status_bar_in_progress);
         setBackgroundColor(COLOR_OK);
     }
 
@@ -58,10 +45,10 @@ public class UploadStatusBar extends View implements UploadStatusListener {
                 setBackgroundColor(COLOR_OK);
                 break;
             case Uploading:
-                setBackgroundColor(COLOR_IN_PROGRESS);
+                setBackgroundResource(R.drawable.in_progress_background);
                 break;
             case NeedsUpload:
-                setBackgroundColor(COLOR_NEEDS_UPLOAD);
+                setBackgroundResource(R.drawable.needs_upload_background);
                 break;
         }
     }

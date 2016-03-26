@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <color android:color="@color/status_bar_in_progress" />
+    </item>
+    <item>
+        <bitmap
+            android:src="@drawable/small_circle"
+            android:tileMode="repeat"
+            android:gravity="center">
+        </bitmap>
+    </item>
+</layer-list>

@@ -138,6 +138,8 @@ public class MainActivity extends AppCompatActivity {
                     .show();
             Log.e(TAG, "Failed to set up map", e);
         }
+
+        startUpload();
     }
 
     @Override
@@ -290,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 // Start the upload service
-                startService(new Intent(MainActivity.this, UploadService.class));
+                startUpload();
                 return true;
             }
         });
@@ -316,5 +318,12 @@ public class MainActivity extends AppCompatActivity {
         } catch (SVGParseException e) {
             throw new RuntimeException("Could not load my location image", e);
         }
+    }
+
+    /**
+     * Starts a service to upload observations
+     */
+    private void startUpload() {
+        startService(new Intent(MainActivity.this, UploadService.class));
     }
 }

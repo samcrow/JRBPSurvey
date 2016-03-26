@@ -7,5 +7,5 @@
     <!-- StatusBar colors -->
     <color name="status_bar_ok">#09A129</color>
     <color name="status_bar_need_upload">#F7B32B</color>
-    <color name="status_bar_in_progress">#3B1C40</color>
+    <color name="status_bar_in_progress">#95EDE5</color>
 </resources>

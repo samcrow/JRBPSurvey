@@ -55,9 +55,9 @@ public class UploadService extends IntentService {
                 if (!deleteResult) {
                     Log.w(TAG, "Failed to delete uploaded result");
                 }
-                LocalBroadcastManager.getInstance(this)
-                        .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_SUCCESS));
             }
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_SUCCESS));
         } catch (SQLException e) {
             Log.e(TAG, "Failed to load an observation", e);
             LocalBroadcastManager.getInstance(this)
