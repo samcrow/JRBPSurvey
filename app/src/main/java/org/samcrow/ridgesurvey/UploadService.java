@@ -85,6 +85,7 @@ public class UploadService extends IntentService {
         final HttpURLConnection connection = (HttpURLConnection) macroUrl.openConnection();
         try {
             // POST
+            connection.setUseCaches(false);
             connection.setDoOutput(true);
             connection.setChunkedStreamingMode(0);
             final PrintStream out = new PrintStream(connection.getOutputStream());
@@ -92,6 +93,7 @@ public class UploadService extends IntentService {
             out.flush();
 
             final String response = IOUtils.toString(connection.getInputStream());
+            Log.v(TAG, response);
             // Check for valid JSON
             final JSONObject json = new JSONObject(response);
 

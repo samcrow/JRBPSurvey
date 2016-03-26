@@ -11,10 +11,13 @@ import android.net.ConnectivityManager;
 public class NetworkBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        final boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-        if (!noConnectivity) {
-            // Start the upload service
-            context.startService(new Intent(context, UploadService.class));
+        if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+            final boolean noConnectivity = intent.getBooleanExtra(
+                    ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+            if (!noConnectivity) {
+                // Start the upload service
+                context.startService(new Intent(context, UploadService.class));
+            }
         }
     }
 }

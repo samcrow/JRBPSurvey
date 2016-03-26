@@ -93,6 +93,7 @@ public class SpeciesView extends LinearLayout {
      * Returns the species associated with this view
      * @return the species
      */
+    @NonNull
     public Species getSpecies() {
         return mSpecies;
     }

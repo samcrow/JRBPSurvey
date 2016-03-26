@@ -14,6 +14,7 @@ import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.layer.Layer;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A layer that displays a route
@@ -188,7 +189,7 @@ public class RouteLayer extends Layer {
 
 
             // Draw the site ID centered below the marker
-            final String idString = String.format("%d", site.getId());
+            final String idString = String.format(Locale.getDefault(), "%d", site.getId());
             final int textWidth = mIdPaint.getTextWidth(idString);
             final int textHeight = mIdPaint.getTextHeight(idString);
             // Stroke with a contrasting background and then fill
