@@ -33,7 +33,7 @@ public class RouteLayer extends Layer {
     /**
      * The height of site label text, in meters
      */
-    private static final float SITE_LABEL_HEIGHT = 20;
+    private static final float SITE_LABEL_HEIGHT = 40;
 
     /**
      * Latitude/longitude distance, in degrees, that is the tolerance for clicking to select a site
