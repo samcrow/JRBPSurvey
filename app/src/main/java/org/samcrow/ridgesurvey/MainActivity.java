@@ -1,6 +1,5 @@
 package org.samcrow.ridgesurvey;
 
-import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.graphics.Color;
@@ -62,11 +61,6 @@ public class MainActivity extends AppCompatActivity {
      * The preferences facade that the map view uses to save preferences
      */
     private PreferencesFacade mPreferences;
-
-    /**
-     * The layer that displays the user's location
-     */
-    private MyLocationLayer mLocationLayer;
 
     /**
      * The heading calculator that gathers heading information
@@ -213,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Location layers
         final RouteLineLayer routeLineLayer = new RouteLineLayer();
-        mLocationLayer = new MyLocationLayer(getMyLocationDrawable());
         mSelectionManager.addSelectionListener(routeLineLayer);
         mLocationFinder.addListener(routeLineLayer);
         final MyLocationLayer locationLayer = new MyLocationLayer(getMyLocationDrawable());
@@ -257,6 +250,9 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra(DataEntryActivity.ARG_SITE, selectedSite);
                     intent.putExtra(DataEntryActivity.ARG_ROUTE, selectedSiteRoute.getName());
                     startActivity(intent);
+                    // Deselect the site so that the user does not accidentally enter an observation
+                    // for it after moving to another site
+                    mSelectionManager.setSelectedSite(null, null);
                 } else {
                     new Builder(MainActivity.this)
                             .setTitle(R.string.no_site_selected)

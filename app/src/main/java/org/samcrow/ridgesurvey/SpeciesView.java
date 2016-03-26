@@ -63,10 +63,7 @@ public class SpeciesView extends LinearLayout {
         final Drawable speciesImage = species.getImage();
         if (speciesImage != null) {
             final ImageButton imageButton = new ImageButton(context);
-            imageButton.setImageDrawable(speciesImage);
-            imageButton.setMaxWidth(MAX_IMAGE_SIZE);
-            imageButton.setMaxHeight(MAX_IMAGE_SIZE);
-            imageButton.setAdjustViewBounds(true);
+            imageButton.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_image_black_18dp));
 
             imageButton.setOnClickListener(new OnClickListener() {
                 @Override
