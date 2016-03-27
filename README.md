@@ -1,6 +1,7 @@
 # JRBP Survey #
 
-The [Jasper Ridge Biological Preserve](https://jrbp.stanford.edu/) regularly surveys ant species
+The [Jasper Ridge Biological Preserve](https://jrbp.stanford.edu/) regularly 
+[surveys](https://jrbp.stanford.edu/research/jrbp-ant-survey) ant species
 found on the preserve. This Android application is intended to make the survey more efficient by
 allowing people to easily navigate and enter data.
 
