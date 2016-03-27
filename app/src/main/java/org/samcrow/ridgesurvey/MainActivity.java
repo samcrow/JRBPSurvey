@@ -80,6 +80,9 @@ public class MainActivity extends AppCompatActivity {
      */
     private static final MapPosition START_POSITION = new MapPosition(
             new LatLong(37.4037, -122.2269), (byte) 13);
+    /**
+     * The permission that allows the application to access the user's location
+     */
     public static final String LOCATION_PERMISSION = "android.permission.ACCESS_FINE_LOCATION";
 
     /**
