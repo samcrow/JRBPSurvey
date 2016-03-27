@@ -50,7 +50,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="318.67445"
+     inkscape:cx="71.531593"
      inkscape:cy="553.5959"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -73,7 +73,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -139,13 +139,13 @@
     <image
        sodipodi:absref="/Users/samcrow/Desktop/JasperRidge/RidgeSurvey/doc/screenshots/entry1.png"
        xlink:href="screenshots/entry1.png"
-       width="371.42856"
-       height="660.3175"
-       preserveAspectRatio="none"
-       style="fill:none;stroke:none;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:optimizeQuality"
-       id="image4237"
+       y="163.65897"
        x="181.66409"
-       y="163.65897" />
+       id="image4237"
+       style="fill:none;stroke:none;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:optimizeQuality"
+       preserveAspectRatio="none"
+       height="660.3175"
+       width="371.42856" />
     <path
        style="opacity:1;fill:none;fill-opacity:0.26751595;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        d="m 119.3469,306.86966 84.85282,0"
@@ -249,17 +249,6 @@
        d="m 288.90363,134.13355 0,67.68022"
        id="path4831"
        inkscape:connector-curvature="0" />
-    <image
-       sodipodi:absref="/Users/samcrow/Desktop/JasperRidge/RidgeSurvey/doc/screenshots/entry2.png"
-       xlink:href="screenshots/entry2.png"
-       clip-path="url(#clipPath4839)"
-       y="664.69464"
-       x="181.66409"
-       id="image4833"
-       style="fill:none;stroke:none;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:optimizeQuality"
-       preserveAspectRatio="none"
-       height="660.3175"
-       width="371.42856" />
     <rect
        y="860.32166"
        x="181.66409"
@@ -267,6 +256,17 @@
        width="371.42856"
        id="rect4835"
        style="opacity:1;fill:none;fill-opacity:0.26751595;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <image
+       sodipodi:absref="/Users/samcrow/Desktop/JasperRidge/RidgeSurvey/doc/screenshots/entry2.png"
+       xlink:href="screenshots/entry2.png"
+       width="371.42856"
+       height="660.3175"
+       preserveAspectRatio="none"
+       style="fill:none;stroke:none;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:optimizeQuality"
+       id="image4833"
+       x="181.66409"
+       y="664.69464"
+       clip-path="url(#clipPath4839)" />
     <path
        style="opacity:1;fill:none;fill-opacity:0.26751595;fill-rule:nonzero;stroke:#000000;stroke-width:2.00000024;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        d="m 60.252975,981.65153 136.563405,0"
