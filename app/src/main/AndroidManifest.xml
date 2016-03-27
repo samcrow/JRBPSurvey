@@ -13,7 +13,6 @@
     <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
     <uses-feature android:name="android.hardware.sensor.compass" android:required="false"/>
     <uses-feature android:name="android.hardware.touchscreen.multitouch	" android:required="false"/>
-    
 
     <application
         android:allowBackup="false"
