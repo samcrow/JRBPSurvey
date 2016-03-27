@@ -29,6 +29,8 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -69,10 +71,16 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     /**
+     * A permission request code used when requesting location permission
+     */
+    private static final int LOCATION_PERMISISON_CODE = 136;
+
+    /**
      * The initial position of the map
      */
     private static final MapPosition START_POSITION = new MapPosition(
             new LatLong(37.4037, -122.2269), (byte) 13);
+    public static final String LOCATION_PERMISSION = "android.permission.ACCESS_FINE_LOCATION";
 
     /**
      * The map view
@@ -108,6 +116,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(getString(R.string.map));
+
+        // Check location permission
+        final int permission = ActivityCompat.checkSelfPermission(this, LOCATION_PERMISSION);
+        if (permission == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{ LOCATION_PERMISSION }, LOCATION_PERMISISON_CODE);
+        }
 
         // Set up map graphics
         if (AndroidGraphicFactory.INSTANCE == null || new View(this).isInEditMode()) {
@@ -175,6 +189,22 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         mLocationFinder.resume();
         mHeadingCalculator.resume();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISISON_CODE) {
+            for (int i = 0; i < permissions.length; i++) {
+                final String permission = permissions[i];
+                final int result = grantResults[i];
+                // If location access was granted, start location finding
+                if (permission.equals(LOCATION_PERMISSION) && result == PackageManager.PERMISSION_GRANTED) {
+                    mLocationFinder.resume();
+                }
+            }
+        }
     }
 
     /**

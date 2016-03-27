@@ -97,13 +97,7 @@ public class LocationFinder {
         final Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
         final String providerName = mLocationManager.getBestProvider(criteria, true);
-        if (providerName == null) {
-            // No provider
-            new AlertDialog.Builder(mContext)
-                    .setTitle("Location not available")
-                    .setMessage("Please ensure that GPS or another location provider is enabled")
-                    .show();
-        } else {
+        if (providerName != null) {
             // Found provider
             final Location lastLocation = mLocationManager.getLastKnownLocation(providerName);
             if (lastLocation != null) {
