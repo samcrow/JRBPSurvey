@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * A permission request code used when requesting location permission
      */
-    private static final int LOCATION_PERMISISON_CODE = 136;
+    private static final int LOCATION_PERMISSION_CODE = 136;
 
     /**
      * The initial position of the map
@@ -120,7 +120,8 @@ public class MainActivity extends AppCompatActivity {
         // Check location permission
         final int permission = ActivityCompat.checkSelfPermission(this, LOCATION_PERMISSION);
         if (permission == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this, new String[]{ LOCATION_PERMISSION }, LOCATION_PERMISISON_CODE);
+            ActivityCompat.requestPermissions(this, new String[]{ LOCATION_PERMISSION },
+                    LOCATION_PERMISSION_CODE);
         }
 
         // Set up map graphics
@@ -195,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == LOCATION_PERMISISON_CODE) {
+        if (requestCode == LOCATION_PERMISSION_CODE) {
             for (int i = 0; i < permissions.length; i++) {
                 final String permission = permissions[i];
                 final int result = grantResults[i];
