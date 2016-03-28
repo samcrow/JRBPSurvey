@@ -21,7 +21,7 @@ package org.samcrow.ridgesurvey;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.view.Gravity;
 import android.view.View;
@@ -79,8 +79,9 @@ public class SpeciesView extends LinearLayout {
         addView(mCheckBox, checkBoxParams);
 
         // Optional ImageButton
-        final Drawable speciesImage = species.getImage();
-        if (speciesImage != null) {
+        @DrawableRes
+        final int speciesImage = species.getImage();
+        if (speciesImage != 0) {
             final ImageButton imageButton = new ImageButton(context);
             imageButton.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_image_black_18dp));
 
@@ -88,7 +89,7 @@ public class SpeciesView extends LinearLayout {
                 @Override
                 public void onClick(View v) {
                     final ImageView imageView = new ImageView(mContext);
-                    imageView.setImageDrawable(mSpecies.getImage());
+                    imageView.setImageResource(mSpecies.getImage());
                     imageView.setAdjustViewBounds(true);
 
                     new AlertDialog.Builder(mContext)

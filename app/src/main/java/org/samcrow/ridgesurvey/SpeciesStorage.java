@@ -20,8 +20,7 @@
 package org.samcrow.ridgesurvey;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
+import android.support.annotation.DrawableRes;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
@@ -94,10 +93,10 @@ public class SpeciesStorage {
                             final String description = speciesJsonObject.optString("description",
                                     null);
                             final String resourceName = speciesJsonObject.optString("image", null);
-                            Drawable speciesImage = null;
+                            @DrawableRes
+                            int speciesImage = 0;
                             if (resourceName != null && !resourceName.equals(JSONObject.NULL)) {
-                                speciesImage = getDrawableResource(context.getResources(),
-                                        resourceName);
+                                speciesImage = context.getResources().getIdentifier(resourceName, null, null);
                             }
                             speciesList.add(
                                     new Species(speciesName, column, description, speciesImage));
@@ -115,23 +114,6 @@ public class SpeciesStorage {
         } catch (JSONException e) {
             // Parse problem
             throw new IOException("JSON parse error", e);
-        }
-    }
-
-    /**
-     * Finds and returns a drawable resource
-     *
-     * @param name a resource name, in the form package:type/name. The type must be drawable
-     *             or mipmap.
-     * @return the drawable resource, or null if none could be found
-     */
-    private static Drawable getDrawableResource(Resources res, String name) {
-        final int resourceId = res.getIdentifier(name, null, null);
-        if (resourceId != 0) {
-            return res.getDrawable(resourceId);
-        } else {
-            Log.w(TAG, "Resource " + name + " not found");
-            return null;
         }
     }
 
