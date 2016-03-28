@@ -32,6 +32,7 @@ public class Objects {
      * @throws NullPointerException if any argument is null
      */
     public static void requireAllNonNull(@Nullable Object... values) {
+        requireNonNull(values);
         for (Object value : values) {
             requireNonNull(value);
         }

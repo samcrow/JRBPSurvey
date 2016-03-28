@@ -39,11 +39,6 @@ import android.widget.LinearLayout;
 public class SpeciesView extends LinearLayout {
 
     /**
-     * Maximum size of the small image view, in pixel-like units
-     */
-    private static final int MAX_IMAGE_SIZE = 160;
-
-    /**
      * The context
      */
     @NonNull
@@ -117,7 +112,7 @@ public class SpeciesView extends LinearLayout {
 
     /**
      * Returns true if the user has checked the checkbox
-     * @return
+     * @return true if the box is checked
      */
     public boolean isChecked() {
         return mCheckBox.isChecked();

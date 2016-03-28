@@ -79,7 +79,6 @@ public class Observation {
         return mTime;
     }
 
-    @NonNull
     public int getSiteId() {
         return mSiteId;
     }
