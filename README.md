@@ -5,6 +5,10 @@ The [Jasper Ridge Biological Preserve](https://jrbp.stanford.edu/) regularly
 found on the preserve. This Android application is intended to make the survey more efficient by
 allowing people to easily navigate and enter data.
 
+# Downloading and using #
+
+[Download the application from the Google Play store](https://play.google.com/store/apps/details?id=org.samcrow.jrbpsurvey)
+
 ## Licensing ##
 
 Documentation files (in the `doc` folder) are licensed under the GNU Free Documentation License,
