@@ -177,6 +177,8 @@ public class RouteLayer extends Layer {
                 canvas.drawCircle((int) pixelX, (int) pixelY, (int) selectedRadius, mSelectedPaint);
             }
 
+            // Draw the marker circle: White stroke, then fill
+            canvas.drawCircle((int) pixelX, (int) pixelY, markerRadius, mIdBackgroundPaint);
             canvas.drawCircle((int) pixelX, (int) pixelY, markerRadius, mPaint);
 
             // Draw a line from the previous site to this one
