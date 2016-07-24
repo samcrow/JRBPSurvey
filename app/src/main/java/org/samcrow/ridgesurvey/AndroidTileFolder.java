@@ -17,7 +17,7 @@ public class AndroidTileFolder {
     public static TileFolder fromResource(Context context, String folderName, String fileExtension, @RawRes int resid) throws
             IOException {
         final InputStream zip = context.getResources().openRawResource(resid);
-        final File cacheDir = context.getCacheDir();
+        final File cacheDir = context.getExternalCacheDir();
         final File tilesDir = new File(cacheDir, folderName);
         return TileFolder.createFromZip(tilesDir, zip, fileExtension, AndroidGraphicFactory.INSTANCE);
     }

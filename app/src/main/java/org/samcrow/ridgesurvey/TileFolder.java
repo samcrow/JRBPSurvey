@@ -5,17 +5,15 @@ import android.support.annotation.NonNull;
 import org.mapsforge.core.graphics.GraphicFactory;
 import org.mapsforge.core.model.Tile;
 import org.mapsforge.map.layer.cache.TileStore;
-import org.mapsforge.map.layer.download.tilesource.TileSource;
 import org.mapsforge.map.layer.queue.Job;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -69,12 +67,12 @@ public class TileFolder extends TileStore {
         final byte zoom = key.tile.zoomLevel;
         final int x = key.tile.tileX;
         final int y = Tile.getMaxTileNumber(zoom) - key.tile.tileY;
-        System.out.println("findFile: x: " + x + ", y: " + y + ", zoom: " + zoom);
         final String relativePath = File.separator + zoom
                 + File.separator + x
                 + File.separator + y
-                + mTileExtension;
-        return new File(mRootFolder, relativePath);
+                + '.' + mTileExtension;
+        final File imageFile = new File(mRootFolder, relativePath);
+        return imageFile;
     }
 
 
@@ -111,6 +109,7 @@ public class TileFolder extends TileStore {
                 throw new IOException("Failed to create root directory " + rootFolder);
             }
         }
+        System.out.println("Root folder: " + rootFolder.getAbsolutePath());
 
         // TODO Delete files that are not present in the archive
 

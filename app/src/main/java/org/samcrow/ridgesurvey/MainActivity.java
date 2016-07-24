@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.graphics.Picture;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -62,6 +63,7 @@ import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
 import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
      * The upload status tracker
      */
     private UploadStatusTracker mUploadStatusTracker;
+    private TileFolder mTileFolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -254,8 +257,10 @@ public class MainActivity extends AppCompatActivity {
         mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
 
         // Orthophoto overlays
-        final TileFolder tileFolder = AndroidTileFolder.fromResource(this, "ortho_tiles", "jpeg", R.raw.tiles);
-        final TileStoreLayer orthoLayer = new TileStoreLayer(tileFolder, model.mapViewPosition, AndroidGraphicFactory.INSTANCE, true);
+        mTileFolder = AndroidTileFolder.fromResource(this, "ortho_tiles", "png", R.raw.tiles);
+        final TileStoreLayer orthoLayer = new TileStoreLayer(mTileFolder, model.mapViewPosition, AndroidGraphicFactory.INSTANCE, true);
+        
+        mMap.getModel().displayModel.setFixedTileSize(256);
 
         final List<Layer> routeLayers = new ArrayList<>();
         // Try to load sites
