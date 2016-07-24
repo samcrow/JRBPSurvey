@@ -105,11 +105,7 @@ public final class Site implements Parcelable {
         }
 
         Site site = (Site) o;
-
-        if (mId != site.mId) {
-            return false;
-        }
-        return mPosition.equals(site.mPosition);
+        return mId == site.mId && mPosition.equals(site.mPosition);
 
     }
 
@@ -128,14 +124,17 @@ public final class Site implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mId);
-        dest.writeSerializable(mPosition);
+        dest.writeDouble(mPosition.getLatitude());
+        dest.writeDouble(mPosition.getLongitude());
     }
 
     public static Parcelable.Creator<Site> CREATOR = new Creator<Site>() {
         @Override
         public Site createFromParcel(Parcel source) {
             final int id = source.readInt();
-            final LatLong position = (LatLong) source.readSerializable();
+            final double latitude = source.readDouble();
+            final double longitude = source.readDouble();
+            final LatLong position = new LatLong(latitude, longitude);
             return new Site(position, id);
         }
 

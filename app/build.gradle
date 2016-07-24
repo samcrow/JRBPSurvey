@@ -44,14 +44,14 @@ android {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:appcompat-v7:24.1.1'
     // Joda time (Apache 2.0) http://www.joda.org/joda-time/
     compile 'joda-time:joda-time:2.9.2'
     // Mapsforge (LGPLv3) https://github.com/mapsforge/mapsforge
-    compile 'org.mapsforge:mapsforge-core:0.6.0'
-    compile 'org.mapsforge:mapsforge-map:0.6.0'
-    compile 'org.mapsforge:mapsforge-map-reader:0.6.0'
-    compile 'org.mapsforge:mapsforge-map-android:0.6.0'
+    compile 'org.mapsforge:mapsforge-core:0.6.1'
+    compile 'org.mapsforge:mapsforge-map:0.6.1'
+    compile 'org.mapsforge:mapsforge-map-reader:0.6.1'
+    compile 'org.mapsforge:mapsforge-map-android:0.6.1'
     // AndroidSVG (Apache 2.0) https://bigbadaboom.github.io/androidsvg/
     compile 'com.caverock:androidsvg:1.2.1'
     // Commons IO (Apache 2.0) https://commons.apache.org/proper/commons-io/

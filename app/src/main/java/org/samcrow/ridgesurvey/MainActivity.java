@@ -54,8 +54,10 @@ import org.mapsforge.map.layer.Layer;
 import org.mapsforge.map.layer.cache.InMemoryTileCache;
 import org.mapsforge.map.layer.cache.TileCache;
 import org.mapsforge.map.layer.cache.TileStore;
+import org.mapsforge.map.layer.cache.TwoLevelTileCache;
 import org.mapsforge.map.layer.renderer.TileRendererLayer;
 import org.mapsforge.map.layer.tilestore.TileStoreLayer;
+import org.mapsforge.map.model.DisplayModel;
 import org.mapsforge.map.model.MapViewPosition;
 import org.mapsforge.map.model.Model;
 import org.mapsforge.map.model.common.PreferencesFacade;
@@ -250,7 +252,8 @@ public class MainActivity extends AppCompatActivity {
                 mapFile,
                 InternalRenderTheme.OSMARENDER,
                 false,
-                true);
+                true,
+                false);
 
         // Limit view to the bounds of the map file
         mMap.getModel().mapViewPosition.setMapLimit(mapFile.boundingBox());
@@ -258,9 +261,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Orthophoto overlays
         mTileFolder = AndroidTileFolder.fromResource(this, "ortho_tiles", "png", R.raw.tiles);
-        final TileStoreLayer orthoLayer = new TileStoreLayer(mTileFolder, model.mapViewPosition, AndroidGraphicFactory.INSTANCE, true);
-        
-        mMap.getModel().displayModel.setFixedTileSize(256);
+        final TileCache orthoCache = new TwoLevelTileCache(new InMemoryTileCache(512), mTileFolder);
+        final TileStoreLayer orthoLayer = new TileStoreLayer(orthoCache, model.mapViewPosition, AndroidGraphicFactory.INSTANCE, true);
+
+        // Set fixed tile size to make orthopthoto tiles display correctly
+//        mMap.getModel().displayModel.setFixedTileSize(256);
+        orthoLayer.setVisible(false);
 
         final List<Layer> routeLayers = new ArrayList<>();
         // Try to load sites
