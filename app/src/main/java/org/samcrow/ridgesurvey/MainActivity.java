@@ -50,8 +50,11 @@ import org.mapsforge.map.android.util.AndroidPreferences;
 import org.mapsforge.map.android.util.AndroidUtil;
 import org.mapsforge.map.android.view.MapView;
 import org.mapsforge.map.layer.Layer;
+import org.mapsforge.map.layer.cache.InMemoryTileCache;
 import org.mapsforge.map.layer.cache.TileCache;
+import org.mapsforge.map.layer.cache.TileStore;
 import org.mapsforge.map.layer.renderer.TileRendererLayer;
+import org.mapsforge.map.layer.tilestore.TileStoreLayer;
 import org.mapsforge.map.model.MapViewPosition;
 import org.mapsforge.map.model.Model;
 import org.mapsforge.map.model.common.PreferencesFacade;
@@ -250,6 +253,10 @@ public class MainActivity extends AppCompatActivity {
         mMap.getModel().mapViewPosition.setMapLimit(mapFile.boundingBox());
         mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
 
+        // Orthophoto overlays
+        final TileFolder tileFolder = AndroidTileFolder.fromResource(this, "ortho_tiles", "jpeg", R.raw.tiles);
+        final TileStoreLayer orthoLayer = new TileStoreLayer(tileFolder, model.mapViewPosition, AndroidGraphicFactory.INSTANCE, true);
+
         final List<Layer> routeLayers = new ArrayList<>();
         // Try to load sites
         try {
@@ -300,6 +307,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Add layers to the map
         mMap.getLayerManager().getLayers().add(tileRendererLayer);
+        mMap.getLayerManager().getLayers().add(orthoLayer);
         mMap.getLayerManager().getLayers().add(routeLineLayer);
         mMap.getLayerManager().getLayers().addAll(routeLayers);
         mMap.getLayerManager().getLayers().add(locationLayer);
@@ -365,6 +373,13 @@ public class MainActivity extends AppCompatActivity {
         mUploadStatusTracker.addListener(controller);
 
         return true;
+    }
+
+    @Override
+    public void onDestroy() {
+        mMap.destroyAll();
+        AndroidGraphicFactory.clearResourceMemoryCache();
+        super.onDestroy();
     }
 
     /**
