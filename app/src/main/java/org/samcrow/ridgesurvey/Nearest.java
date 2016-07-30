@@ -20,6 +20,7 @@
 package org.samcrow.ridgesurvey;
 
 import org.mapsforge.core.model.LatLong;
+import org.samcrow.ridgesurvey.tsp.TravelingSalesman;
 
 import java.util.ArrayList;
 import java.util.List;

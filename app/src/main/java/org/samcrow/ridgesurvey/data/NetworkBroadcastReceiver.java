@@ -17,12 +17,14 @@
  * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.data;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+
+import org.samcrow.ridgesurvey.data.UploadService;
 
 /**
  * Receives notifications of network changes and starts an {@link UploadService}

@@ -1,11 +1,11 @@
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.map;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.annotation.RawRes;
 
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
-import org.samcrow.ridgesurvey.TileFolder.ProgressCallback;
+import org.samcrow.ridgesurvey.map.TileFolder.ProgressCallback;
 
 import java.io.File;
 import java.io.IOException;

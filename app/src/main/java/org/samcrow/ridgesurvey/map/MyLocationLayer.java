@@ -17,7 +17,7 @@
  * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.map;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;

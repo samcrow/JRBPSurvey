@@ -17,12 +17,15 @@
  * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.data;
 
 import android.content.Context;
 import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.view.View;
+
+import org.samcrow.ridgesurvey.Objects;
+import org.samcrow.ridgesurvey.R;
 
 /**
  * Displays the status of uploads, and allows them to be triggered

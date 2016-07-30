@@ -17,7 +17,7 @@
  * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.map;
 
 import android.support.annotation.NonNull;
 
@@ -31,6 +31,11 @@ import org.mapsforge.core.model.Point;
 import org.mapsforge.core.util.MercatorProjection;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.layer.Layer;
+import org.samcrow.ridgesurvey.Objects;
+import org.samcrow.ridgesurvey.OrderedRoute;
+import org.samcrow.ridgesurvey.Route;
+import org.samcrow.ridgesurvey.SelectionManager;
+import org.samcrow.ridgesurvey.Site;
 
 import java.util.List;
 import java.util.Locale;

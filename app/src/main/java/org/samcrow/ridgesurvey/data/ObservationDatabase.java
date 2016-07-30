@@ -17,7 +17,7 @@
  * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -33,6 +33,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.samcrow.ridgesurvey.Objects;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +49,8 @@ public final class ObservationDatabase {
     public static final String TABLE_NAME = "observations";
     /*
      * Schema:
+     * id: Observation ID, INTEGER PRIMARY KEY
+     * uploaded: 1/0 uploaded yet or not, INTEGER
      * site: Site ID, INTEGER
      * route: Route name, TEXT
      * time: Time recorded, ISO 8601 date+time format with milliseconds, TEXT
@@ -87,8 +90,26 @@ public final class ObservationDatabase {
         }
     }
 
+    /**
+     * Updates an observation in the database
+     *
+     * @param observation the observation
+     * @throws SQLException if an error occurs
+     */
+    public void updateObservation(@NonNull IdentifiedObservation observation) throws SQLException {
+        final ContentValues values = createContentValues(observation);
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        try {
+            db.update(TABLE_NAME, values, "id = ?",
+                    new String[]{Integer.toString(observation.getId())});
+        } finally {
+            db.close();
+        }
+    }
+
     private static ContentValues createContentValues(@NonNull Observation observation) {
         final ContentValues values = new ContentValues();
+        values.put("uploaded", observation.isUploaded() ? 1 : 0);
         values.put("site", observation.getSiteId());
         values.put("route", observation.getRouteName());
 
@@ -112,6 +133,7 @@ public final class ObservationDatabase {
         return values;
     }
 
+
     /**
      * Loads and returns one observation from the database
      * <p/>
@@ -120,7 +142,7 @@ public final class ObservationDatabase {
      * @return an arbitrarily chosen database, or null if the database is empty
      * @throws SQLException if an error occurs
      */
-    public Observation getOneObservation() throws SQLException {
+    public IdentifiedObservation getOneObservation() throws SQLException {
         final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         try {
             // Select one
@@ -145,8 +167,8 @@ public final class ObservationDatabase {
      * @return a list of all observations in the database
      * @throws SQLException if an error occurs
      */
-    public List<Observation> getObservations() throws SQLException {
-        final List<Observation> observations = new ArrayList<>();
+    public List<IdentifiedObservation> getObservations() throws SQLException {
+        final List<IdentifiedObservation> observations = new ArrayList<>();
 
         final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         try {
@@ -170,12 +192,17 @@ public final class ObservationDatabase {
         return observations;
     }
 
-    private static Observation createObservation(Cursor result) throws SQLException {
+    private static IdentifiedObservation createObservation(Cursor result) throws SQLException {
+        final int idIndex = result.getColumnIndexOrThrow("id");
+        final int uploadedIndex = result.getColumnIndexOrThrow("uploaded");
         final int siteIndex = result.getColumnIndexOrThrow("site");
         final int routeIndex = result.getColumnIndexOrThrow("route");
         final int timeIndex = result.getColumnIndexOrThrow("time");
         final int speciesIndex = result.getColumnIndexOrThrow("species");
         final int notesIndex = result.getColumnIndexOrThrow("notes");
+
+        final int id = result.getInt(idIndex);
+        final boolean uploaded = result.getInt(uploadedIndex) == 1;
 
         final int site = result.getInt(siteIndex);
         final String route = result.getString(routeIndex);
@@ -210,7 +237,7 @@ public final class ObservationDatabase {
 
         final String notes = result.getString(notesIndex);
 
-        return new Observation(time, site, route, speciesPresent, notes);
+        return new IdentifiedObservation(time, uploaded, site, route, speciesPresent, notes, id);
     }
 
     /**
@@ -220,16 +247,13 @@ public final class ObservationDatabase {
      * @param observation the observation to delete
      * @return true if the observation was deleted, otherwise false
      */
-    public boolean delete(Observation observation) {
+    public boolean delete(IdentifiedObservation observation) {
         final ContentValues values = createContentValues(observation);
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         try {
-            // Only use the time as a criterion (assume that no two observations were made
-            // in the same millisecond)
-            // Using all the fields as critera resulted in no rows being deleted.
             final int count = db.delete(TABLE_NAME,
-                    "time = ?",
-                    new String[]{values.getAsString("time")});
+                    "id = ?",
+                    new String[]{Integer.toString(observation.getId())});
             return count > 0;
         } finally {
             db.close();
@@ -240,25 +264,52 @@ public final class ObservationDatabase {
 
         private static final String NAME = "observations";
 
-        private static final int VERSION = 1;
+        private static final int VERSION = 2;
 
         public ObservationOpenHelper(Context context) {
             super(context, NAME, null, VERSION);
         }
 
+        /**
+         * The SQL to create the table, with a binding for the table name
+         */
+        private static final String CREATE = "CREATE TABLE ? (" +
+                "id INTEGER NOT NULL PRIMARY KEY, " +
+                "uploaded INTEGER NOT NULL DEFAULT 0 CHECK (uploaded = 0 OR uploaded = 1), " +
+                "site INTEGER NOT NULL, " +
+                "route TEXT NOT NULL, " +
+                "time TEXT NOT NULL, " +
+                "species TEXT NOT NULL, " +
+                "notes TEXT NOT NULL)";
+
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + TABLE_NAME + " (" +
-                    "site INTEGER NOT NULL, " +
-                    "route TEXT NOT NULL, " +
-                    "time TEXT NOT NULL, " +
-                    "species TEXT NOT NULL, " +
-                    "notes TEXT NOT NULL)");
+            db.execSQL(CREATE, new Object[]{TABLE_NAME});
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            // Implement when version changes
+            if (oldVersion == 1 && newVersion == 2) {
+                // Add an ID column
+                db.beginTransaction();
+                try {
+                    // Create a new table
+                    final String copyTable = TABLE_NAME + "_temp";
+                    db.execSQL(CREATE, new Object[]{copyTable});
+                    // Copy everything into the new table
+                    // IDs will be assigned automatically
+                    db.execSQL("INSERT INTO ? (site, route, time, species, notes)" +
+                                    " SELECT site, route, time, species, notes FROM ?",
+                            new Object[]{copyTable, TABLE_NAME});
+                    // Delete the old table
+                    db.execSQL("DROP TABLE ?", new Object[]{TABLE_NAME});
+                    db.execSQL("ALTER TABLE ? RENAME TO ?", new Object[]{copyTable, TABLE_NAME});
+
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+            }
         }
     }
 }

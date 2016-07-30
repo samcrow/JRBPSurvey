@@ -1,4 +1,4 @@
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.map;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -7,6 +7,7 @@ import org.mapsforge.core.graphics.GraphicFactory;
 import org.mapsforge.core.model.Tile;
 import org.mapsforge.map.layer.cache.TileStore;
 import org.mapsforge.map.layer.queue.Job;
+import org.samcrow.ridgesurvey.Objects;
 
 import java.io.BufferedInputStream;
 import java.io.File;

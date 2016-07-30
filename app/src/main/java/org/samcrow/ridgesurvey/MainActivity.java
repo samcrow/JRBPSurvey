@@ -57,7 +57,16 @@ import org.mapsforge.map.model.Model;
 import org.mapsforge.map.model.common.PreferencesFacade;
 import org.mapsforge.map.reader.MapFile;
 import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
-import org.samcrow.ridgesurvey.TileFolderLoad.DoneHandler;
+import org.samcrow.ridgesurvey.data.UploadMenuItemController;
+import org.samcrow.ridgesurvey.map.MyLocationLayer;
+import org.samcrow.ridgesurvey.map.RouteLayer;
+import org.samcrow.ridgesurvey.map.RouteLineLayer;
+import org.samcrow.ridgesurvey.map.TileFolder;
+import org.samcrow.ridgesurvey.map.TileFolderLoad;
+import org.samcrow.ridgesurvey.map.TileFolderLoad.DoneHandler;
+import org.samcrow.ridgesurvey.data.UploadService;
+import org.samcrow.ridgesurvey.data.UploadStatusListener;
+import org.samcrow.ridgesurvey.data.UploadStatusTracker;
 
 import java.io.IOException;
 import java.util.ArrayList;

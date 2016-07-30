@@ -17,17 +17,34 @@
  * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.data;
 
 /**
- * Interface for algorithms that can solve the traveling salesman problem
+ * An interface for objects that can respond to changes in the upload state
  */
-public interface TravelingSalesman {
+public interface UploadStatusListener {
+
     /**
-     * Solves the traveling salesman problem for a route and returns an ordered route solution
-     * @param input a route containing the sites to solve. Must not be null.
-     * @param start  the site to start at. input must contain this site. Must not be null.
-     * @return an ordered route visiting all the sites in the input
+     * Possible upload statuses
      */
-    OrderedRoute solve(Route input, Site start);
+    enum UploadState {
+        /**
+         * All observations have been uploaded
+         */
+        Ok,
+        /**
+         * One or more observations still needs to be uploaded
+         */
+        NeedsUpload,
+        /**
+         * An upload is in progress
+         */
+        Uploading,
+    }
+
+    /**
+     * Sets the status to display
+     * @param state the status, which must not be null
+     */
+    void setState(UploadState state);
 }

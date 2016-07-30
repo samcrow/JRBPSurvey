@@ -1,4 +1,4 @@
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.map;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -9,7 +9,8 @@ import android.support.annotation.RawRes;
 import android.util.Log;
 
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
-import org.samcrow.ridgesurvey.TileFolder.ProgressCallback;
+import org.samcrow.ridgesurvey.R;
+import org.samcrow.ridgesurvey.map.TileFolder.ProgressCallback;
 
 import java.io.File;
 import java.io.IOException;

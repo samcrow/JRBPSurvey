@@ -17,11 +17,12 @@
  * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.data;
 
 import android.support.annotation.NonNull;
 
 import org.joda.time.DateTime;
+import org.samcrow.ridgesurvey.Objects;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,11 @@ public class Observation {
      */
     @NonNull
     private final DateTime mTime;
+
+    /**
+     * If this observation has been uploaded
+     */
+    private final boolean mUploaded;
 
     /**
      * The ID of the site where the observation was made
@@ -61,13 +67,14 @@ public class Observation {
     @NonNull
     private final String mNotes;
 
-    public Observation(@NonNull DateTime time, int siteId, @NonNull String routeName,
+    public Observation(@NonNull DateTime time, boolean uploaded, int siteId, @NonNull String routeName,
                        @NonNull Map<String, Boolean> species, @NonNull String notes) {
         Objects.requireAllNonNull(time, routeName, species, notes);
         for (Boolean value : species.values()) {
             Objects.requireNonNull(value);
         }
         mTime = time;
+        mUploaded = uploaded;
         mSiteId = siteId;
         mRouteName = routeName;
         mSpecies = new HashMap<>(species);
@@ -77,6 +84,10 @@ public class Observation {
     @NonNull
     public DateTime getTime() {
         return mTime;
+    }
+
+    public boolean isUploaded() {
+        return mUploaded;
     }
 
     public int getSiteId() {

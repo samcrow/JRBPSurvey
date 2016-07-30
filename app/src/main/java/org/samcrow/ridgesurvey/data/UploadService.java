@@ -17,7 +17,7 @@
  * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.data;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -28,10 +28,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.samcrow.ridgesurvey.Objects;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -40,14 +43,26 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * A service that uploads observations to a server
+ * A service that uploads observations to a server and deletes observations that have been
+ * uploaded
  */
 public class UploadService extends IntentService {
 
     private static final String TAG = UploadService.class.getSimpleName();
+
+    /**
+     * The minimum age of an observation before it should be uploaded
+     */
+    private static final Duration UPLOAD_AGE = Duration.standardMinutes(30);
+
+    /**
+     * The minimum age of an uploaded observation before it is deleted
+     */
+    private static final Duration DELETE_AGE = Duration.standardDays(2);
 
     public UploadService() {
         super(UploadService.class.getName());
@@ -66,15 +81,27 @@ public class UploadService extends IntentService {
                 .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_STARTED));
         final ObservationDatabase db = new ObservationDatabase(this);
         try {
-            Observation observation;
-            while ((observation = db.getOneObservation()) != null) {
-                upload(observation);
-                // Success, now delete it
-                final boolean deleteResult = db.delete(observation);
-                if (!deleteResult) {
-                    Log.w(TAG, "Failed to delete uploaded result");
+            final List<IdentifiedObservation> observations = db.getObservations();
+            final DateTime uploadThreshold = DateTime.now().minus(UPLOAD_AGE);
+            final DateTime deleteThreshold = DateTime.now().minus(DELETE_AGE);
+
+            for (IdentifiedObservation observation : observations) {
+                // Check for upload
+                if (!observation.isUploaded() && observation.getTime().isBefore(uploadThreshold)) {
+                    upload(observation);
+                    // Make a copy marked as uploaded
+                    final IdentifiedObservation uploaded = new IdentifiedObservation(
+                            observation.getTime(), true, observation.getSiteId(),
+                            observation.getRouteName(), observation.getSpecies(),
+                            observation.getNotes(), observation.getId());
+                    db.updateObservation(uploaded);
+                }
+                // Check for delete
+                if (observation.isUploaded() && observation.getTime().isBefore(deleteThreshold)) {
+                    db.delete(observation);
                 }
             }
+
             LocalBroadcastManager.getInstance(this)
                     .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_SUCCESS));
         } catch (SQLException e) {
@@ -101,6 +128,10 @@ public class UploadService extends IntentService {
             Log.e(TAG, "Upload server error", e);
             LocalBroadcastManager.getInstance(this)
                     .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_FAILED));
+        } catch (Exception e) {
+            Log.e(TAG, "Unknown upload error", e);
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_FAILED));
         }
     }
 
@@ -117,7 +148,7 @@ public class UploadService extends IntentService {
 
         // The URL of the script macro that enters data
         final URL macroUrl = new URL(
-                "https://script.google.com/macros/s/AKfycbyQqLKAlEcK9BqSAZ3r6El4T5w7fIs6SwEljTlSENKalYD7NRD7/exec");
+                "https://script.google.com/macros/s/AKfycbx94BFDIWE5w9cVsAFwHH9T7282QRwjiBkmQ3lGergJkEqOQ6k/exec");
         final HttpURLConnection connection = (HttpURLConnection) macroUrl.openConnection();
         try {
             // POST

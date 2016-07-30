@@ -17,10 +17,15 @@
  * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.samcrow.ridgesurvey;
+package org.samcrow.ridgesurvey.tsp;
 
 
 import android.util.Log;
+
+import org.samcrow.ridgesurvey.Objects;
+import org.samcrow.ridgesurvey.OrderedRoute;
+import org.samcrow.ridgesurvey.Route;
+import org.samcrow.ridgesurvey.Site;
 
 import java.util.ArrayList;
 import java.util.Arrays;

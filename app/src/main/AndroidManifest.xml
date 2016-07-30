@@ -58,13 +58,13 @@
         <activity android:name=".DataEntryActivity">
         </activity>
 
-        <receiver android:name=".NetworkBroadcastReceiver">
+        <receiver android:name=".data.NetworkBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
 
-        <service android:name=".UploadService"/>
+        <service android:name=".data.UploadService"/>
     </application>
 
 </manifest>

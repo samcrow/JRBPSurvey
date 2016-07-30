@@ -37,6 +37,9 @@ import android.widget.Toast;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
+import org.samcrow.ridgesurvey.data.Observation;
+import org.samcrow.ridgesurvey.data.ObservationDatabase;
+import org.samcrow.ridgesurvey.data.UploadService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +54,7 @@ import java.util.Map;
  * to record data at and an extra with key {@link #ARG_ROUTE} containing the name of the route
  * that contains the site.
  */
-public class DataEntryActivity extends AppCompatActivity {
+public class DataEntryActivity extends ObservationActivity {
 
     private static final String TAG = DataEntryActivity.class.getSimpleName();
 
@@ -64,17 +67,9 @@ public class DataEntryActivity extends AppCompatActivity {
      */
     public static final String ARG_ROUTE = DataEntryActivity.class.getName() + ".ARG_ROUTE";
     /**
-     * The group that contains the SpeciesViews and potentially other views
-     */
-    private ViewGroup mSpeciesContainer;
-    /**
      * The site where the entry is taking place
      */
     private Site mSite;
-    /**
-     * The field used to enter notes
-     */
-    private EditText mNotesField;
 
     /**
      * The name of the route that contains {@link #mSite}
@@ -84,11 +79,6 @@ public class DataEntryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_data_entry);
-        final ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
 
         // Unpack site from intent
         mSite = getIntent().getParcelableExtra(ARG_SITE);
@@ -101,31 +91,6 @@ public class DataEntryActivity extends AppCompatActivity {
         }
 
         setTitle(String.format(getString(R.string.format_site_id), mSite.getId()));
-
-        mNotesField = (EditText) findViewById(R.id.notes_field);
-
-        // Load species
-        mSpeciesContainer = (ViewGroup) findViewById(R.id.species_container);
-        final InputStream source = getResources().openRawResource(R.raw.species);
-        try {
-            final List<SpeciesGroup> groups = SpeciesStorage.loadSpeciesGroups(this, source);
-            for (SpeciesGroup group : groups) {
-                // Add a medium text view for the species group
-                final TextView groupLabel = new TextView(this, null);
-                groupLabel.setTextAppearance(this, android.R.style.TextAppearance_Medium);
-                groupLabel.setText(group.getName());
-                mSpeciesContainer.addView(groupLabel);
-
-                for (Species species : group.getSpecies()) {
-                    final SpeciesView speciesView = new SpeciesView(this, species);
-                    mSpeciesContainer.addView(speciesView);
-                }
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to read species input", e);
-        } finally {
-            IOUtils.closeQuietly(source);
-        }
     }
 
     @Override
@@ -163,7 +128,7 @@ public class DataEntryActivity extends AppCompatActivity {
         }
         final String notes = mNotesField.getText().toString();
 
-        final Observation observation = new Observation(DateTime.now(), mSite.getId(), mRouteName,
+        final Observation observation = new Observation(DateTime.now(), false, mSite.getId(), mRouteName,
                 speciesData, notes);
 
         // Store
