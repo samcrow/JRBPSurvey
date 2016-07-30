@@ -79,8 +79,7 @@ public class TileFolder extends TileStore {
                 + File.separator + x
                 + File.separator + y
                 + '.' + mTileExtension;
-        final File imageFile = new File(mRootFolder, relativePath);
-        return imageFile;
+        return new File(mRootFolder, relativePath);
     }
 
 

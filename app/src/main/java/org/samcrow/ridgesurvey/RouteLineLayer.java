@@ -20,7 +20,6 @@
 package org.samcrow.ridgesurvey;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 

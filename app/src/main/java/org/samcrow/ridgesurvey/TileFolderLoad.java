@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RawRes;
 import android.util.Log;
 
-import org.mapsforge.core.model.Tile;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.samcrow.ridgesurvey.TileFolder.ProgressCallback;
 
@@ -118,7 +117,7 @@ public class TileFolderLoad extends AsyncTask<Void, TileFolderLoad.Progress, Til
         mDialog = new ProgressDialog(mContext);
         mDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mDialog.setCancelable(false);
-        mDialog.setMessage("Loading images");
+        mDialog.setMessage(mContext.getString(R.string.message_loading_images));
         mDialog.show();
     }
 
