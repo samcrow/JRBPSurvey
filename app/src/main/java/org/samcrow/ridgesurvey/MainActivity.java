@@ -27,14 +27,12 @@ import android.graphics.Color;
 import android.graphics.Picture;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,24 +46,19 @@ import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.util.AndroidPreferences;
-import org.mapsforge.map.android.util.AndroidUtil;
 import org.mapsforge.map.android.view.MapView;
 import org.mapsforge.map.layer.Layer;
+import org.mapsforge.map.layer.LayerManager;
 import org.mapsforge.map.layer.cache.InMemoryTileCache;
 import org.mapsforge.map.layer.cache.TileCache;
-import org.mapsforge.map.layer.cache.TileStore;
 import org.mapsforge.map.layer.cache.TwoLevelTileCache;
-import org.mapsforge.map.layer.renderer.TileRendererLayer;
 import org.mapsforge.map.layer.tilestore.TileStoreLayer;
-import org.mapsforge.map.model.DisplayModel;
-import org.mapsforge.map.model.MapViewPosition;
 import org.mapsforge.map.model.Model;
 import org.mapsforge.map.model.common.PreferencesFacade;
 import org.mapsforge.map.reader.MapFile;
-import org.mapsforge.map.rendertheme.InternalRenderTheme;
 import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
+import org.samcrow.ridgesurvey.TileFolderLoad.DoneHandler;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
      * The initial position of the map
      */
     private static final MapPosition START_POSITION = new MapPosition(
-            new LatLong(37.4037, -122.2269), (byte) 13);
+            new LatLong(37.4037, -122.2269), (byte) 15);
     /**
      * The permission that allows the application to access the user's location
      */
@@ -121,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
      * The upload status tracker
      */
     private UploadStatusTracker mUploadStatusTracker;
-    private TileFolder mTileFolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         // Check location permission
         final int permission = ActivityCompat.checkSelfPermission(this, LOCATION_PERMISSION);
         if (permission == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this, new String[]{ LOCATION_PERMISSION },
+            ActivityCompat.requestPermissions(this, new String[]{LOCATION_PERMISSION},
                     LOCATION_PERMISSION_CODE);
         }
 
@@ -148,7 +140,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up upload status tracker
         mUploadStatusTracker = new UploadStatusTracker(this);
-        mUploadStatusTracker.addListener((UploadStatusListener) findViewById(R.id.upload_status_bar));
+        mUploadStatusTracker.addListener(
+                (UploadStatusListener) findViewById(R.id.upload_status_bar));
 
         final LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         final IntentFilter filter = new IntentFilter();
@@ -212,7 +205,8 @@ public class MainActivity extends AppCompatActivity {
                 final String permission = permissions[i];
                 final int result = grantResults[i];
                 // If location access was granted, start location finding
-                if (permission.equals(LOCATION_PERMISSION) && result == PackageManager.PERMISSION_GRANTED) {
+                if (permission.equals(
+                        LOCATION_PERMISSION) && result == PackageManager.PERMISSION_GRANTED) {
                     mLocationFinder.resume();
                 }
             }
@@ -220,9 +214,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Adds orthophoto imagery from the provided tile folder to the map
+     *
+     * @param tileFolder the folder to get tiles from
+     */
+    private void addOrthophotos(@NonNull TileFolder tileFolder) {
+        final TileCache orthoCache = new TwoLevelTileCache(new InMemoryTileCache(512), tileFolder);
+        final Model model = mMap.getModel();
+        final TileStoreLayer orthoLayer = new TileStoreLayer(orthoCache, model.mapViewPosition,
+                AndroidGraphicFactory.INSTANCE, false);
+
+        // Set fixed tile size to make orthopthoto tiles display correctly
+        mMap.getModel().displayModel.setFixedTileSize(256);
+
+        final LayerManager layerManager = mMap.getLayerManager();
+        layerManager.getLayers().add(0, orthoLayer);
+        mMap.setCenter(START_POSITION.latLong);
+        mMap.setZoomLevel(START_POSITION.zoomLevel);
+    }
+
+    /**
      * Sets up the map view in {@link #mMap}
      */
     private void setUpMap() throws IOException {
+
+        // Start loading orthophoto images in the background
+        final TileFolderLoad loadTask = new TileFolderLoad(this, R.raw.tiles, "ortho_tiles",
+                "jpeg");
+        loadTask.setDoneHandler(new DoneHandler() {
+            @Override
+            public void done(TileFolder result) {
+                addOrthophotos(result);
+            }
+        });
+        loadTask.execute();
+
+
         mMap = (MapView) findViewById(R.id.map);
         // Disable built-in zoom controls, unless running in an emulator or if the device
         // does not support basic multi-touch
@@ -236,37 +263,13 @@ public class MainActivity extends AppCompatActivity {
         final Model model = mMap.getModel();
         model.init(mPreferences);
 
-        final DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-        final TileCache cache = AndroidUtil.createTileCache(this, TAG,
-                model.displayModel.getTileSize(),
-                metrics.widthPixels, metrics.heightPixels,
-                model.frameBufferModel.getOverdrawFactor(), true);
-
-        final MapFile mapFile = new MapFile(
-                Storage.getResourceAsFile(this, R.raw.jasper_ridge_map));
-        TileRendererLayer tileRendererLayer = AndroidUtil.createTileRendererLayer(
-                cache,
-                initializePosition(model.mapViewPosition),
-                mapFile,
-                InternalRenderTheme.OSMARENDER,
-                false,
-                true,
-                false);
-
-        // Limit view to the bounds of the map file
-        mMap.getModel().mapViewPosition.setMapLimit(mapFile.boundingBox());
-        mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
-
-        // Orthophoto overlays
-        mTileFolder = AndroidTileFolder.fromResource(this, "ortho_tiles", "png", R.raw.tiles);
-        final TileCache orthoCache = new TwoLevelTileCache(new InMemoryTileCache(512), mTileFolder);
-        final TileStoreLayer orthoLayer = new TileStoreLayer(orthoCache, model.mapViewPosition, AndroidGraphicFactory.INSTANCE, true);
-
-        // Set fixed tile size to make orthopthoto tiles display correctly
-//        mMap.getModel().displayModel.setFixedTileSize(256);
-        orthoLayer.setVisible(false);
+        {
+            // Limit view to the bounds of the map file
+            MapFile mapFile = new MapFile(
+                    Storage.getResourceAsFile(this, R.raw.jasper_ridge_map));
+            mMap.getModel().mapViewPosition.setMapLimit(mapFile.boundingBox());
+            mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
+        }
 
         final List<Layer> routeLayers = new ArrayList<>();
         // Try to load sites
@@ -296,7 +299,8 @@ public class MainActivity extends AppCompatActivity {
 
                     final OrderedRoute solution = new Nearest().solve(route, start);
                     final int color = Color.HSVToColor(new float[]{hue, saturation, value});
-                    final Layer routeLayer = new RouteLayer(route, solution, color, mSelectionManager);
+                    final Layer routeLayer = new RouteLayer(route, solution, color,
+                            mSelectionManager);
                     routeLayers.add(routeLayer);
                 }
                 i++;
@@ -317,26 +321,9 @@ public class MainActivity extends AppCompatActivity {
         mLocationFinder.addListener(locationLayer);
 
         // Add layers to the map
-        mMap.getLayerManager().getLayers().add(tileRendererLayer);
-        mMap.getLayerManager().getLayers().add(orthoLayer);
         mMap.getLayerManager().getLayers().add(routeLineLayer);
         mMap.getLayerManager().getLayers().addAll(routeLayers);
         mMap.getLayerManager().getLayers().add(locationLayer);
-    }
-
-    /**
-     * Accepts a MapViewPosition. If the position is set to a latitude/longitude of (0, 0),
-     * sets it to {@link #START_POSITION}
-     * @param mvp The position to modify. Must not be null.
-     * @return mvp, potentially modified
-     */
-    private MapViewPosition initializePosition(MapViewPosition mvp) {
-        LatLong center = mvp.getCenter();
-
-        if (center.equals(new LatLong(0, 0))) {
-            mvp.setMapPosition(START_POSITION);
-        }
-        return mvp;
     }
 
     @Override
@@ -395,6 +382,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Returns a drawable that represents an icon used to display the user's location
+     *
      * @return an icon drawable
      */
     private Drawable getMyLocationDrawable() {
