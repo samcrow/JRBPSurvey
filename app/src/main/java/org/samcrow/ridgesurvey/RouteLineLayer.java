@@ -19,6 +19,8 @@
 
 package org.samcrow.ridgesurvey;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -56,9 +58,14 @@ public class RouteLineLayer extends Layer implements LocationListener, Selection
     @NonNull
     private final Paint mLinePaint;
 
-    public RouteLineLayer() {
+    public RouteLineLayer(@NonNull Context context) {
+        // Resources.getColor(int) is another method that deprecated in API 23 with a replacement
+        // not available until API 23.
+        @SuppressWarnings("deprecation")
+        final int lineColor = context.getResources().getColor(R.color.map_route_line);
+
         mLinePaint = AndroidGraphicFactory.INSTANCE.createPaint();
-        mLinePaint.setColor(0xFF0030B0);
+        mLinePaint.setColor(lineColor);
         mLinePaint.setStrokeWidth(4);
     }
 

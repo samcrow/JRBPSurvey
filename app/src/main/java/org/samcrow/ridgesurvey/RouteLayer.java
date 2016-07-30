@@ -198,7 +198,7 @@ public class RouteLayer extends Layer {
                     mapSize);
             mIdPaint.setTextSize(textSize);
             mIdBackgroundPaint.setTextSize(textSize);
-            mIdBackgroundPaint.setStrokeWidth(0.2f * textSize);
+            mIdBackgroundPaint.setStrokeWidth(4);
 
             final int markerRadius = (int) Math.ceil(
                     MercatorProjection.metersToPixels(MARKER_RADIUS, ll.latitude, mapSize));

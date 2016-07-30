@@ -314,7 +314,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Location layers
-        final RouteLineLayer routeLineLayer = new RouteLineLayer();
+        final RouteLineLayer routeLineLayer = new RouteLineLayer(this);
         mSelectionManager.addSelectionListener(routeLineLayer);
         mLocationFinder.addListener(routeLineLayer);
         final MyLocationLayer locationLayer = new MyLocationLayer(getMyLocationDrawable());
