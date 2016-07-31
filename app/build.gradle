@@ -27,8 +27,8 @@ android {
         applicationId "org.samcrow.jrbpsurvey"
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 3
-        versionName "1.0.2"
+        versionCode 4
+        versionName "1.1.0"
     }
     buildTypes {
         release {
@@ -44,6 +44,7 @@ android {
 
 dependencies {
     testCompile 'junit:junit:4.12'
+    //noinspection GradleDependency
     compile 'com.android.support:appcompat-v7:23.1.1'
     // Joda time (Apache 2.0) http://www.joda.org/joda-time/
     compile 'joda-time:joda-time:2.9.2'
