@@ -57,7 +57,7 @@ public class UploadService extends IntentService {
     /**
      * The minimum age of an observation before it should be uploaded
      */
-    private static final Duration UPLOAD_AGE = Duration.standardMinutes(30);
+    private static final Duration UPLOAD_AGE = Duration.standardMinutes(10);
 
     /**
      * The minimum age of an uploaded observation before it is deleted
@@ -81,13 +81,14 @@ public class UploadService extends IntentService {
                 .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_STARTED));
         final ObservationDatabase db = new ObservationDatabase(this);
         try {
-            final List<IdentifiedObservation> observations = db.getObservations();
-            final DateTime uploadThreshold = DateTime.now().minus(UPLOAD_AGE);
+            final List<IdentifiedObservation> observations = db.getObservationsByTime();
             final DateTime deleteThreshold = DateTime.now().minus(DELETE_AGE);
 
             for (IdentifiedObservation observation : observations) {
+                Log.d(TAG, "Loaded observation " + observation.getId());
                 // Check for upload
-                if (!observation.isUploaded() && observation.getTime().isBefore(uploadThreshold)) {
+                if (needsUpload(observation)) {
+                    Log.d(TAG, "Trying to upload...");
                     upload(observation);
                     // Make a copy marked as uploaded
                     final IdentifiedObservation uploaded = new IdentifiedObservation(
@@ -95,9 +96,12 @@ public class UploadService extends IntentService {
                             observation.getRouteName(), observation.getSpecies(),
                             observation.getNotes(), observation.getId());
                     db.updateObservation(uploaded);
+                } else if (!observation.isUploaded()) {
+                    Log.d(TAG, "Not uploading observation " + observation.getId() + " because it is not old enough");
                 }
                 // Check for delete
                 if (observation.isUploaded() && observation.getTime().isBefore(deleteThreshold)) {
+                    Log.d(TAG, "Deleting observation");
                     db.delete(observation);
                 }
             }
@@ -243,6 +247,16 @@ public class UploadService extends IntentService {
         map.put("NOTES", observation.getNotes());
 
         return map;
+    }
+
+    /**
+     * Determines if this observation should be uploaded
+     * @param observation the observation
+     * @return if the observation should be uploaded
+     */
+    public static boolean needsUpload(Observation observation) {
+        final DateTime uploadThreshold = DateTime.now().minus(UPLOAD_AGE);
+        return !observation.isUploaded() && observation.getTime().isBefore(uploadThreshold);
     }
 
     public static class UploadException extends Exception {

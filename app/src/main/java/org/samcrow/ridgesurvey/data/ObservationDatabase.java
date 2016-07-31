@@ -164,15 +164,16 @@ public final class ObservationDatabase {
     /**
      * Loads and returns all observations in the database
      *
-     * @return a list of all observations in the database
+     * @return a list of all observations in the database, ordered by time decreasing
+     * (newest first)
      * @throws SQLException if an error occurs
      */
-    public List<IdentifiedObservation> getObservations() throws SQLException {
+    public List<IdentifiedObservation> getObservationsByTime() throws SQLException {
         final List<IdentifiedObservation> observations = new ArrayList<>();
 
         final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         try {
-            final Cursor result = db.query(TABLE_NAME, null, null, null, null, null, null);
+            final Cursor result = db.query(TABLE_NAME, null, null, null, null, null, "time DESC");
             try {
                 while (result.moveToNext()) {
                     try {
@@ -270,21 +271,9 @@ public final class ObservationDatabase {
             super(context, NAME, null, VERSION);
         }
 
-        /**
-         * The SQL to create the table, with a binding for the table name
-         */
-        private static final String CREATE = "CREATE TABLE ? (" +
-                "id INTEGER NOT NULL PRIMARY KEY, " +
-                "uploaded INTEGER NOT NULL DEFAULT 0 CHECK (uploaded = 0 OR uploaded = 1), " +
-                "site INTEGER NOT NULL, " +
-                "route TEXT NOT NULL, " +
-                "time TEXT NOT NULL, " +
-                "species TEXT NOT NULL, " +
-                "notes TEXT NOT NULL)";
-
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(CREATE, new Object[]{TABLE_NAME});
+            db.execSQL(createSyntax(TABLE_NAME));
         }
 
         @Override
@@ -295,21 +284,37 @@ public final class ObservationDatabase {
                 try {
                     // Create a new table
                     final String copyTable = TABLE_NAME + "_temp";
-                    db.execSQL(CREATE, new Object[]{copyTable});
+                    db.execSQL(createSyntax(copyTable));
                     // Copy everything into the new table
                     // IDs will be assigned automatically
-                    db.execSQL("INSERT INTO ? (site, route, time, species, notes)" +
-                                    " SELECT site, route, time, species, notes FROM ?",
-                            new Object[]{copyTable, TABLE_NAME});
+                    db.execSQL("INSERT INTO " + copyTable + " (site, route, time, species, notes)" +
+                            " SELECT site, route, time, species, notes FROM " + TABLE_NAME);
                     // Delete the old table
-                    db.execSQL("DROP TABLE ?", new Object[]{TABLE_NAME});
-                    db.execSQL("ALTER TABLE ? RENAME TO ?", new Object[]{copyTable, TABLE_NAME});
+                    db.execSQL("DROP TABLE " + TABLE_NAME);
+                    db.execSQL("ALTER TABLE " + copyTable + " RENAME TO " + TABLE_NAME);
 
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
                 }
             }
+        }
+
+        /**
+         * Returns the create table syntax for the table with the specified name
+         *
+         * @param tableName the name of the table to create
+         * @return SQL to create the table
+         */
+        private static String createSyntax(String tableName) {
+            return "CREATE TABLE " + tableName + " (" +
+                    "id INTEGER NOT NULL PRIMARY KEY, " +
+                    "uploaded INTEGER NOT NULL DEFAULT 0 CHECK (uploaded = 0 OR uploaded = 1), " +
+                    "site INTEGER NOT NULL, " +
+                    "route TEXT NOT NULL, " +
+                    "time TEXT NOT NULL, " +
+                    "species TEXT NOT NULL, " +
+                    "notes TEXT NOT NULL)";
         }
     }
 }

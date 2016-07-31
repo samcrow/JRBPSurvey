@@ -57,6 +57,7 @@ import org.mapsforge.map.model.Model;
 import org.mapsforge.map.model.common.PreferencesFacade;
 import org.mapsforge.map.reader.MapFile;
 import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
+import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
 import org.samcrow.ridgesurvey.map.MyLocationLayer;
 import org.samcrow.ridgesurvey.map.RouteLayer;
@@ -160,6 +161,12 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction(UploadStatusTracker.ACTION_UPLOAD_FAILED);
         manager.registerReceiver(mUploadStatusTracker, filter);
 
+        // Check for upload/delete every minute
+        final IntentFilter tickFilter = new IntentFilter();
+        tickFilter.addAction(Intent.ACTION_TIME_TICK);
+        registerReceiver(new NetworkBroadcastReceiver(), tickFilter);
+
+        // Set up compass
         final Compass compass = (Compass) findViewById(R.id.compass);
         mHeadingCalculator = new HeadingCalculator(this);
         if (mHeadingCalculator.isAvailable()) {
@@ -363,6 +370,16 @@ public class MainActivity extends AppCompatActivity {
                             .setMessage(R.string.select_a_site)
                             .show();
                 }
+                return true;
+            }
+        });
+
+        final MenuItem viewObservationsItem = menu.findItem(R.id.view_observations_item);
+        viewObservationsItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                final Intent intent = new Intent(MainActivity.this, ObservationListActivity.class);
+                startActivity(intent);
                 return true;
             }
         });

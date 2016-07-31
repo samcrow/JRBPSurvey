@@ -16,8 +16,7 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
-  -->
-
+-->
 <manifest package="org.samcrow.ridgesurvey"
           xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
@@ -29,9 +28,15 @@
     <!-- Internet access for data upload -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
-    <uses-feature android:name="android.hardware.sensor.compass" android:required="false"/>
-    <uses-feature android:name="android.hardware.touchscreen.multitouch	" android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.sensor.compass"
+        android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.touchscreen.multitouch "
+        android:required="false"/>
 
     <application
         android:allowBackup="false"
@@ -51,7 +56,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
@@ -60,11 +64,17 @@
 
         <receiver android:name=".data.NetworkBroadcastReceiver">
             <intent-filter>
+                <!-- Try uploading/deleting when the network status changed -->
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
 
         <service android:name=".data.UploadService"/>
+
+        <activity android:name=".ObservationListActivity">
+        </activity>
+        <activity android:name=".ObservationEditActivity">
+        </activity>
     </application>
 
 </manifest>

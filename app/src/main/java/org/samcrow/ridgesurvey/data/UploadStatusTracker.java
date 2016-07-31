@@ -29,6 +29,7 @@ import org.samcrow.ridgesurvey.Objects;
 import org.samcrow.ridgesurvey.data.UploadStatusListener.UploadState;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -114,13 +115,18 @@ public class UploadStatusTracker extends BroadcastReceiver {
 
     /**
      * Determines if there are one or more observations waiting to be uploaded
-     * @return
+     * @return true if one or more observations still needs to be uploaded
      */
     private boolean hasObservationWaiting() {
         final ObservationDatabase db = new ObservationDatabase(mContext);
         try {
-            final Observation observation = db.getOneObservation();
-            return observation != null;
+            final List<IdentifiedObservation> observations = db.getObservationsByTime();
+            for (IdentifiedObservation observation : observations) {
+                if (UploadService.needsUpload(observation)) {
+                    return true;
+                }
+            }
+            return false;
         } catch (SQLException e) {
             return false;
         }

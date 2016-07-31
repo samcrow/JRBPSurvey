@@ -27,6 +27,11 @@
         android:id="@+id/upload_item"
         app:showAsAction="ifRoom" />
     <item
+        android:icon="@drawable/ic_menu_white_24dp"
+        android:title="View observations"
+        android:id="@+id/view_observations_item"
+        app:showAsAction="ifRoom" />
+    <item
         android:icon="@drawable/ic_edit_white_24dp"
         android:title="@string/edit"
         android:id="@+id/edit_item"

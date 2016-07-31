@@ -19,7 +19,7 @@ import java.util.List;
  * An activity that uses the R.layout.activity_data_entry layout and allows an activity
  * to be created or edited
  */
-public class ObservationActivity extends AppCompatActivity {
+public abstract class ObservationActivity extends AppCompatActivity {
 
 
     private static final String TAG = ObservationActivity.class.getSimpleName();

@@ -117,4 +117,8 @@ public class SpeciesView extends LinearLayout {
     public boolean isChecked() {
         return mCheckBox.isChecked();
     }
+
+    public void setChecked(boolean checked) {
+        mCheckBox.setChecked(checked);
+    }
 }
