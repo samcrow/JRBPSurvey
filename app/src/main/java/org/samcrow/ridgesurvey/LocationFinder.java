@@ -39,7 +39,7 @@ public class LocationFinder {
     /**
      * Minimum time between location updates, in milliseconds
      */
-    private static final long MIN_TIME = 1000;
+    private static final long MIN_TIME = 500;
 
     /**
      * Minimum movement between location updates, in meters
