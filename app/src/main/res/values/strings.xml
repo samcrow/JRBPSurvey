@@ -33,4 +33,5 @@
     <string name="saved">Saved</string>
     <string name="upload">Upload</string>
     <string name="message_loading_images">Loading images</string>
+    <string name="help_species_image">Press to view an image of the species</string>
 </resources>

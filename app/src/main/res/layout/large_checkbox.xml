@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheckBox android:id="@+id/species_check_box"
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          android:layout_width="60dp"
+          android:layout_height="60dp"
+          android:background="?android:attr/listChoiceIndicatorMultiple"
+          android:button="@null"/>
