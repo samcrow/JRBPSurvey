@@ -55,6 +55,19 @@ public class UploadService extends IntentService {
     private static final String TAG = UploadService.class.getSimpleName();
 
     /**
+     * The URL to upload to
+     */
+    private static final URL UPLOAD_URL;
+
+    static {
+        try {
+            UPLOAD_URL = new URL("https://script.google.com/macros/s/AKfycbzsthf8y06ftlIJ1EAxFblh1H8gpDSVyjAVl_jEEXQ1aOKia90/exec");
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Invalid URL in source", e);
+        }
+    }
+
+    /**
      * The minimum age of an observation before it should be uploaded
      */
     private static final Duration UPLOAD_AGE = Duration.standardMinutes(10);
@@ -150,10 +163,7 @@ public class UploadService extends IntentService {
         final Map<String, String> formData = formatObservation(observation);
         Log.v(TAG, "Formatted observation: " + formData);
 
-        // The URL of the script macro that enters data
-        final URL macroUrl = new URL(
-                "https://script.google.com/macros/s/AKfycbx94BFDIWE5w9cVsAFwHH9T7282QRwjiBkmQ3lGergJkEqOQ6k/exec");
-        final HttpURLConnection connection = (HttpURLConnection) macroUrl.openConnection();
+        final HttpURLConnection connection = (HttpURLConnection) UPLOAD_URL.openConnection();
         try {
             // POST
             connection.setUseCaches(false);
