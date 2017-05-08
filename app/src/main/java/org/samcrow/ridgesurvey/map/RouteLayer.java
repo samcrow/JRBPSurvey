@@ -119,7 +119,7 @@ public class RouteLayer extends Layer {
      */
     public RouteLayer(@NonNull Route baseRoute, @NonNull OrderedRoute route, int color,
                       @NonNull SelectionManager selectionManager) {
-        Objects.requireAllNonNull(route, selectionManager);
+        Objects.requireAllNonNull(baseRoute, route, selectionManager);
 
         mRoute = baseRoute;
         mSites = route.getSites();

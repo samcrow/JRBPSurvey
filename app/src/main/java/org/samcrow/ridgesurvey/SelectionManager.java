@@ -112,5 +112,7 @@ public class SelectionManager {
      */
     public void addSelectionListener(SelectionListener listener) {
         mListeners.add(listener);
+        // Initialize the selection
+        listener.selectionChanged(mSelectedSite, mSelectedSiteRoute);
     }
 }

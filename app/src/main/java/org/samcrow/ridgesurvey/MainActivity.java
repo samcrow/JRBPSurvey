@@ -22,6 +22,8 @@ package org.samcrow.ridgesurvey;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Picture;
@@ -59,15 +61,15 @@ import org.mapsforge.map.reader.MapFile;
 import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
+import org.samcrow.ridgesurvey.data.UploadService;
+import org.samcrow.ridgesurvey.data.UploadStatusListener;
+import org.samcrow.ridgesurvey.data.UploadStatusTracker;
 import org.samcrow.ridgesurvey.map.MyLocationLayer;
 import org.samcrow.ridgesurvey.map.RouteLayer;
 import org.samcrow.ridgesurvey.map.RouteLineLayer;
 import org.samcrow.ridgesurvey.map.TileFolder;
 import org.samcrow.ridgesurvey.map.TileFolderLoad;
 import org.samcrow.ridgesurvey.map.TileFolderLoad.DoneHandler;
-import org.samcrow.ridgesurvey.data.UploadService;
-import org.samcrow.ridgesurvey.data.UploadStatusListener;
-import org.samcrow.ridgesurvey.data.UploadStatusTracker;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -93,7 +95,9 @@ public class MainActivity extends AppCompatActivity {
     /**
      * The permission that allows the application to access the user's location
      */
-    public static final String LOCATION_PERMISSION = "android.permission.ACCESS_FINE_LOCATION";
+    private static final String LOCATION_PERMISSION = "android.permission.ACCESS_FINE_LOCATION";
+
+    private static final String SELECTED_SITE_KEY = MainActivity.class.getName() + ".SELECTED_SITE_KEY";
 
     /**
      * The map view
@@ -101,9 +105,13 @@ public class MainActivity extends AppCompatActivity {
     private MapView mMap;
 
     /**
-     * The preferences facade that the map view uses to save preferences
+     * The preferences interface
      */
-    private PreferencesFacade mPreferences;
+    private SharedPreferences mPreferences;
+    /**
+     * The preferences facade (wrapping {@link #mPreferences} that the map view uses to save preferences
+     */
+    private PreferencesFacade mPreferencesFacade;
 
     /**
      * The heading calculator that gathers heading information
@@ -182,8 +190,8 @@ public class MainActivity extends AppCompatActivity {
             compass.setVisibility(View.INVISIBLE);
         }
 
-
-        mPreferences = new AndroidPreferences(getSharedPreferences(TAG, MODE_PRIVATE));
+        mPreferences = getSharedPreferences(TAG, MODE_PRIVATE);
+        mPreferencesFacade = new AndroidPreferences(mPreferences);
         try {
             setUpMap();
         } catch (IOException e) {
@@ -200,7 +208,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        mMap.getModel().save(mPreferences);
+        mMap.getModel().save(mPreferencesFacade);
+        mPreferencesFacade.save();
+
+        // Save selected colony
+        final Site selectedSite = mSelectionManager.getSelectedSite();
+        if (selectedSite != null) {
+            Log.d(TAG, "Saving selected site " + selectedSite.getId());
+            final Editor prefsEditor = mPreferences.edit();
+            prefsEditor.putInt(SELECTED_SITE_KEY, selectedSite.getId());
+            prefsEditor.apply();
+        }
+
         mLocationFinder.pause();
         mHeadingCalculator.pause();
     }
@@ -240,13 +259,13 @@ public class MainActivity extends AppCompatActivity {
         final TileStoreLayer orthoLayer = new TileStoreLayer(orthoCache, model.mapViewPosition,
                 AndroidGraphicFactory.INSTANCE, false);
 
-        // Set fixed tile size to make orthopthoto tiles display correctly
-        mMap.getModel().displayModel.setFixedTileSize(256);
-
         final LayerManager layerManager = mMap.getLayerManager();
         layerManager.getLayers().add(0, orthoLayer);
         mMap.setCenter(START_POSITION.latLong);
         mMap.setZoomLevel(START_POSITION.zoomLevel);
+
+        // Set fixed tile size to make orthopthoto tiles display correctly
+        mMap.getModel().displayModel.setFixedTileSize(256);
     }
 
     /**
@@ -276,9 +295,6 @@ public class MainActivity extends AppCompatActivity {
             mMap.setBuiltInZoomControls(false);
         }
 
-        final Model model = mMap.getModel();
-        model.init(mPreferences);
-
         {
             // Limit view to the bounds of the map file
             MapFile mapFile = new MapFile(
@@ -289,8 +305,9 @@ public class MainActivity extends AppCompatActivity {
 
         final List<Layer> routeLayers = new ArrayList<>();
         // Try to load sites
+        List<Route> routes = null;
         try {
-            final List<Route> routes = SiteStorage.readRoutes(
+            routes = SiteStorage.readRoutes(
                     getResources().openRawResource(R.raw.sites));
             final float saturation = 1.0f;
             final float value = 1.0f;
@@ -335,6 +352,19 @@ public class MainActivity extends AppCompatActivity {
         mLocationFinder.addListener(routeLineLayer);
         final MyLocationLayer locationLayer = new MyLocationLayer(getMyLocationDrawable());
         mLocationFinder.addListener(locationLayer);
+
+        // If a selected site was saved, restore it
+        if (routes != null && mPreferences.contains(SELECTED_SITE_KEY)) {
+            final int selectedSiteId = mPreferences.getInt(SELECTED_SITE_KEY, 0);
+            for (Route route : routes) {
+                for (Site site : route.getSites()) {
+                    if (site.getId() == selectedSiteId) {
+                        Log.d(TAG, "Restoring selected site " + selectedSiteId);
+                        mSelectionManager.setSelectedSite(site, route);
+                    }
+                }
+            }
+        }
 
         // Add layers to the map
         mMap.getLayerManager().getLayers().add(routeLineLayer);
