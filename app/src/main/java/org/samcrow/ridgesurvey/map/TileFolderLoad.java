@@ -99,7 +99,10 @@ public class TileFolderLoad extends AsyncTask<Void, TileFolderLoad.Progress, Til
     public TileFolderLoad(@NonNull Context context, @RawRes int archiveResource, @NonNull  String folderName, @NonNull  String extension) {
         this.mContext = context;
         this.mZip = context.getResources().openRawResource(archiveResource);
-        final File cache = context.getExternalCacheDir();
+        File cache = context.getExternalCacheDir();
+        if (cache == null) {
+            cache = context.getCacheDir();
+        }
         if (cache == null) {
             throw new IllegalStateException("No cache directory");
         }

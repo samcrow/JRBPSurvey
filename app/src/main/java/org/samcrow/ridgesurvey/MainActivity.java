@@ -25,7 +25,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.Picture;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
@@ -59,6 +58,7 @@ import org.mapsforge.map.model.Model;
 import org.mapsforge.map.model.common.PreferencesFacade;
 import org.mapsforge.map.reader.MapFile;
 import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
+import org.samcrow.ridgesurvey.color.Palette;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
 import org.samcrow.ridgesurvey.data.UploadService;
@@ -73,6 +73,7 @@ import org.samcrow.ridgesurvey.map.TileFolderLoad.DoneHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -303,18 +304,17 @@ public class MainActivity extends AppCompatActivity {
             mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
         }
 
+        // Get colors
+        final Iterator<Integer> colors = Palette.getColorsRepeating();
+
         final List<Layer> routeLayers = new ArrayList<>();
         // Try to load sites
         List<Route> routes = null;
         try {
             routes = SiteStorage.readRoutes(
                     getResources().openRawResource(R.raw.sites));
-            final float saturation = 1.0f;
-            final float value = 1.0f;
-            int i = 0;
             for (Route route : routes) {
                 if (!route.getSites().isEmpty()) {
-                    final float hue = 360.0f * (i / (float) routes.size());
 
                     // Solve the traveling salesman problem, starting at the southwesternmost point
                     double minLatitude = Double.MAX_VALUE;
@@ -331,12 +331,11 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     final OrderedRoute solution = new Nearest().solve(route, start);
-                    final int color = Color.HSVToColor(new float[]{hue, saturation, value});
+                    final int color = colors.next();
                     final Layer routeLayer = new RouteLayer(route, solution, color,
                             mSelectionManager);
                     routeLayers.add(routeLayer);
                 }
-                i++;
             }
         } catch (IOException e) {
             new Builder(this)
@@ -398,6 +397,7 @@ public class MainActivity extends AppCompatActivity {
                     new Builder(MainActivity.this)
                             .setTitle(R.string.no_site_selected)
                             .setMessage(R.string.select_a_site)
+                            .setNeutralButton(android.R.string.ok, null)
                             .show();
                 }
                 return true;
