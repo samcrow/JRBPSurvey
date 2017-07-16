@@ -121,7 +121,7 @@ public class DataEntryActivity extends ObservationActivity {
         final Map<String, Boolean> speciesData = new HashMap<>();
         for (int i = 0; i < mSpeciesContainer.getChildCount(); i++) {
             final View view = mSpeciesContainer.getChildAt(i);
-            if (view instanceof SpeciesView) {
+            if (view instanceof SpeciesView && !isNoSpeciesView((SpeciesView) view)) {
                 final SpeciesView speciesView = (SpeciesView) view;
                 speciesData.put(speciesView.getSpecies().getColumn(), speciesView.isChecked());
             }

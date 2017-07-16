@@ -27,6 +27,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -140,5 +141,14 @@ public class SpeciesView extends LinearLayout {
 
     public void setChecked(boolean checked) {
         mCheckBox.setChecked(checked);
+    }
+
+    /**
+     * Sets the listener to be notified when the check box is checked or unchecked
+     * @param listener the listener
+     */
+    public void setOnCheckedChangeListener(
+            OnCheckedChangeListener listener) {
+        mCheckBox.setOnCheckedChangeListener(listener);
     }
 }
