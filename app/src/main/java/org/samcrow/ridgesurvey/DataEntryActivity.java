@@ -23,6 +23,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -40,6 +41,7 @@ import org.joda.time.DateTime;
 import org.samcrow.ridgesurvey.data.Observation;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
 import org.samcrow.ridgesurvey.data.UploadService;
+import org.samcrow.ridgesurvey.data.UploadStatusTracker;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,6 +55,9 @@ import java.util.Map;
  * This activity must be started with an extra with key {@link #ARG_SITE} containing the site
  * to record data at and an extra with key {@link #ARG_ROUTE} containing the name of the route
  * that contains the site.
+ *
+ * If the user saves the observation, this activity exists with result {@link #RESULT_OK}. Otherwise,
+ * it exits with result {@link #RESULT_CANCELED}.
  */
 public class DataEntryActivity extends ObservationActivity {
 
@@ -91,6 +96,7 @@ public class DataEntryActivity extends ObservationActivity {
         }
 
         setTitle(String.format(getString(R.string.format_site_id), mSite.getId()));
+        setResult(RESULT_CANCELED);
     }
 
     @Override
@@ -138,6 +144,10 @@ public class DataEntryActivity extends ObservationActivity {
             Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
             // Start a service to upload the observation
             startService(new Intent(this, UploadService.class));
+            // Update the status bar
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(new Intent(UploadStatusTracker.ACTION_OBSERVATION_MADE));
+            setResult(RESULT_OK);
             finish();
         } catch (SQLException e) {
             new AlertDialog.Builder(this)

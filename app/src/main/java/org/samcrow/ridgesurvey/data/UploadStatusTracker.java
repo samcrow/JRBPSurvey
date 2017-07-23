@@ -94,14 +94,6 @@ public class UploadStatusTracker extends BroadcastReceiver {
         }
     }
 
-    private void update() {
-        if (hasObservationWaiting()) {
-            setListenerStates(UploadState.NeedsUpload);
-        } else {
-            setListenerStates(UploadState.Ok);
-        }
-    }
-
     private void setListenerStates(UploadState state) {
         for (UploadStatusListener listener : mListeners) {
             listener.setState(state);

@@ -60,6 +60,7 @@ import org.mapsforge.map.reader.MapFile;
 import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
 import org.samcrow.ridgesurvey.color.Palette;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
+import org.samcrow.ridgesurvey.data.ObservationDatabase;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
 import org.samcrow.ridgesurvey.data.UploadService;
 import org.samcrow.ridgesurvey.data.UploadStatusListener;
@@ -75,6 +76,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -87,6 +90,11 @@ public class MainActivity extends AppCompatActivity {
      * A permission request code used when requesting location permission
      */
     private static final int LOCATION_PERMISSION_CODE = 136;
+
+    /**
+     * A code used when starting a DataEntryActivity to get a result from it
+     */
+    private static final int REQUEST_CODE_ENTRY = 13393;
 
     /**
      * The initial position of the map
@@ -137,6 +145,11 @@ public class MainActivity extends AppCompatActivity {
      * The compass view
      */
     private Compass mCompass;
+
+    /**
+     * The executor that runs asynchronous layer site updates
+     */
+    private final ExecutorService mLayerUpdateExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -317,6 +330,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             routes = SiteStorage.readRoutes(
                     getResources().openRawResource(R.raw.sites));
+            final ObservationDatabase db = new ObservationDatabase(this);
             for (Route route : routes) {
                 if (!route.getSites().isEmpty()) {
 
@@ -336,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
 
                     final OrderedRoute solution = new Nearest().solve(route, start);
                     final int color = colors.next();
-                    final Layer routeLayer = new RouteLayer(route, solution, color,
+                    final Layer routeLayer = new RouteLayer(db, route, solution, color,
                             mSelectionManager);
                     routeLayers.add(routeLayer);
                 }
@@ -385,10 +399,13 @@ public class MainActivity extends AppCompatActivity {
             compassItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
+                    item.setChecked(!item.isChecked());
                     if (item.isChecked()) {
                         mCompass.setVisibility(View.VISIBLE);
+                        mHeadingCalculator.resume();
                     } else {
                         mCompass.setVisibility(View.INVISIBLE);
+                        mHeadingCalculator.pause();
                     }
                     return true;
                 }
@@ -407,13 +424,7 @@ public class MainActivity extends AppCompatActivity {
                     final Intent intent = new Intent(MainActivity.this, DataEntryActivity.class);
                     intent.putExtra(DataEntryActivity.ARG_SITE, selectedSite);
                     intent.putExtra(DataEntryActivity.ARG_ROUTE, selectedSiteRoute.getName());
-                    startActivity(intent);
-                    // Deselect the site so that the user does not accidentally enter an observation
-                    // for it after moving to another site
-                    mSelectionManager.setSelectedSite(null, null);
-                    // Update the status bar
-                    LocalBroadcastManager.getInstance(MainActivity.this)
-                            .sendBroadcast(new Intent(UploadStatusTracker.ACTION_OBSERVATION_MADE));
+                    startActivityForResult(intent, REQUEST_CODE_ENTRY);
                 } else {
                     new Builder(MainActivity.this)
                             .setTitle(R.string.no_site_selected)
@@ -448,6 +459,31 @@ public class MainActivity extends AppCompatActivity {
         mUploadStatusTracker.addListener(controller);
 
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_ENTRY && resultCode == RESULT_OK) {
+            // The data entry activity just returned and an observation was recorded
+
+            // Deselect the site so that the user does not accidentally enter an observation
+            // for it after moving to another site
+            mSelectionManager.setSelectedSite(null, null);
+
+            mLayerUpdateExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    // Tell all route layers to update the visited sites
+                    for (Layer layer : mMap.getLayerManager().getLayers()) {
+                        if (layer instanceof RouteLayer) {
+                            ((RouteLayer) layer).updateVisitedSites();
+                        }
+                    }
+                    mMap.getLayerManager().redrawLayers();
+                }
+            });
+        }
     }
 
     @Override

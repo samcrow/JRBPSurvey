@@ -162,6 +162,33 @@ public final class ObservationDatabase {
     }
 
     /**
+     * Gets an observation for the site with the provided site ID
+     *
+     * If more than one observation exists, the most recent one is returned.
+     *
+     * @param siteId the site ID to find an observation for
+     * @return the most recent observation for the requested site, or null if none exists
+     * @throws SQLException if an error occurs
+     */
+    public IdentifiedObservation getObservationForSite(int siteId) throws SQLException {
+        final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        try {
+            final Cursor result = db.query(TABLE_NAME, null, "site = ?", new String[] { Integer.toString(siteId) }, null, null, "time DESC");
+            try {
+                if (result.moveToNext()) {
+                    return createObservation(result);
+                } else {
+                    return null;
+                }
+            } finally {
+                result.close();
+            }
+        } finally {
+            db.close();
+        }
+    }
+
+    /**
      * Loads and returns all observations in the database
      *
      * @return a list of all observations in the database, ordered by time decreasing
@@ -215,6 +242,7 @@ public final class ObservationDatabase {
             time = formatter.parseDateTime(timeString);
         } catch (IllegalArgumentException e) {
             final SQLException e1 = new SQLException("Invalid date/time value: " + timeString);
+            //noinspection UnnecessaryInitCause
             e1.initCause(e);
             throw e1;
         }
@@ -267,7 +295,7 @@ public final class ObservationDatabase {
 
         private static final int VERSION = 2;
 
-        public ObservationOpenHelper(Context context) {
+        ObservationOpenHelper(Context context) {
             super(context, NAME, null, VERSION);
         }
 

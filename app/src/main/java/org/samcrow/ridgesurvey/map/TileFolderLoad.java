@@ -26,15 +26,15 @@ public class TileFolderLoad extends AsyncTask<Void, TileFolderLoad.Progress, Til
     /**
      * A progress level
      */
-    public class Progress {
+    class Progress {
         /**
          * The current amount of progress
          */
-        public int current;
+        int current;
         /**
          * The maximum amount of progress
          */
-        public int max;
+        int max;
     }
 
     /**

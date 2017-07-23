@@ -22,16 +22,14 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:icon="@drawable/ic_compass_white_24dp"
-        android:title="@string/compass"
-        android:id="@+id/compass_item"
-        app:showAsAction="ifRoom"
-        android:checkable="true" />
-
-    <item
         android:icon="@drawable/ic_cloud_upload_white_24dp"
         android:title="@string/upload"
         android:id="@+id/upload_item"
+        app:showAsAction="always" />
+    <item
+        android:icon="@drawable/ic_edit_white_24dp"
+        android:title="@string/record_observation"
+        android:id="@+id/edit_item"
         app:showAsAction="always" />
     <item
         android:icon="@drawable/ic_menu_white_24dp"
@@ -39,8 +37,11 @@
         android:id="@+id/view_observations_item"
         app:showAsAction="ifRoom" />
     <item
-        android:icon="@drawable/ic_edit_white_24dp"
-        android:title="@string/edit"
-        android:id="@+id/edit_item"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/compass_item"
+        android:checkable="true"
+        android:checked="true"
+        android:enabled="true"
+        android:icon="@drawable/ic_compass_white_24dp"
+        android:title="@string/compass"
+        app:showAsAction="ifRoom"/>
 </menu>
