@@ -55,6 +55,14 @@ public class UploadService extends IntentService {
     private static final String TAG = UploadService.class.getSimpleName();
 
     /**
+     * An extra key for forcing uploads
+     *
+     * If this service is started with an intent that has a boolean extra with this key and a value
+     * of true, the service will upload observations that are newer than {@link #UPLOAD_AGE}.
+     */
+    public static final String EXTRA_FORCE_UPLOAD = UploadService.class.getName() + ".EXTRA_FORCE_UPLOAD";
+
+    /**
      * The URL to upload to
      */
     private static final URL UPLOAD_URL;
@@ -92,6 +100,9 @@ public class UploadService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         LocalBroadcastManager.getInstance(this)
                 .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_STARTED));
+
+        final boolean ignoreAge = intent.getBooleanExtra(EXTRA_FORCE_UPLOAD, false);
+
         final ObservationDatabase db = new ObservationDatabase(this);
         try {
             final List<IdentifiedObservation> observations = db.getObservationsByTime();
@@ -100,7 +111,7 @@ public class UploadService extends IntentService {
             for (IdentifiedObservation observation : observations) {
                 Log.d(TAG, "Loaded observation " + observation.getId());
                 // Check for upload
-                if (needsUpload(observation)) {
+                if (needsUpload(observation) || (ignoreAge && !observation.isUploaded())) {
                     Log.d(TAG, "Trying to upload...");
                     upload(observation);
                     // Make a copy marked as uploaded
@@ -269,11 +280,11 @@ public class UploadService extends IntentService {
         return !observation.isUploaded() && observation.getTime().isBefore(uploadThreshold);
     }
 
-    public static class UploadException extends Exception {
+    private static class UploadException extends Exception {
         public UploadException() {
         }
 
-        public UploadException(String detailMessage) {
+        UploadException(String detailMessage) {
             super(detailMessage);
         }
 

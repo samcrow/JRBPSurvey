@@ -37,4 +37,6 @@
     <string name="view_observations">View observations</string>
     <string name="compass">Compass</string>
     <string name="record_observation">Record observation</string>
+    <string name="force_upload">Force upload</string>
+    <string name="question_load_all_observations">Upload all observations?</string>
 </resources>
