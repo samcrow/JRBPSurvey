@@ -39,4 +39,11 @@
     <string name="record_observation">Record observation</string>
     <string name="force_upload">Force upload</string>
     <string name="question_load_all_observations">Upload all observations?</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_2_30_elapsed">2:30 elapsed</string>
+    <string name="content_2_30_elapsed">Two-person search time has ended</string>
+    <string name="title_5_elapsed">5:00 elapsed</string>
+    <string name="content_5_elapsed">One-person search time has ended</string>
 </resources>
