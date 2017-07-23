@@ -22,13 +22,20 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:icon="@drawable/ic_compass_white_24dp"
+        android:title="@string/compass"
+        android:id="@+id/compass_item"
+        app:showAsAction="ifRoom"
+        android:checkable="true" />
+
+    <item
         android:icon="@drawable/ic_cloud_upload_white_24dp"
         android:title="@string/upload"
         android:id="@+id/upload_item"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:icon="@drawable/ic_menu_white_24dp"
-        android:title="View observations"
+        android:title="@string/view_observations"
         android:id="@+id/view_observations_item"
         app:showAsAction="ifRoom" />
     <item

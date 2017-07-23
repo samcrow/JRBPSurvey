@@ -133,6 +133,10 @@ public class MainActivity extends AppCompatActivity {
      * The upload status tracker
      */
     private UploadStatusTracker mUploadStatusTracker;
+    /**
+     * The compass view
+     */
+    private Compass mCompass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,19 +180,19 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(new NetworkBroadcastReceiver(), tickFilter);
 
         // Set up compass
-        final Compass compass = (Compass) findViewById(R.id.compass);
+        mCompass = (Compass) findViewById(R.id.compass);
         mHeadingCalculator = new HeadingCalculator(this);
         if (mHeadingCalculator.isAvailable()) {
             Log.d(TAG, "Heading available");
             mHeadingCalculator.setHeadingListener(new HeadingListener() {
                 @Override
                 public void headingUpdated(double heading) {
-                    compass.setHeading(heading);
+                    mCompass.setHeading(heading);
                 }
             });
         } else {
             Log.d(TAG, "Heading not available");
-            compass.setVisibility(View.INVISIBLE);
+            mCompass.setVisibility(View.INVISIBLE);
         }
 
         mPreferences = getSharedPreferences(TAG, MODE_PRIVATE);
@@ -375,6 +379,23 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.home_menu, menu);
+
+        final MenuItem compassItem = menu.findItem(R.id.compass_item);
+        if (mHeadingCalculator.isAvailable()) {
+            compassItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    if (item.isChecked()) {
+                        mCompass.setVisibility(View.VISIBLE);
+                    } else {
+                        mCompass.setVisibility(View.INVISIBLE);
+                    }
+                    return true;
+                }
+            });
+        } else {
+            compassItem.setVisible(false);
+        }
 
         final MenuItem editItem = menu.findItem(R.id.edit_item);
         editItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
