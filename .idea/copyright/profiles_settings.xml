@@ -1,3 +1,8 @@
 <component name="CopyrightManager">
-  <settings default="" />
+  <settings default="JRBP Survey">
+    <module2copyright>
+      <element module="Documentation" copyright="JRBP Documentation" />
+      <element module="All" copyright="JRBP Survey" />
+    </module2copyright>
+  </settings>
 </component>

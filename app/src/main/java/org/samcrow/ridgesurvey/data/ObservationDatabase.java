@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Sam Crow
+ * Copyright 2017 Sam Crow
  *
  * This file is part of JRBP Survey.
  *
@@ -124,8 +124,7 @@ public final class ObservationDatabase {
             }
             values.put("species", species.toString(0));
         } catch (JSONException e) {
-            final SQLException e1 = new SQLException("JSON problem");
-            e1.initCause(e);
+            final SQLException e1 = new SQLException("JSON problem", e);
             throw e1;
         }
 
@@ -259,8 +258,7 @@ public final class ObservationDatabase {
                 speciesPresent.put(speciesName, present);
             }
         } catch (JSONException e) {
-            final SQLException e1 = new SQLException("Species JSON could not be parsed");
-            e1.initCause(e);
+            final SQLException e1 = new SQLException("Species JSON could not be parsed", e);
             throw e1;
         }
 
