@@ -19,7 +19,6 @@
 
 package org.samcrow.ridgesurvey;
 
-import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -33,6 +32,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             setUpMap();
         } catch (IOException e) {
-            new Builder(this)
+            new AlertDialog.Builder(this)
                     .setTitle(R.string.failed_to_load_map)
                     .setMessage(e.getLocalizedMessage())
                     .show();
@@ -356,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         } catch (IOException e) {
-            new Builder(this)
+            new AlertDialog.Builder(this)
                     .setTitle(R.string.failed_to_load_sites)
                     .setMessage(e.getLocalizedMessage())
                     .show();
@@ -426,7 +426,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra(DataEntryActivity.ARG_ROUTE, selectedSiteRoute.getName());
                     startActivityForResult(intent, REQUEST_CODE_ENTRY);
                 } else {
-                    new Builder(MainActivity.this)
+                    new AlertDialog.Builder(MainActivity.this)
                             .setTitle(R.string.no_site_selected)
                             .setMessage(R.string.select_a_site)
                             .setNeutralButton(android.R.string.ok, null)

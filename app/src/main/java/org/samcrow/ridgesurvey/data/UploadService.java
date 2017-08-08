@@ -113,7 +113,7 @@ public class UploadService extends IntentService {
                 // Check for upload
                 if (needsUpload(observation) || (ignoreAge && !observation.isUploaded())) {
                     Log.d(TAG, "Trying to upload...");
-                    upload(observation);
+                    upload(UPLOAD_URL, observation);
                     // Make a copy marked as uploaded
                     final IdentifiedObservation uploaded = new IdentifiedObservation(
                             observation.getTime(), true, observation.getSiteId(),
@@ -168,13 +168,13 @@ public class UploadService extends IntentService {
      *
      * @param observation the observation to upload
      */
-    private void upload(@NonNull Observation observation)
+    private void upload(@NonNull URL url, @NonNull Observation observation)
             throws IOException, ParseException, UploadException {
         Objects.requireNonNull(observation);
         final Map<String, String> formData = formatObservation(observation);
         Log.v(TAG, "Formatted observation: " + formData);
 
-        final HttpURLConnection connection = (HttpURLConnection) UPLOAD_URL.openConnection();
+        final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
             // POST
             connection.setUseCaches(false);
@@ -186,17 +186,35 @@ public class UploadService extends IntentService {
 
             final String response = IOUtils.toString(connection.getInputStream());
             Log.v(TAG, response);
-            // Check for valid JSON
-            final JSONObject json = new JSONObject(response);
 
-            final String result = json.optString("result", "");
-            if (!result.equals("success")) {
-                final String message = json.optString("message", null);
-                if (message != null) {
-                    throw new UploadException(message);
-                } else {
-                    throw new UploadException("Unknown server error");
+
+            // Check status
+            final int status = connection.getResponseCode();
+            if (status == 200) {
+                // Check for valid JSON
+                final JSONObject json = new JSONObject(response);
+
+                final String result = json.optString("result", "");
+                if (!result.equals("success")) {
+                    final String message = json.optString("message", null);
+                    if (message != null) {
+                        throw new UploadException(message);
+                    } else {
+                        throw new UploadException("Unknown server error");
+                    }
                 }
+            } else if (status == 301 || status == 302) {
+                // Handle redirect and add cookies
+                final String location = connection.getHeaderField("Location");
+                if (location != null) {
+                    final URL redirectUrl = new URL(location);
+                    Log.i(TAG, "Following redirect to " + redirectUrl);
+                    upload(redirectUrl, observation);
+                } else {
+                    throw new UploadException("Got a 301 or 302 response with no Location header");
+                }
+            } else {
+                throw new UploadException("Unexpected HTTP status " + status);
             }
 
         } catch (JSONException e) {
