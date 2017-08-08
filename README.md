@@ -9,6 +9,10 @@ allowing people to easily navigate and enter data.
 
 [Download the application from the Google Play store](https://play.google.com/store/apps/details?id=org.samcrow.jrbpsurvey)
 
+# Where to get uploaded data #
+
+The current version uploads data to the spreadsheet at https://docs.google.com/spreadsheets/d/1weo2DuzZbOe9BEkpv7i3pBx_9mcwGSgOy5E_QnPrhZM/edit?usp=sharing .
+
 ## Licensing ##
 
 Documentation files (in the `doc` folder) are licensed under the GNU Free Documentation License,
