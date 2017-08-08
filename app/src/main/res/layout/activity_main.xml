@@ -46,7 +46,6 @@
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/upload_status_bar"
             android:clickable="true"/>
 
         <org.samcrow.ridgesurvey.Compass
