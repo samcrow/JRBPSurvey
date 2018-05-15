@@ -69,7 +69,7 @@ public class UploadService extends IntentService {
 
     static {
         try {
-            UPLOAD_URL = new URL("https://script.google.com/macros/s/AKfycbxmf8vH6oaaOiSTEAuTazfR4MeKTl-qozkDi1gRg-IQ-WPFc2w/exec");
+            UPLOAD_URL = new URL("https://script.google.com/macros/s/AKfycbz-JyJ_hDSLmQpNLFDufQf97XHG9BJhNcNMvyiHuyEwpc4qcH0/exec");
         } catch (MalformedURLException e) {
             throw new RuntimeException("Invalid URL in source", e);
         }
