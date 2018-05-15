@@ -11,7 +11,7 @@ allowing people to easily navigate and enter data.
 
 # Where to get uploaded data #
 
-The current version uploads data to the spreadsheet at https://docs.google.com/spreadsheets/d/1weo2DuzZbOe9BEkpv7i3pBx_9mcwGSgOy5E_QnPrhZM/edit?usp=sharing .
+The current version uploads data to the spreadsheet at https://docs.google.com/spreadsheets/d/13hYfwopgJ3sfB4xiO79GpRNCzP7nAjOXntBCX1CyyRM/edit?usp=sharing .
 
 ## Licensing ##
 
