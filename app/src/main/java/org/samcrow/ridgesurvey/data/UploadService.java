@@ -176,6 +176,8 @@ public class UploadService extends IntentService {
 
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
+            // Disable response compression, which might be causing problems
+            connection.setRequestProperty("Accept-Encoding", "identity");
             // POST
             connection.setUseCaches(false);
             connection.setDoOutput(true);
