@@ -21,6 +21,8 @@ package org.samcrow.ridgesurvey;
 
 import android.support.annotation.NonNull;
 
+import org.mapsforge.core.model.LatLong;
+
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -75,6 +77,28 @@ public class Route {
     @NonNull
     public Set<Site> getSites() {
         return new LinkedHashSet<>(mSites);
+    }
+
+    /**
+     * Returns the center point of this route, calculated from the sites with an implementation-
+     * defined method
+     * @return the center point
+     */
+    @NonNull
+    public LatLong getCenter() {
+        if (mSites.isEmpty()) {
+            throw new IllegalStateException("Can't get the center of an empty route");
+        }
+        double latitudeSum = 0;
+        double longitudeSum = 0;
+
+        // For implementation, try the average
+        for (Site site : mSites) {
+            latitudeSum += site.getPosition().latitude;
+            longitudeSum += site.getPosition().longitude;
+        }
+
+        return new LatLong(latitudeSum / mSites.size(), longitudeSum / mSites.size());
     }
 
     @Override

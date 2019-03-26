@@ -77,12 +77,26 @@ public class RouteLayer extends Layer {
      * Radius of the selected site marker, in meters
      */
     private static final float SELECTED_RADIUS = 20;
+    /**
+     * Route label text height, pixels
+     */
+    private static final int ROUTE_LABEL_HEIGHT = 24;
+    /**
+     * Threshold to switch between showing route labels and showing site labels
+     */
+    private static final byte LABEL_THRESHOLD = 16;
 
     /**
      * The observation database
      */
     @NonNull
     private final ObservationDatabase mDatabase;
+
+    /**
+     * The approximate center of the route, derived from the route sites
+     */
+    @NonNull
+    private final LatLong mCenter;
 
     /**
      * The paint used to draw site markers
@@ -106,6 +120,18 @@ public class RouteLayer extends Layer {
      */
     @NonNull
     private final Paint mIdBackgroundPaint;
+
+    /**
+     * The paint used to draw the route name
+     */
+    @NonNull
+    private final Paint mRouteNamePaint;
+
+    /**
+     * The paint used to draw a contrasting background of the route name
+     */
+    @NonNull
+    private final Paint mRouteNameBackgroundPaint;
 
     /**
      * A paint used to indicate the selected site
@@ -145,6 +171,7 @@ public class RouteLayer extends Layer {
         Objects.requireAllNonNull(database, baseRoute, route, selectionManager);
         mDatabase = database;
         mRoute = baseRoute;
+        mCenter = baseRoute.getCenter();
 
         // Copy sites in, initially not visited
         final List<Site> sites = route.getSites();
@@ -172,6 +199,16 @@ public class RouteLayer extends Layer {
 
         mSelectedPaint = AndroidGraphicFactory.INSTANCE.createPaint();
         mSelectedPaint.setColor(android.graphics.Color.argb(0x40, 0xFF, 0x0, 0x0));
+
+        mRouteNamePaint = AndroidGraphicFactory.INSTANCE.createPaint();
+        mRouteNamePaint.setColor(Color.BLACK);
+        mRouteNamePaint.setTypeface(FontFamily.SANS_SERIF, FontStyle.BOLD);
+        mRouteNamePaint.setTextSize(ROUTE_LABEL_HEIGHT);
+
+        mRouteNameBackgroundPaint = AndroidGraphicFactory.INSTANCE.createPaint(mRouteNamePaint);
+        mRouteNameBackgroundPaint.setColor(Color.WHITE);
+        mRouteNameBackgroundPaint.setStyle(Style.STROKE);
+        mRouteNameBackgroundPaint.setStrokeWidth(4);
 
         updateVisitedSites();
     }
@@ -209,9 +246,25 @@ public class RouteLayer extends Layer {
                                   Point topLeftPoint) {
         final long mapSize = MercatorProjection.getMapSize(zoomLevel, displayModel.getTileSize());
 
-
-
         // Draw lines between sites
+        drawLines(canvas, topLeftPoint, mapSize);
+
+        // Draw sites
+        drawSites(canvas, topLeftPoint, mapSize);
+
+        if (zoomLevel > LABEL_THRESHOLD) {
+            // Draw site labels
+            drawSiteLabels(canvas, topLeftPoint, mapSize);
+        } else {
+            // Draw route name
+            drawRouteLabel(canvas, topLeftPoint, mapSize);
+        }
+    }
+
+    /**
+     * Draws lines between sites
+     */
+    private void drawLines(Canvas canvas, Point topLeftPoint, long mapSize) {
         Point lastPoint = null;
         for (VisitedSite visitedSite : mSites) {
             final Site site = visitedSite.getSite();
@@ -233,8 +286,12 @@ public class RouteLayer extends Layer {
             }
             lastPoint = new Point(pixelX, pixelY);
         }
+    }
 
-        // Draw sites
+    /**
+     * Draws site markers
+     */
+    private void drawSites(Canvas canvas, Point topLeftPoint, long mapSize) {
         for (VisitedSite visitedSite : mSites) {
             final Site site = visitedSite.getSite();
             final LatLong ll = site.getPosition();
@@ -268,8 +325,12 @@ public class RouteLayer extends Layer {
                 canvas.drawCircle((int) pixelX, (int) pixelY, markerRadius, mPaint);
             }
         }
+    }
 
-        // Draw labels
+    /**
+     * Draws a label for each site
+     */
+    private void drawSiteLabels(Canvas canvas, Point topLeftPoint, long mapSize) {
         for (VisitedSite visitedSite : mSites) {
             final Site site = visitedSite.getSite();
             final LatLong ll = site.getPosition();
@@ -301,6 +362,15 @@ public class RouteLayer extends Layer {
             canvas.drawText(idString, textX, textY, mIdBackgroundPaint);
             canvas.drawText(idString, textX, textY, mIdPaint);
         }
+    }
+
+    private void drawRouteLabel(Canvas canvas, Point topLeftPoint, long mapSize) {
+        final double centerX= MercatorProjection.longitudeToPixelX(mCenter.getLongitude(), mapSize)
+                - topLeftPoint.x;
+        final double centerY = MercatorProjection.latitudeToPixelY(mCenter.getLatitude(), mapSize)
+                - topLeftPoint.y;
+        canvas.drawText(mRoute.getName(), (int) centerX, (int) centerY, mRouteNameBackgroundPaint);
+        canvas.drawText(mRoute.getName(), (int) centerX, (int) centerY, mRouteNamePaint);
     }
 
     /**
