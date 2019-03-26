@@ -97,6 +97,12 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_ENTRY = 13393;
 
     /**
+     * A code used when starting an ObservationListActivity (really used to get a callback when
+     * the observation edit activity closes)
+     */
+    private static final int REQUEST_CODE_OBSERVATION_LIST = 13621;
+
+    /**
      * The initial position of the map
      */
     private static final MapPosition START_POSITION = new MapPosition(
@@ -441,7 +447,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 final Intent intent = new Intent(MainActivity.this, ObservationListActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, REQUEST_CODE_OBSERVATION_LIST);
                 return true;
             }
         });
@@ -483,6 +489,10 @@ public class MainActivity extends AppCompatActivity {
                     mMap.getLayerManager().redrawLayers();
                 }
             });
+        }
+        if (requestCode == REQUEST_CODE_OBSERVATION_LIST) {
+            // Observation list has closed, clear selection
+            mSelectionManager.setSelectedSite(null, null);
         }
     }
 
