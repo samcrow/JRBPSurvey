@@ -20,15 +20,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "org.samcrow.jrbpsurvey"
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode 10
-        versionName "1.1.6"
+        versionCode 11
+        versionName "1.2.0"
     }
     buildTypes {
         release {
@@ -49,13 +49,13 @@ dependencies {
     // Commons IO (Apache 2.0) https://commons.apache.org/proper/commons-io/
     // Jcoord (GPLv2) http://www.jstott.me.uk/jcoord/
     implementation files('libs/jcoord-1.0.jar')
-    implementation 'com.android.support:appcompat-v7:25.4.0'
-    implementation 'joda-time:joda-time:2.9.2'
-    implementation 'org.mapsforge:mapsforge-core:0.6.1'
-    implementation 'org.mapsforge:mapsforge-map:0.6.1'
-    implementation 'org.mapsforge:mapsforge-map-android:0.6.1'
-    implementation 'com.caverock:androidsvg:1.2.1'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'joda-time:joda-time:2.9.9'
+    implementation 'org.mapsforge:mapsforge-core:0.11.0'
+    implementation 'org.mapsforge:mapsforge-map:0.11.0'
+    implementation 'org.mapsforge:mapsforge-map-android:0.11.0'
+    implementation 'com.caverock:androidsvg:1.3'
     implementation 'org.apache.commons:commons-io:1.3.2'
-    implementation 'com.android.support:support-v4:25.4.0'
+    implementation 'com.android.support:support-v4:26.1.0'
     testImplementation 'junit:junit:4.12'
 }
