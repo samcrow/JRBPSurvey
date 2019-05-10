@@ -47,16 +47,22 @@ import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.util.AndroidPreferences;
+import org.mapsforge.map.android.util.AndroidUtil;
 import org.mapsforge.map.android.view.MapView;
 import org.mapsforge.map.layer.Layer;
 import org.mapsforge.map.layer.LayerManager;
 import org.mapsforge.map.layer.cache.InMemoryTileCache;
 import org.mapsforge.map.layer.cache.TileCache;
 import org.mapsforge.map.layer.cache.TwoLevelTileCache;
+import org.mapsforge.map.layer.renderer.TileRendererLayer;
 import org.mapsforge.map.layer.tilestore.TileStoreLayer;
 import org.mapsforge.map.model.Model;
 import org.mapsforge.map.model.common.PreferencesFacade;
 import org.mapsforge.map.reader.MapFile;
+import org.mapsforge.map.rendertheme.InternalRenderTheme;
+import org.mapsforge.map.rendertheme.StreamRenderTheme;
+import org.mapsforge.map.rendertheme.XmlRenderTheme;
+import org.mapsforge.map.rendertheme.rule.RenderTheme;
 import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
 import org.samcrow.ridgesurvey.color.Palette;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
@@ -170,9 +176,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Set up map graphics
-        if (AndroidGraphicFactory.INSTANCE == null || new View(this).isInEditMode()) {
-            AndroidGraphicFactory.createInstance(getApplication());
-        }
+        AndroidGraphicFactory.createInstance(getApplication());
 
         setContentView(R.layout.activity_main);
 
@@ -288,14 +292,42 @@ public class MainActivity extends AppCompatActivity {
         mMap.setCenter(START_POSITION.latLong);
         mMap.setZoomLevel(START_POSITION.zoomLevel);
 
-        // Set fixed tile size to make orthopthoto tiles display correctly
-        mMap.getModel().displayModel.setFixedTileSize(256);
+        try {
+            // Load map with roads and trails (again)
+            MapFile mapFile = new MapFile(
+                    Storage.getResourceAsFile(this, R.raw.roads_trails));
+
+            // Display the map over the aerial imagery
+            final InMemoryTileCache memoryTileCache = new InMemoryTileCache(AndroidUtil.getMinimumCacheSize(this,
+                    mMap.getModel().displayModel.getTileSize(),
+                    mMap.getModel().frameBufferModel.getOverdrawFactor(), 0.9f));
+
+            // Custom render theme from XML
+            final XmlRenderTheme customTheme = new StreamRenderTheme("",
+                    getResources().openRawResource(R.raw.roads_trails_render_theme));
+
+            final TileRendererLayer mapTiles = AndroidUtil.createTileRendererLayer(
+                    memoryTileCache,
+                    mMap.getModel().mapViewPosition,
+                    mapFile,
+                    customTheme,
+                    true,
+                    false,
+                    false
+            );
+            mMap.getLayerManager().getLayers().add(1, mapTiles);
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to load road/trail map file", e);
+        }
     }
 
     /**
      * Sets up the map view in {@link #mMap}
      */
     private void setUpMap() throws IOException {
+        mMap = findViewById(R.id.map);
+        // Set fixed tile size to make orthopthoto tiles display correctly
+        mMap.getModel().displayModel.setFixedTileSize(256);
 
         // Start loading orthophoto images in the background
         final TileFolderLoad loadTask = new TileFolderLoad(this, R.raw.tiles, "ortho_tiles",
@@ -309,10 +341,10 @@ public class MainActivity extends AppCompatActivity {
         loadTask.execute();
 
 
-        mMap = (MapView) findViewById(R.id.map);
         // Disable built-in zoom controls, unless running in an emulator or if the device
         // does not support basic multi-touch
-        if (Build.HARDWARE.equals("goldfish") || !(getPackageManager().hasSystemFeature(
+        if (Build.HARDWARE.equals("goldfish") || Build.HARDWARE.equals("ranchu")
+                || !(getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH))) {
             mMap.setBuiltInZoomControls(true);
         } else {
@@ -320,11 +352,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         {
-            // Limit view to the bounds of the map file
+            // Load map with roads and trails
             MapFile mapFile = new MapFile(
-                    Storage.getResourceAsFile(this, R.raw.jasper_ridge_map));
-            mMap.getModel().mapViewPosition.setMapLimit(mapFile.boundingBox());
-            mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
+                    Storage.getResourceAsFile(this, R.raw.roads_trails));
+            try {
+
+                // Limit view to the bounds of the map file
+                mMap.getModel().mapViewPosition.setMapLimit(mapFile.boundingBox());
+                mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
+
+            } finally {
+                mapFile.close();
+            }
         }
 
         // Get colors

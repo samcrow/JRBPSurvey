@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rendertheme xmlns="http://mapsforge.org/renderTheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://mapsforge.org/renderTheme renderTheme.xsd" version="1">
+
+    <!-- Service roads near entrance, used for regular cars -->
+    <rule e="way" k="highway" v="service">
+        <line stroke="#BBBBBB" stroke-width="0.3" />
+    </rule>
+    <!-- Track-type roads -->
+    <rule e="way" k="highway" v="track">
+        <line stroke="#CC2222" stroke-width="0.2" />
+    </rule>
+    <!-- Trails -->
+    <rule e="way" k="highway" v="footway">
+        <line stroke="#CC2222" stroke-width="0.1" />
+    </rule>
+</rendertheme>
