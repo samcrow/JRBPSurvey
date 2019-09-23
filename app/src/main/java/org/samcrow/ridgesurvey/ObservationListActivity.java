@@ -93,7 +93,7 @@ public class ObservationListActivity extends AppCompatActivity {
                         .setPositiveButton(android.R.string.ok, new OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                final Intent uploadIntent = new Intent(ObservationListActivity.this,
+                                final Intent uploadIntent = new Intent(getApplicationContext(),
                                         UploadService.class);
                                 uploadIntent.putExtra(UploadService.EXTRA_FORCE_UPLOAD, true);
                                 startService(uploadIntent);

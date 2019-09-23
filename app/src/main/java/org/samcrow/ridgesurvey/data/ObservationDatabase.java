@@ -124,7 +124,9 @@ public final class ObservationDatabase {
             }
             values.put("species", species.toString(0));
         } catch (JSONException e) {
-            final SQLException e1 = new SQLException("JSON problem", e);
+            final SQLException e1 = new SQLException("JSON problem");
+            //noinspection UnnecessaryInitCause (the cause constructor requires API 16)
+            e1.initCause(e);
             throw e1;
         }
 

@@ -20,29 +20,23 @@
 package org.samcrow.ridgesurvey;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.GridLayout.Spec;
 import android.widget.TextView;
 
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * An activity that uses the R.layout.activity_data_entry layout and allows an activity
@@ -106,10 +100,10 @@ public abstract class ObservationActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mNotesField = (EditText) findViewById(R.id.notes_field);
+        mNotesField = findViewById(R.id.notes_field);
 
 
-        mSpeciesContainer = (ViewGroup) findViewById(R.id.species_container);
+        mSpeciesContainer = findViewById(R.id.species_container);
 
         // Add the no-species checkbox, checked by default
         mNoSpeciesView = new SpeciesView(this, new Species("None", "none", null, 0));

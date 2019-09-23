@@ -63,7 +63,9 @@ import org.mapsforge.map.rendertheme.StreamRenderTheme;
 import org.mapsforge.map.rendertheme.XmlRenderTheme;
 import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
 import org.samcrow.ridgesurvey.color.Palette;
+import org.samcrow.ridgesurvey.data.IdentifiedObservation;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
+import org.samcrow.ridgesurvey.data.Observation;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
 import org.samcrow.ridgesurvey.data.UploadService;
@@ -464,10 +466,16 @@ public class MainActivity extends AppCompatActivity {
                 final Site selectedSite = mSelectionManager.getSelectedSite();
                 final Route selectedSiteRoute = mSelectionManager.getSelectedSiteRoute();
                 if (selectedSite != null && selectedSiteRoute != null) {
-                    final Intent intent = new Intent(MainActivity.this, DataEntryActivity.class);
-                    intent.putExtra(DataEntryActivity.ARG_SITE, selectedSite);
-                    intent.putExtra(DataEntryActivity.ARG_ROUTE, selectedSiteRoute.getName());
-                    startActivityForResult(intent, REQUEST_CODE_ENTRY);
+                    // Look up observations for this site
+                    final ObservationDatabase database = new ObservationDatabase(MainActivity.this);
+                    final IdentifiedObservation lastObservation = database.getObservationForSite(selectedSite.getId());
+                    // If this site has been visited, edit the most recent observation
+                    if (lastObservation != null) {
+                        startObservationEditActivity(lastObservation);
+                    } else {
+                        // Otherwise create a new observation
+                        startDataEntryActivity(selectedSite, selectedSiteRoute);
+                    }
                 } else {
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle(R.string.no_site_selected)
@@ -502,6 +510,22 @@ public class MainActivity extends AppCompatActivity {
         mUploadStatusTracker.addListener(controller);
 
         return true;
+    }
+
+    private void startObservationEditActivity(IdentifiedObservation observation) {
+        final Intent intent = new Intent(this, ObservationEditActivity.class);
+        intent.putExtra(ObservationEditActivity.EXTRA_OBSERVATION, observation);
+        startActivityForResult(intent, REQUEST_CODE_ENTRY);
+    }
+
+    /**
+     * Starts an activity to record a new observation for the selected site
+     */
+    private void startDataEntryActivity(Site selectedSite, Route selectedSiteRoute) {
+        final Intent intent = new Intent(this, DataEntryActivity.class);
+        intent.putExtra(DataEntryActivity.ARG_SITE, selectedSite);
+        intent.putExtra(DataEntryActivity.ARG_ROUTE, selectedSiteRoute.getName());
+        startActivityForResult(intent, REQUEST_CODE_ENTRY);
     }
 
     @Override
@@ -563,6 +587,6 @@ public class MainActivity extends AppCompatActivity {
      * Starts a service to upload observations
      */
     private void startUpload() {
-        startService(new Intent(MainActivity.this, UploadService.class));
+        startService(new Intent(getApplicationContext(), UploadService.class));
     }
 }

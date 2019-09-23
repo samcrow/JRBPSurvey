@@ -143,7 +143,7 @@ public class DataEntryActivity extends ObservationActivity {
             db.insertObservation(observation);
             Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
             // Start a service to upload the observation
-            startService(new Intent(this, UploadService.class));
+            startService(new Intent(getApplicationContext(), UploadService.class));
             // Update the status bar
             LocalBroadcastManager.getInstance(this)
                     .sendBroadcast(new Intent(UploadStatusTracker.ACTION_OBSERVATION_MADE));

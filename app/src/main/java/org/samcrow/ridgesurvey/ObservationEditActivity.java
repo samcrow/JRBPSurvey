@@ -56,6 +56,7 @@ public class ObservationEditActivity extends ObservationActivity {
         super.onCreate(savedInstanceState);
 
         setTitle("Edit observation");
+        setResult(RESULT_CANCELED);
 
         mObservation = getIntent().getParcelableExtra(EXTRA_OBSERVATION);
         if (mObservation == null) {
@@ -117,7 +118,8 @@ public class ObservationEditActivity extends ObservationActivity {
             db.updateObservation(edited);
             Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
             // Start a service to upload the observation
-            startService(new Intent(this, UploadService.class));
+            startService(new Intent(getApplicationContext(), UploadService.class));
+            setResult(RESULT_OK);
             finish();
         } catch (SQLException e) {
             new AlertDialog.Builder(this)
