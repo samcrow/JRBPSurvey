@@ -36,12 +36,12 @@
         "image": "org.samcrow.jrbpsurvey:drawable/messor"
       },
       {
-        "name": "Temnothrax sp.",
+        "name": "Temnothorax sp.",
         "column": "Temnothrax sp.",
         "description": "Round abdomen. Moves slowly, usually found alone."
       },
       {
-        "name": "Aphenogaster occidentalis",
+        "name": "Aphaenogaster occidentalis",
         "column": "Aphenogaster occidentalis",
         "image": "org.samcrow.jrbpsurvey:drawable/aphaenogaster"
       },
@@ -80,7 +80,7 @@
         "column": "Formica moki"
       },
       {
-        "name": "Formica subpoleta",
+        "name": "Formica subpolita",
         "column": "Formica subpoleta"
       },
       {
@@ -105,7 +105,7 @@
         "image": "org.samcrow.jrbpsurvey:drawable/stenamma"
       },
       {
-        "name": "Neivamyrmex",
+        "name": " Neivamyrmex",
         "column": "Neivamyrme",
         "image": "org.samcrow.jrbpsurvey:drawable/neivamyrmex"
       }
