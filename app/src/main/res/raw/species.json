@@ -70,18 +70,14 @@
         "image": "org.samcrow.jrbpsurvey:drawable/prenolepis"
       },
       {
-        "name": "Formica sp.",
-        "column": "Formica sp.",
-        "description": "Not shiny, 2 colors, 2 humps on the thorax, long legs and antennae. Run fast, very hard to catch. Usually 1-2 workers.",
-        "image": "org.samcrow.jrbpsurvey:drawable/formica"
-      },
-      {
         "name": "Formica moki",
         "column": "Formica moki"
       },
       {
         "name": "Formica subpolita",
-        "column": "Formica subpoleta"
+        "column": "Formica subpoleta",
+        "description": "Not shiny, 2 colors, 2 humps on the thorax, long legs and antennae. Run fast, very hard to catch. Usually 1-2 workers.",
+        "image": "org.samcrow.jrbpsurvey:drawable/formica"
       },
       {
         "name": "Camponotus sp. (carpenter ant)",
