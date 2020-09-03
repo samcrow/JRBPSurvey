@@ -34,7 +34,6 @@ import org.mapsforge.core.util.MercatorProjection;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.layer.Layer;
 import org.samcrow.ridgesurvey.Objects;
-import org.samcrow.ridgesurvey.OrderedRoute;
 import org.samcrow.ridgesurvey.Route;
 import org.samcrow.ridgesurvey.SelectionManager;
 import org.samcrow.ridgesurvey.Site;
@@ -161,17 +160,16 @@ public class RouteLayer extends Layer {
      * Creates a new route layer
      *
      * @param database         an observation database to use. Must not be null.
-     * @param baseRoute        the route to display. Must not be null.
-     * @param route            the route to display, with its points in a valid order. Must not be null.
+     * @param route            the route to display. Must not be null.
      * @param color            the color to use for this route, in the format used by {@link android.graphics.Color}
      * @param selectionManager A selection manager to track the selected site. Must not be null.
      */
-    public RouteLayer(@NonNull ObservationDatabase database, @NonNull Route baseRoute, @NonNull OrderedRoute route, int color,
+    public RouteLayer(@NonNull ObservationDatabase database, @NonNull Route route, int color,
                       @NonNull SelectionManager selectionManager) {
-        Objects.requireAllNonNull(database, baseRoute, route, selectionManager);
+        Objects.requireAllNonNull(database, route, selectionManager);
         mDatabase = database;
-        mRoute = baseRoute;
-        mCenter = baseRoute.getCenter();
+        mRoute = route;
+        mCenter = route.getCenter();
 
         // Copy sites in, initially not visited
         final List<Site> sites = route.getSites();

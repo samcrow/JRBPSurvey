@@ -4,14 +4,14 @@
 
     <!-- Service roads near entrance, used for regular cars -->
     <rule e="way" k="highway" v="service">
-        <line stroke="#BBBBBB" stroke-width="0.3" />
+        <line stroke="#BBBBBB" stroke-width="0.5" />
     </rule>
     <!-- Track-type roads -->
     <rule e="way" k="highway" v="track">
-        <line stroke="#CC2222" stroke-width="0.2" />
+        <line stroke="#CC2222" stroke-width="0.4" />
     </rule>
     <!-- Trails -->
     <rule e="way" k="highway" v="footway">
-        <line stroke="#CC2222" stroke-width="0.1" />
+        <line stroke="#CC2222" stroke-width="0.3" />
     </rule>
 </rendertheme>

@@ -30,6 +30,7 @@ import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RawRes;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -43,6 +44,7 @@ import android.view.View;
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 
+import org.json.JSONException;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
@@ -61,11 +63,9 @@ import org.mapsforge.map.model.common.PreferencesFacade;
 import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.StreamRenderTheme;
 import org.mapsforge.map.rendertheme.XmlRenderTheme;
-import org.samcrow.ridgesurvey.HeadingCalculator.HeadingListener;
 import org.samcrow.ridgesurvey.color.Palette;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
-import org.samcrow.ridgesurvey.data.Observation;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
 import org.samcrow.ridgesurvey.data.UploadService;
@@ -135,11 +135,6 @@ public class MainActivity extends AppCompatActivity {
     private PreferencesFacade mPreferencesFacade;
 
     /**
-     * The heading calculator that gathers heading information
-     */
-    private HeadingCalculator mHeadingCalculator;
-
-    /**
      * The location finder that gets heading information
      */
     private LocationFinder mLocationFinder;
@@ -153,10 +148,6 @@ public class MainActivity extends AppCompatActivity {
      * The upload status tracker
      */
     private UploadStatusTracker mUploadStatusTracker;
-    /**
-     * The compass view
-     */
-    private Compass mCompass;
 
     /**
      * The executor that runs asynchronous layer site updates
@@ -202,22 +193,6 @@ public class MainActivity extends AppCompatActivity {
         tickFilter.addAction(Intent.ACTION_TIME_TICK);
         registerReceiver(new NetworkBroadcastReceiver(), tickFilter);
 
-        // Set up compass
-        mCompass = (Compass) findViewById(R.id.compass);
-        mHeadingCalculator = new HeadingCalculator(this);
-        if (mHeadingCalculator.isAvailable()) {
-            Log.d(TAG, "Heading available");
-            mHeadingCalculator.setHeadingListener(new HeadingListener() {
-                @Override
-                public void headingUpdated(double heading) {
-                    mCompass.setHeading(heading);
-                }
-            });
-        } else {
-            Log.d(TAG, "Heading not available");
-            mCompass.setVisibility(View.INVISIBLE);
-        }
-
         mPreferences = getSharedPreferences(TAG, MODE_PRIVATE);
         mPreferencesFacade = new AndroidPreferences(mPreferences);
         try {
@@ -249,14 +224,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mLocationFinder.pause();
-        mHeadingCalculator.pause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mLocationFinder.resume();
-        mHeadingCalculator.resume();
     }
 
     @Override
@@ -289,36 +262,44 @@ public class MainActivity extends AppCompatActivity {
 
         final LayerManager layerManager = mMap.getLayerManager();
         layerManager.getLayers().add(0, orthoLayer);
-        mMap.setCenter(START_POSITION.latLong);
-        mMap.setZoomLevel(START_POSITION.zoomLevel);
+    }
 
+    private void addVectorMaps() {
         try {
-            // Load map with roads and trails (again)
-            MapFile mapFile = new MapFile(
-                    Storage.getResourceAsFile(this, R.raw.roads_trails));
-
-            // Display the map over the aerial imagery
-            final InMemoryTileCache memoryTileCache = new InMemoryTileCache(AndroidUtil.getMinimumCacheSize(this,
-                    mMap.getModel().displayModel.getTileSize(),
-                    mMap.getModel().frameBufferModel.getOverdrawFactor(), 0.9f));
-
-            // Custom render theme from XML
-            final XmlRenderTheme customTheme = new StreamRenderTheme("",
-                    getResources().openRawResource(R.raw.roads_trails_render_theme));
-
-            final TileRendererLayer mapTiles = AndroidUtil.createTileRendererLayer(
-                    memoryTileCache,
-                    mMap.getModel().mapViewPosition,
-                    mapFile,
-                    customTheme,
-                    true,
-                    false,
-                    false
-            );
-            mMap.getLayerManager().getLayers().add(1, mapTiles);
+            addVectorMapLayer(R.raw.creek, R.raw.creek_render_theme);
         } catch (IOException e) {
-            Log.w(TAG, "Failed to load road/trail map file", e);
+            Log.w(TAG, "Failed to load creek map file", e);
         }
+        try {
+            addVectorMapLayer(R.raw.roads_trails, R.raw.roads_trails_render_theme);
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to load roads/trails map file", e);
+        }
+    }
+
+    private void addVectorMapLayer(@RawRes int map_file, @RawRes int theme_file) throws IOException {
+        MapFile mapFile = new MapFile(
+                Storage.getResourceAsFile(this, map_file));
+
+        // Display the map over the aerial imagery
+        final InMemoryTileCache memoryTileCache = new InMemoryTileCache(AndroidUtil.getMinimumCacheSize(this,
+                mMap.getModel().displayModel.getTileSize(),
+                mMap.getModel().frameBufferModel.getOverdrawFactor(), 0.9f));
+
+        // Custom render theme from XML
+        final XmlRenderTheme customTheme = new StreamRenderTheme("",
+                getResources().openRawResource(theme_file));
+
+        final TileRendererLayer mapTiles = AndroidUtil.createTileRendererLayer(
+                memoryTileCache,
+                mMap.getModel().mapViewPosition,
+                mapFile,
+                customTheme,
+                true,
+                false,
+                false
+        );
+        mMap.getLayerManager().getLayers().add(1, mapTiles);
     }
 
     /**
@@ -336,6 +317,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void done(TileFolder result) {
                 addOrthophotos(result);
+                // Finish map setup
+                addVectorMaps();
+                mMap.setCenter(START_POSITION.latLong);
+                mMap.setZoomLevel(START_POSITION.zoomLevel);
             }
         });
         loadTask.execute();
@@ -377,30 +362,13 @@ public class MainActivity extends AppCompatActivity {
                     getResources().openRawResource(R.raw.sites));
             final ObservationDatabase db = new ObservationDatabase(this);
             for (Route route : routes) {
-                if (!route.getSites().isEmpty()) {
+                final int color = colors.next();
+                final Layer routeLayer = new RouteLayer(db, route, color,
+                        mSelectionManager);
+                routeLayers.add(routeLayer);
 
-                    // Solve the traveling salesman problem, starting at the southwesternmost point
-                    double minLatitude = Double.MAX_VALUE;
-                    double minLongitude = Double.MAX_VALUE;
-                    Site start = null;
-                    for (Site site : route.getSites()) {
-                        final double latitude = site.getPosition().latitude;
-                        final double longitude = site.getPosition().longitude;
-                        if (latitude < minLatitude && longitude < minLongitude) {
-                            minLatitude = latitude;
-                            minLongitude = longitude;
-                            start = site;
-                        }
-                    }
-
-                    final OrderedRoute solution = new Nearest().solve(route, start);
-                    final int color = colors.next();
-                    final Layer routeLayer = new RouteLayer(db, route, solution, color,
-                            mSelectionManager);
-                    routeLayers.add(routeLayer);
-                }
             }
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             new AlertDialog.Builder(this)
                     .setTitle(R.string.failed_to_load_sites)
                     .setMessage(e.getLocalizedMessage())
@@ -438,26 +406,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.home_menu, menu);
-
-        final MenuItem compassItem = menu.findItem(R.id.compass_item);
-        if (mHeadingCalculator.isAvailable()) {
-            compassItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    item.setChecked(!item.isChecked());
-                    if (item.isChecked()) {
-                        mCompass.setVisibility(View.VISIBLE);
-                        mHeadingCalculator.resume();
-                    } else {
-                        mCompass.setVisibility(View.INVISIBLE);
-                        mHeadingCalculator.pause();
-                    }
-                    return true;
-                }
-            });
-        } else {
-            compassItem.setVisible(false);
-        }
 
         final MenuItem editItem = menu.findItem(R.id.edit_item);
         editItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {

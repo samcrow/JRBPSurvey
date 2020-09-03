@@ -23,9 +23,8 @@ import android.support.annotation.NonNull;
 
 import org.mapsforge.core.model.LatLong;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An immutable set of {@link Site sites} with a name
@@ -39,10 +38,10 @@ public class Route {
     private final String mName;
 
     /**
-     * The sites in this route
+     * The sites in this route, ordered for a reasonable walking route
      */
     @NonNull
-    private final Set<Site> mSites;
+    private final List<Site> mSites;
 
     /**
      * Creates a new route
@@ -50,7 +49,7 @@ public class Route {
      * @param sites The sites to include in the route. Must not be null, and must not contain any
      *              null elements.
      */
-    public Route(@NonNull String name, @NonNull Collection<? extends Site> sites) {
+    public Route(@NonNull String name, @NonNull List<? extends Site> sites) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(sites);
         for (Site site : sites) {
@@ -58,7 +57,7 @@ public class Route {
         }
 
         mName = name;
-        mSites = new LinkedHashSet<>(sites);
+        mSites = new ArrayList<>(sites);
     }
 
     /**
@@ -75,8 +74,8 @@ public class Route {
      * @return the sites
      */
     @NonNull
-    public Set<Site> getSites() {
-        return new LinkedHashSet<>(mSites);
+    public List<Site> getSites() {
+        return new ArrayList<>(mSites);
     }
 
     /**
