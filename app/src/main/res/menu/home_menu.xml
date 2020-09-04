@@ -36,12 +36,4 @@
         android:title="@string/view_observations"
         android:id="@+id/view_observations_item"
         app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/compass_item"
-        android:checkable="true"
-        android:checked="true"
-        android:enabled="true"
-        android:icon="@drawable/ic_compass_white_24dp"
-        android:title="@string/compass"
-        app:showAsAction="ifRoom"/>
 </menu>

@@ -21,7 +21,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '29.0.2'
 
     defaultConfig {
         applicationId "org.samcrow.jrbpsurvey"
@@ -51,6 +51,8 @@ dependencies {
     implementation files('libs/jcoord-1.0.jar')
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'joda-time:joda-time:2.9.9'
+    // Upgrading mapsforge to 0.12 causes performance problems and/or vector layer glitches on
+    // Samsung Galaxy Tab 3 Lite devices
     implementation 'org.mapsforge:mapsforge-core:0.11.0'
     implementation 'org.mapsforge:mapsforge-map:0.11.0'
     implementation 'org.mapsforge:mapsforge-map-android:0.11.0'
