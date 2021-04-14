@@ -103,7 +103,7 @@
       "northing": 4139297.5
     }
   ],
-  "Mansions": [
+  "Mansion": [
     {
       "id": 367,
       "easting": 569102.625,
@@ -222,7 +222,7 @@
       "northing": 4139497.5
     }
   ],
-  "Fringe Pod": [
+  "Fringe Pond": [
     {
       "id": 473,
       "easting": 567702.625,
@@ -326,7 +326,7 @@
       "northing": 4139697.5
     }
   ],
-  "Leonard's": [
+  "Leonards Bridge": [
     {
       "id": 512,
       "easting": 567602.625,
@@ -440,7 +440,7 @@
       "northing": 4139797.5
     }
   ],
-  "Machines": [
+  "Machine": [
     {
       "id": 629,
       "easting": 567302.625,
@@ -497,7 +497,7 @@
       "northing": 4139697.5
     }
   ],
-  "Chaparral": [
+  "Chapparal": [
     {
       "id": 598,
       "easting": 568202.625,
