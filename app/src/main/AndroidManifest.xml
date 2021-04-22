@@ -19,27 +19,11 @@
   ~ along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<manifest package="org.samcrow.ridgesurvey"
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="org.samcrow.ridgesurvey">
 
     <!-- Write external storage for tile cache -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <!-- Location for navigation -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <!-- Internet access for data upload -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-
-    <uses-feature
-        android:name="android.hardware.location.gps"
-        android:required="false"/>
-    <uses-feature
-        android:name="android.hardware.sensor.compass"
-        android:required="false"/>
-    <uses-feature
-        android:name="android.hardware.touchscreen.multitouch "
-        android:required="false"/>
-
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -48,6 +32,12 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
+        <activity android:name=".WelcomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <!--
          Purpose of configChanges: Don't restart when these things change
          (A bug, probably a memory leak, triggers an OutOfMemoryError when the activity
@@ -55,28 +45,36 @@
         -->
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-        <activity android:name=".DataEntryActivity">
-        </activity>
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity android:name=".DataEntryActivity"></activity>
+
+        <activity android:name=".ObservationListActivity"></activity>
+
+        <activity android:name=".ObservationEditActivity"></activity>
 
         <receiver android:name=".data.NetworkBroadcastReceiver">
             <intent-filter>
                 <!-- Try uploading/deleting when the network status changed -->
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
-
-        <service android:name=".data.UploadService"/>
-
-        <activity android:name=".ObservationListActivity">
-        </activity>
-        <activity android:name=".ObservationEditActivity">
-        </activity>
+        <service android:name=".data.UploadService" />
     </application>
+    <!-- Location for navigation -->
+    <uses-feature
+        android:name="android.hardware.sensor.compass"
+        android:required="false" />
+    <!-- Internet access for data upload -->
+    <uses-feature
+        android:name="android.hardware.touchscreen.multitouch "
+        android:required="false" />
+
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>

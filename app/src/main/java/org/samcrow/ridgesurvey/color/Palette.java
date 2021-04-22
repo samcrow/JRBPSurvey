@@ -84,7 +84,7 @@ public class Palette {
          * Invariant: Not null
          */
         @NonNull
-        private Iterable<E> mSource;
+        private final Iterable<E> mSource;
 
         /**
          * The current active iterator over the source

@@ -36,7 +36,8 @@
         android:text="0:00"
         android:textAlignment="center"
         android:textColor="?android:attr/textColorPrimaryInverse"
-        android:textSize="40dp"/>
+        android:textSize="40dp"
+        android:gravity="center_horizontal" />
 
     <ImageButton
         android:id="@+id/start_stop_button"
