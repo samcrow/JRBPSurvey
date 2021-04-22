@@ -119,6 +119,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String LOCATION_PERMISSION = "android.permission.ACCESS_FINE_LOCATION";
 
     private static final String SELECTED_SITE_KEY = MainActivity.class.getName() + ".SELECTED_SITE_KEY";
+    /**
+     * Key corresponding to a RouteState extra that must be provided when launching this activity
+     */
+    public static final String EXTRA_ROUTE_STATE = MainActivity.class.getName() + ".EXTRA_ROUTE_STATE";
 
     /**
      * The map view

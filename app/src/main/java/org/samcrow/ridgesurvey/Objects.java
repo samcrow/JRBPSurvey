@@ -19,6 +19,7 @@
 
 package org.samcrow.ridgesurvey;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
@@ -44,8 +45,9 @@ public class Objects {
      * @param <T> the value type
      * @throws NullPointerException if value is null
      */
-    public static <T> void requireNonNull(@Nullable T value) {
+    @NonNull public static <T> T requireNonNull(@Nullable T value) {
         requireNonNull(value, "Unexpected null value");
+        return value;
     }
 
     /**

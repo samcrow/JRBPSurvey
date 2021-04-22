@@ -1,0 +1,112 @@
+<!--
+  ~ Copyright 2017 Sam Crow
+  ~
+  ~ This file is part of JRBP Survey.
+  ~
+  ~ JRBP Survey is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ JRBP Survey is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:columnCount="3"
+    android:padding="@dimen/timer_margin"
+    android:rowCount="4">
+
+    <EditText
+        android:id="@+id/fieldTabletId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="1"
+        android:layout_columnSpan="2"
+        android:layout_row="1"
+        android:ems="10"
+        android:inputType="textShortMessage|number" />
+
+    <EditText
+        android:id="@+id/fieldSurveyorName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="1"
+        android:layout_columnSpan="2"
+        android:layout_row="0"
+        android:ems="10"
+        android:inputType="textPersonName" />
+
+    <EditText
+        android:id="@+id/fieldSensorId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="1"
+        android:layout_columnSpan="2"
+        android:layout_row="2"
+        android:ems="10"
+        android:inputType="textShortMessage|number" />
+
+    <TextView
+        android:id="@+id/labelRoute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_gravity="start|center_vertical"
+        android:layout_row="3"
+        android:text="Route" />
+
+    <TextView
+        android:id="@+id/labelTabletId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_row="1"
+        android:text="Tablet ID" />
+
+    <TextView
+        android:id="@+id/labelSensorId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_row="2"
+        android:text="Sensor ID" />
+
+    <TextView
+        android:id="@+id/labelName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_row="0"
+        android:text="Your name" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_column="1"
+        android:layout_row="3"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonSelectRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="Select" />
+
+        <TextView
+            android:id="@+id/labelSelectedRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:text="None"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+    </LinearLayout>
+</GridLayout>
