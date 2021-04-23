@@ -41,8 +41,8 @@ public class IdentifiedObservation extends Observation implements Parcelable {
     public IdentifiedObservation(@NonNull DateTime time, boolean uploaded, int siteId,
                                  @NonNull String routeName,
                                  @NonNull Map<String, Boolean> species,
-                                 @NonNull String notes, int id) {
-        super(time, uploaded, siteId, routeName, species, notes);
+                                 @NonNull String notes, int id, boolean testMode) {
+        super(time, uploaded, siteId, routeName, species, notes, testMode);
         mId = id;
     }
 
@@ -68,6 +68,11 @@ public class IdentifiedObservation extends Observation implements Parcelable {
         dest.writeString(getRouteName());
         dest.writeSerializable((Serializable) getSpecies());
         dest.writeString(getNotes());
+        if (isTest()) {
+            dest.writeInt(1);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     public static final Creator<IdentifiedObservation> CREATOR = new Creator<IdentifiedObservation>() {
@@ -81,7 +86,8 @@ public class IdentifiedObservation extends Observation implements Parcelable {
             @SuppressWarnings("unchecked")
             final Map<String, Boolean> species = (Map<String, Boolean>) in.readSerializable();
             final String notes = in.readString();
-            return new IdentifiedObservation(time, uploaded, siteId, routeName, species, notes, id);
+            final boolean testMode = in.readInt() != 0;
+            return new IdentifiedObservation(time, uploaded, siteId, routeName, species, notes, id, testMode);
         }
 
         @Override

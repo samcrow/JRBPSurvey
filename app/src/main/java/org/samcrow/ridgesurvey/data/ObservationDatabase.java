@@ -56,6 +56,7 @@ public final class ObservationDatabase {
      * time: Time recorded, ISO 8601 date+time format with milliseconds, TEXT
      * species: JSON-formatted map from column name to boolean present, TEXT
      * notes: Notes, TEXT
+     * test_mode: 1/0 recorded in test mode or not, INTEGER
      */
 
     /**
@@ -131,6 +132,8 @@ public final class ObservationDatabase {
         }
 
         values.put("notes", observation.getNotes());
+        values.put("test_mode", observation.isTest());
+
         return values;
     }
 
@@ -164,7 +167,7 @@ public final class ObservationDatabase {
 
     /**
      * Gets an observation for the site with the provided site ID
-     *
+     * <p>
      * If more than one observation exists, the most recent one is returned.
      *
      * @param siteId the site ID to find an observation for
@@ -174,7 +177,7 @@ public final class ObservationDatabase {
     public IdentifiedObservation getObservationForSite(int siteId) throws SQLException {
         final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         try {
-            final Cursor result = db.query(TABLE_NAME, null, "site = ?", new String[] { Integer.toString(siteId) }, null, null, "time DESC");
+            final Cursor result = db.query(TABLE_NAME, null, "site = ?", new String[]{Integer.toString(siteId)}, null, null, "time DESC");
             try {
                 if (result.moveToNext()) {
                     return createObservation(result);
@@ -229,6 +232,7 @@ public final class ObservationDatabase {
         final int timeIndex = result.getColumnIndexOrThrow("time");
         final int speciesIndex = result.getColumnIndexOrThrow("species");
         final int notesIndex = result.getColumnIndexOrThrow("notes");
+        final int testModeIndex = result.getColumnIndexOrThrow("test_mode");
 
         final int id = result.getInt(idIndex);
         final boolean uploaded = result.getInt(uploadedIndex) == 1;
@@ -266,7 +270,9 @@ public final class ObservationDatabase {
 
         final String notes = result.getString(notesIndex);
 
-        return new IdentifiedObservation(time, uploaded, site, route, speciesPresent, notes, id);
+        final boolean testMode = result.getInt(testModeIndex) != 0;
+
+        return new IdentifiedObservation(time, uploaded, site, route, speciesPresent, notes, id, testMode);
     }
 
     /**
@@ -293,7 +299,7 @@ public final class ObservationDatabase {
 
         private static final String NAME = "observations";
 
-        private static final int VERSION = 2;
+        private static final int VERSION = 3;
 
         ObservationOpenHelper(Context context) {
             super(context, NAME, null, VERSION);
@@ -308,23 +314,21 @@ public final class ObservationDatabase {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             if (oldVersion == 1 && newVersion == 2) {
                 // Add an ID column
-                db.beginTransaction();
-                try {
-                    // Create a new table
-                    final String copyTable = TABLE_NAME + "_temp";
-                    db.execSQL(createSyntax(copyTable));
-                    // Copy everything into the new table
-                    // IDs will be assigned automatically
-                    db.execSQL("INSERT INTO " + copyTable + " (site, route, time, species, notes)" +
-                            " SELECT site, route, time, species, notes FROM " + TABLE_NAME);
-                    // Delete the old table
-                    db.execSQL("DROP TABLE " + TABLE_NAME);
-                    db.execSQL("ALTER TABLE " + copyTable + " RENAME TO " + TABLE_NAME);
-
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
-                }
+                // Create a new table
+                final String copyTable = TABLE_NAME + "_temp";
+                db.execSQL(createSyntax(copyTable));
+                // Copy everything into the new table
+                // IDs will be assigned automatically
+                db.execSQL("INSERT INTO " + copyTable + " (site, route, time, species, notes)" +
+                        " SELECT site, route, time, species, notes FROM " + TABLE_NAME);
+                // Delete the old table
+                db.execSQL("DROP TABLE " + TABLE_NAME);
+                db.execSQL("ALTER TABLE " + copyTable + " RENAME TO " + TABLE_NAME);
+            } else if (oldVersion == 2 && newVersion == 3) {
+                db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " +
+                        "test_mode INTEGER NOT NULL DEFAULT 0 CHECK (test_mode = 0 OR test_mode = 1)");
+            } else {
+                throw new RuntimeException("Unsupported combination of database versions");
             }
         }
 
@@ -342,7 +346,8 @@ public final class ObservationDatabase {
                     "route TEXT NOT NULL, " +
                     "time TEXT NOT NULL, " +
                     "species TEXT NOT NULL, " +
-                    "notes TEXT NOT NULL)";
+                    "notes TEXT NOT NULL," +
+                    "test_mode INTEGER NOT NULL DEFAULT 0 CHECK (test_mode = 0 OR test_mode = 1) )";
         }
     }
 }

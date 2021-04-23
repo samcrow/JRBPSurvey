@@ -45,7 +45,7 @@ function doPost(e) {
   if (!e) return;
 
   // The ID of the spreadsheet to insert into
-  var sheetID = "1k6rfY3KHKfU2MIdHpvmo8aYbFCDqM239cJIOR4t1dgM";
+  var sheetID = "1TMBLRNYbcvIP5KG83BZ4NprRxCsfX6tXZJTD42ZnnHM";
   var status = {};
 
   var lock = LockService.getScriptLock();
@@ -66,24 +66,12 @@ function doPost(e) {
       input[keys] = e.parameter[keys];
     }
 
-    // Find the record number from the last data row, or set to 1 if no data are present
-    var recordNumber = 1;
-    var lastRowNumber = sheet.getLastRow();
-    if (lastRowNumber != 1) {
-      var lastRecord = parseInt(sheet.getRange(lastRowNumber, 1).getValue());
-      recordNumber = lastRecord + 1;
-    }
-    input["RECORD NUMBER"] = recordNumber;
-
     // For each parameter that matches a heading, add the value to the row
-    // If no parameter matches, add an emtpy string
+    // If no parameter matches, add an empty string
     for (i in headers) {
       column = headers[i];
       row.push(input[column] || "");
     }
-    Logger.log('Record number: ' + recordNumber);
-    // Add the record number
-    row[0] = recordNumber;
 
     if (row.length) {
       sheet.appendRow(row);

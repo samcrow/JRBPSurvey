@@ -13,8 +13,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONException;
 import org.samcrow.ridgesurvey.data.RouteState;
+import org.samcrow.ridgesurvey.data.StartRouteDatabase;
 
 import java.io.IOException;
 import java.util.List;
@@ -110,15 +113,25 @@ public class WelcomeActivity extends AppCompatActivity {
                     return;
                 }
                 // Save settings
+                final DateTime now = DateTime.now();
                 final SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("start_time", ISODateTimeFormat.dateTime().print(now));
                 editor.putString("surveyor_name", surveyorName);
                 editor.putString("tablet_id", tabletId);
                 editor.putString("sensor_id", sensorId);
                 editor.putString("route_name", mSelectedRoute);
                 editor.apply();
-                // TODO: Save and upload route start event
+
+                // Save global tablet ID for use in the upload service
+                saveGlobalTabletId(tabletId);
+
+                // Save route start event for upload later
+                final RouteState newRoute = new RouteState(now, surveyorName, mSelectedRoute, tabletId, sensorId);
+
+                final StartRouteDatabase db = new StartRouteDatabase(WelcomeActivity.this);
+                db.saveRouteState(newRoute);
+
                 // Launch map activity
-                final RouteState newRoute = new RouteState(surveyorName, mSelectedRoute, tabletId);
                 final Intent mapIntent = new Intent(WelcomeActivity.this, MainActivity.class);
                 mapIntent.putExtra(MainActivity.EXTRA_ROUTE_STATE, newRoute);
                 startActivity(mapIntent);
@@ -137,7 +150,7 @@ public class WelcomeActivity extends AppCompatActivity {
         testModeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final RouteState testMode = RouteState.testMode();
+                final RouteState testMode = RouteState.testMode(DateTime.now());
                 final Intent mapIntent = new Intent(WelcomeActivity.this, MainActivity.class);
                 mapIntent.putExtra(MainActivity.EXTRA_ROUTE_STATE, testMode);
                 startActivity(mapIntent);
@@ -157,12 +170,21 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void initResumableRoute() {
         final SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+
+        DateTime savedStartTime = null;
+        final String savedStartTimeString = prefs.getString("start_time", null);
+        if (savedStartTimeString != null) {
+            try {
+                savedStartTime = ISODateTimeFormat.dateTime().parseDateTime(savedStartTimeString);
+            } catch (IllegalArgumentException e) { /* Time formatted incorrectly */ }
+        }
+
         final String savedTabletId = prefs.getString("tablet_id", null);
         final String savedSurveyorName = prefs.getString("surveyor_name", null);
         final String savedRouteName = prefs.getString("route_name", null);
         final String savedSensorId = prefs.getString("sensor_id", null);
-        if (savedTabletId != null && savedSurveyorName != null && savedRouteName != null && savedSensorId != null) {
-            mResumableRoute = new RouteState(savedSurveyorName, savedRouteName, savedTabletId);
+        if (savedStartTime != null && savedTabletId != null && savedSurveyorName != null && savedRouteName != null && savedSensorId != null) {
+            mResumableRoute = new RouteState(savedStartTime, savedSurveyorName, savedRouteName, savedTabletId, savedSensorId);
             resumeRouteDescription.setText(String.format("%s surveying %s", savedSurveyorName, savedRouteName));
             resumeButton.setEnabled(true);
         } else {
@@ -180,6 +202,13 @@ public class WelcomeActivity extends AppCompatActivity {
             routeNames[i] = routes.get(i).getName();
         }
         return routeNames;
+    }
+
+    private void saveGlobalTabletId(String tabletId) {
+        final SharedPreferences globalPrefs = getSharedPreferences("tablet_properties", MODE_PRIVATE);
+        final SharedPreferences.Editor editor = globalPrefs.edit();
+        editor.putString("tablet_id", tabletId);
+        editor.apply();
     }
 }
 

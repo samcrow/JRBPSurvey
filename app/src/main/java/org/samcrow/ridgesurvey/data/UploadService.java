@@ -21,6 +21,7 @@ package org.samcrow.ridgesurvey.data;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.SQLException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -30,8 +31,7 @@ import android.util.Log;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.samcrow.ridgesurvey.Objects;
@@ -52,41 +52,101 @@ import java.util.Map;
  */
 public class UploadService extends IntentService {
 
-    private static final String TAG = UploadService.class.getSimpleName();
-
     /**
      * An extra key for forcing uploads
-     *
+     * <p>
      * If this service is started with an intent that has a boolean extra with this key and a value
      * of true, the service will upload observations that are newer than {@link #UPLOAD_AGE}.
      */
     public static final String EXTRA_FORCE_UPLOAD = UploadService.class.getName() + ".EXTRA_FORCE_UPLOAD";
-
+    private static final String TAG = UploadService.class.getSimpleName();
     /**
      * The URL to upload to
      */
     private static final URL UPLOAD_URL;
-
-    static {
-        try {
-            UPLOAD_URL = new URL("https://script.google.com/macros/s/AKfycbz-JyJ_hDSLmQpNLFDufQf97XHG9BJhNcNMvyiHuyEwpc4qcH0/exec");
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Invalid URL in source", e);
-        }
-    }
-
     /**
      * The minimum age of an observation before it should be uploaded
      */
     private static final Duration UPLOAD_AGE = Duration.standardMinutes(10);
-
     /**
      * The minimum age of an uploaded observation before it is deleted
      */
     private static final Duration DELETE_AGE = Duration.standardDays(2);
 
+    static {
+        try {
+            UPLOAD_URL = new URL("https://script.google.com/macros/s/AKfycbzZ-Q1KzInEPV5MC3B61EnZvYiTZ2kofVI3ymtnyTftAb4zHNx76PmGfIwsZup0bD5j/exec");
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Invalid URL in source", e);
+        }
+    }
+
     public UploadService() {
         super(UploadService.class.getName());
+    }
+
+    /**
+     * Writes URL-encoded form data to a PrintStream
+     *
+     * @param data the key-value pairs to write, not URL encoded
+     * @param out  the stream to write to
+     */
+    private static void writeFormEncodedData(@NonNull Map<String, String> data,
+                                             @NonNull PrintStream out) {
+        Objects.requireAllNonNull(data, out);
+        int i = 0;
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            out.print(Uri.encode(entry.getKey()));
+            out.print("=");
+            out.print(Uri.encode(entry.getValue()));
+            // Add the separator after each entry except the last
+            if (i < data.size() - 1) {
+                out.print("&");
+            }
+            i++;
+        }
+    }
+
+    /**
+     * Converts an Observation into a set of key-value pairs suitable for uploading
+     *
+     * @param observation the observation
+     * @return a form-compatible representation of the observation
+     */
+    private static Map<String, String> formatObservation(@NonNull Observation observation) {
+        Objects.requireNonNull(observation);
+        final Map<String, String> map = new HashMap<>();
+
+        map.put("Time", ISODateTimeFormat.dateTime().print(observation.getTime()));
+        map.put("Event", "Observation");
+        map.put("Test mode", observation.isTest() ? "1" : "0");
+        map.put("Route", observation.getRouteName());
+        map.put("Site", Integer.toString(observation.getSiteId()));
+
+        // Species (each species key is already a column name)
+        for (Map.Entry<String, Boolean> species : observation.getSpecies().entrySet()) {
+            final Boolean present = species.getValue();
+            if (present != null) {
+                final String stringValue = present ? "1" : "0";
+                map.put(species.getKey(), stringValue);
+            }
+        }
+
+        // Notes
+        map.put("Notes", observation.getNotes());
+
+        return map;
+    }
+
+    /**
+     * Determines if this observation should be uploaded
+     *
+     * @param observation the observation
+     * @return if the observation should be uploaded
+     */
+    public static boolean needsUpload(Observation observation) {
+        final DateTime uploadThreshold = DateTime.now().minus(UPLOAD_AGE);
+        return !observation.isUploaded() && observation.getTime().isBefore(uploadThreshold);
     }
 
     /**
@@ -104,7 +164,20 @@ public class UploadService extends IntentService {
         final boolean ignoreAge = intent.getBooleanExtra(EXTRA_FORCE_UPLOAD, false);
 
         final ObservationDatabase db = new ObservationDatabase(this);
+        final StartRouteDatabase startDb = new StartRouteDatabase(this);
         try {
+            // Part 1: Route start events
+            while (true) {
+                final StartRouteDatabase.IdentifiedRouteState routeState = startDb.getOldestRouteState();
+                if (routeState == null) {
+                    break;
+                }
+                Log.d(TAG, "Trying to upload route start " + routeState);
+                uploadStartRoute(UPLOAD_URL, routeState.mRouteState);
+                startDb.deleteRouteState(routeState.mId);
+            }
+
+            // Part 2: Observations
             final List<IdentifiedObservation> observations = db.getObservationsByTime();
             final DateTime deleteThreshold = DateTime.now().minus(DELETE_AGE);
 
@@ -113,12 +186,12 @@ public class UploadService extends IntentService {
                 // Check for upload
                 if (needsUpload(observation) || (ignoreAge && !observation.isUploaded())) {
                     Log.d(TAG, "Trying to upload...");
-                    upload(UPLOAD_URL, observation);
+                    uploadObservation(UPLOAD_URL, observation);
                     // Make a copy marked as uploaded
                     final IdentifiedObservation uploaded = new IdentifiedObservation(
                             observation.getTime(), true, observation.getSiteId(),
                             observation.getRouteName(), observation.getSpecies(),
-                            observation.getNotes(), observation.getId());
+                            observation.getNotes(), observation.getId(), observation.isTest());
                     db.updateObservation(uploaded);
                 } else if (!observation.isUploaded()) {
                     Log.d(TAG, "Not uploading observation " + observation.getId() + " because it is not old enough");
@@ -163,17 +236,7 @@ public class UploadService extends IntentService {
         }
     }
 
-    /**
-     * Uploads an observation
-     *
-     * @param observation the observation to upload
-     */
-    private void upload(@NonNull URL url, @NonNull Observation observation)
-            throws IOException, ParseException, UploadException {
-        Objects.requireNonNull(observation);
-        final Map<String, String> formData = formatObservation(observation);
-        Log.v(TAG, "Formatted observation: " + formData);
-
+    private void uploadGeneric(@NonNull URL url, @NonNull Map<String, String> formData) throws IOException, ParseException, UploadException {
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
             // Disable response compression, which might be causing problems
@@ -183,6 +246,7 @@ public class UploadService extends IntentService {
             connection.setDoOutput(true);
             connection.setChunkedStreamingMode(0);
             final PrintStream out = new PrintStream(connection.getOutputStream());
+            Log.v(TAG, "Upload form data: " + formData);
             writeFormEncodedData(formData, out);
             out.flush();
 
@@ -211,7 +275,7 @@ public class UploadService extends IntentService {
                 if (location != null) {
                     final URL redirectUrl = new URL(location);
                     Log.i(TAG, "Following redirect to " + redirectUrl);
-                    upload(redirectUrl, observation);
+                    uploadGeneric(redirectUrl, formData);
                 } else {
                     throw new UploadException("Got a 301 or 302 response with no Location header");
                 }
@@ -229,75 +293,36 @@ public class UploadService extends IntentService {
     }
 
     /**
-     * Writes URL-encoded form data to a PrintStream
+     * Uploads an observation
      *
-     * @param data the key-value pairs to write, not URL encoded
-     * @param out  the stream to write to
+     * @param observation the observation to upload
      */
-    private static void writeFormEncodedData(@NonNull Map<String, String> data,
-                                             @NonNull PrintStream out) {
-        Objects.requireAllNonNull(data, out);
-        int i = 0;
-        for (Map.Entry<String, String> entry : data.entrySet()) {
-            out.print(Uri.encode(entry.getKey()));
-            out.print("=");
-            out.print(Uri.encode(entry.getValue()));
-            // Add the separator after each entry except the last
-            if (i < data.size() - 1) {
-                out.print("&");
-            }
-            i++;
-        }
-    }
-
-    /**
-     * Converts an Observation into a set of key-value pairs suitable for uploading
-     *
-     * @param observation the observation
-     * @return a form-compatible representation of the observation
-     */
-    private static Map<String, String> formatObservation(@NonNull Observation observation) {
+    private void uploadObservation(@NonNull URL url, @NonNull Observation observation)
+            throws IOException, ParseException, UploadException {
         Objects.requireNonNull(observation);
-        final Map<String, String> map = new HashMap<>();
+        final Map<String, String> formData = formatObservation(observation);
 
-        map.put("SURVEY LOCATION", Integer.toString(observation.getSiteId()));
-        map.put("ROUTE", observation.getRouteName());
-
-        // Date format: month/day/year h:m:s
-        final DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd/YYYY HH:mm:ss");
-        map.put("DATE", formatter.print(observation.getTime()));
-        // Year field
-        map.put("YEAR", Integer.toString(observation.getTime().getYear()));
-        // Datestamp field: year, month, day concatenated
-        final DateTimeFormatter datestampFormatter = DateTimeFormat.forPattern("YYYYMMdd");
-        map.put("DATESTAMP", datestampFormatter.print(observation.getTime()));
-        // Time field: hour:minute
-        final DateTimeFormatter timeFormatter = DateTimeFormat.forPattern("HH:mm");
-        map.put("TIME", timeFormatter.print(observation.getTime()));
-
-        // Species (each species key is already a column name)
-        for (Map.Entry<String, Boolean> species : observation.getSpecies().entrySet()) {
-            final Boolean present = species.getValue();
-            if (present != null) {
-                final String stringValue = present ? "1" : "0";
-                map.put(species.getKey(), stringValue);
-            }
+        // Add the tablet ID, if it was set up
+        final SharedPreferences prefs = getSharedPreferences("tablet_properties", MODE_PRIVATE);
+        final String tabletId = prefs.getString("tablet_id", null);
+        if (tabletId != null) {
+            formData.put("Tablet ID", tabletId);
         }
 
-        // Notes
-        map.put("NOTES", observation.getNotes());
-
-        return map;
+        Log.v(TAG, "Formatted observation: " + formData);
+        uploadGeneric(url, formData);
     }
 
-    /**
-     * Determines if this observation should be uploaded
-     * @param observation the observation
-     * @return if the observation should be uploaded
-     */
-    public static boolean needsUpload(Observation observation) {
-        final DateTime uploadThreshold = DateTime.now().minus(UPLOAD_AGE);
-        return !observation.isUploaded() && observation.getTime().isBefore(uploadThreshold);
+    private void uploadStartRoute(@NonNull URL url, @NonNull RouteState routeState) throws IOException, ParseException, UploadException {
+        final Map<String, String> map = new HashMap<>(4);
+        map.put("Time", ISODateTimeFormat.dateTime().print(routeState.getStartTime()));
+        map.put("Event", "Route start");
+        map.put("Surveyor name", routeState.getSurveyorName());
+        map.put("Tablet ID", routeState.getTabletId());
+        map.put("Sensor ID", routeState.getSensorId());
+        map.put("Route", routeState.getRouteName());
+
+        uploadGeneric(url, map);
     }
 
     private static class UploadException extends Exception {

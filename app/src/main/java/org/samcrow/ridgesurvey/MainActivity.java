@@ -33,6 +33,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RawRes;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -67,6 +68,7 @@ import org.samcrow.ridgesurvey.color.Palette;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
+import org.samcrow.ridgesurvey.data.RouteState;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
 import org.samcrow.ridgesurvey.data.UploadService;
 import org.samcrow.ridgesurvey.data.UploadStatusListener;
@@ -158,10 +160,20 @@ public class MainActivity extends AppCompatActivity {
      */
     private final ExecutorService mLayerUpdateExecutor = Executors.newSingleThreadExecutor();
 
+    /**
+     * The active route / other information
+     */
+    private RouteState mRouteState;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(getString(R.string.map));
+
+        mRouteState = getIntent().getParcelableExtra(EXTRA_ROUTE_STATE);
+        if (mRouteState == null) {
+            throw new RuntimeException("Route state extra required");
+        }
 
         // Check location permission
         final int permission = ActivityCompat.checkSelfPermission(this, LOCATION_PERMISSION);
@@ -174,6 +186,11 @@ public class MainActivity extends AppCompatActivity {
         AndroidGraphicFactory.createInstance(getApplication());
 
         setContentView(R.layout.activity_main);
+
+        final ActionBar bar = getSupportActionBar();
+        if (bar != null) {
+            bar.setDisplayHomeAsUpEnabled(true);
+        }
 
         mSelectionManager = new SelectionManager();
 
@@ -477,6 +494,7 @@ public class MainActivity extends AppCompatActivity {
         final Intent intent = new Intent(this, DataEntryActivity.class);
         intent.putExtra(DataEntryActivity.ARG_SITE, selectedSite);
         intent.putExtra(DataEntryActivity.ARG_ROUTE, selectedSiteRoute.getName());
+        intent.putExtra(DataEntryActivity.ARG_ROUTE_STATE, mRouteState);
         startActivityForResult(intent, REQUEST_CODE_ENTRY);
     }
 
@@ -540,5 +558,12 @@ public class MainActivity extends AppCompatActivity {
      */
     private void startUpload() {
         startService(new Intent(getApplicationContext(), UploadService.class));
+    }
+
+    // Close this activity when the user presses the back button
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 }
