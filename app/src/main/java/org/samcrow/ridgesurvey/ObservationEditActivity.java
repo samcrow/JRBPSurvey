@@ -22,7 +22,6 @@ package org.samcrow.ridgesurvey;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.SQLException;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,11 +31,9 @@ import android.widget.Toast;
 
 import org.joda.time.DateTime;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
-import org.samcrow.ridgesurvey.data.Observation;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
 import org.samcrow.ridgesurvey.data.UploadService;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class ObservationEditActivity extends ObservationActivity {
@@ -110,7 +107,7 @@ public class ObservationEditActivity extends ObservationActivity {
         final String notes = mNotesField.getText().toString();
 
         final IdentifiedObservation edited = new IdentifiedObservation(DateTime.now(), false, mObservation.getSiteId(), mObservation.getRouteName(),
-                speciesData, notes, mObservation.getId());
+                speciesData, notes, mObservation.getId(), mObservation.isTest());
 
         // Store
         try {

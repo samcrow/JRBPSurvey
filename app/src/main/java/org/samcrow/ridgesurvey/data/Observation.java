@@ -62,13 +62,18 @@ public class Observation {
     private final Map<String, Boolean> mSpecies;
 
     /**
+     * If the observation was recorded in test mode
+     */
+    private final boolean mTest;
+
+    /**
      * Notes that the user recorded
      */
     @NonNull
     private final String mNotes;
 
     public Observation(@NonNull DateTime time, boolean uploaded, int siteId, @NonNull String routeName,
-                       @NonNull Map<String, Boolean> species, @NonNull String notes) {
+                       @NonNull Map<String, Boolean> species, @NonNull String notes, boolean test) {
         Objects.requireAllNonNull(time, routeName, species, notes);
         for (Boolean value : species.values()) {
             Objects.requireNonNull(value);
@@ -79,6 +84,7 @@ public class Observation {
         mRouteName = routeName;
         mSpecies = new HashMap<>(species);
         mNotes = notes;
+        mTest = test;
     }
 
     @NonNull
@@ -107,5 +113,9 @@ public class Observation {
     @NonNull
     public String getNotes() {
         return mNotes;
+    }
+
+    public boolean isTest() {
+        return mTest;
     }
 }

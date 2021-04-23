@@ -40,6 +40,7 @@ import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.samcrow.ridgesurvey.data.Observation;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
+import org.samcrow.ridgesurvey.data.RouteState;
 import org.samcrow.ridgesurvey.data.UploadService;
 import org.samcrow.ridgesurvey.data.UploadStatusTracker;
 
@@ -71,6 +72,7 @@ public class DataEntryActivity extends ObservationActivity {
      * The argument key used to provide the name of the route that the site is on
      */
     public static final String ARG_ROUTE = DataEntryActivity.class.getName() + ".ARG_ROUTE";
+    public static final String ARG_ROUTE_STATE = DataEntryActivity.class.getName() + ".ARG_ROUTE_STATE";
     /**
      * The site where the entry is taking place
      */
@@ -80,6 +82,8 @@ public class DataEntryActivity extends ObservationActivity {
      * The name of the route that contains {@link #mSite}
      */
     private String mRouteName;
+
+    private RouteState mRouteState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +97,10 @@ public class DataEntryActivity extends ObservationActivity {
         mRouteName = getIntent().getStringExtra(ARG_ROUTE);
         if (mRouteName == null) {
             throw new IllegalStateException("DataEntryActivity must be started with a route extra");
+        }
+        mRouteState = getIntent().getParcelableExtra(ARG_ROUTE_STATE);
+        if (mRouteState == null) {
+            throw new IllegalStateException("DataEntryActivity must be started with a route state extra");
         }
 
         setTitle(String.format(getString(R.string.format_site_id), mSite.getId()));
@@ -134,8 +142,9 @@ public class DataEntryActivity extends ObservationActivity {
         }
         final String notes = mNotesField.getText().toString();
 
+        final boolean testMode = mRouteState.isTestMode();
         final Observation observation = new Observation(DateTime.now(), false, mSite.getId(), mRouteName,
-                speciesData, notes);
+                speciesData, notes, testMode);
 
         // Store
         try {

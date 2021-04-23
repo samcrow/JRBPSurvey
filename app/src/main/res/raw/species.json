@@ -26,7 +26,7 @@
     "species": [
       {
         "name": "Crematogaster coarctata (acrobat ant)",
-        "column": "Cremtogaster coarctata",
+        "column": "Crematogaster coarctata",
         "description": "Black and shiny. The abdomen is flat and heart shaped. Head is big and round. Can forage in groups.",
         "image": "org.samcrow.jrbpsurvey:drawable/crematogaster"
       },
@@ -37,12 +37,12 @@
       },
       {
         "name": "Temnothorax sp.",
-        "column": "Temnothrax sp.",
+        "column": "Temnothorax sp.",
         "description": "Round abdomen. Moves slowly, usually found alone."
       },
       {
         "name": "Aphaenogaster occidentalis",
-        "column": "Aphenogaster occidentalis",
+        "column": "Aphaenogaster occidentalis",
         "image": "org.samcrow.jrbpsurvey:drawable/aphaenogaster"
       },
       {
@@ -56,7 +56,7 @@
       },
       {
         "name": "Pseudomyremex apache",
-        "column": "Psedomyremex apache"
+        "column": "Pseudomyremex apache"
       }
     ]
   },
@@ -101,12 +101,12 @@
       },
       {
         "name": "Stenamma sp.",
-        "column": "Stenamman sp",
+        "column": "Stenamma sp.",
         "image": "org.samcrow.jrbpsurvey:drawable/stenamma"
       },
       {
-        "name": " Neivamyrmex",
-        "column": "Neivamyrme",
+        "name": "Neivamyrmex",
+        "column": "Neivamyrmex",
         "image": "org.samcrow.jrbpsurvey:drawable/neivamyrmex"
       }
     ]
