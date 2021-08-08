@@ -43,4 +43,5 @@
     <string name="content_2_30_elapsed">Two-person search time has ended</string>
     <string name="title_5_elapsed">5:00 elapsed</string>
     <string name="content_5_elapsed">One-person search time has ended</string>
+    <string name="no_previous_route">No previous route</string>
 </resources>

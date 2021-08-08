@@ -65,6 +65,7 @@ public class StartRouteDatabase {
             }
         } finally {
             cursor.close();
+            db.close();
         }
     }
 
@@ -92,7 +93,7 @@ public class StartRouteDatabase {
         public final RouteState mRouteState;
         public final int mId;
 
-        private IdentifiedRouteState(RouteState routeState, int id) {
+        private IdentifiedRouteState(@NonNull RouteState routeState, int id) {
             mRouteState = routeState;
             this.mId = id;
         }
@@ -111,6 +112,7 @@ public class StartRouteDatabase {
             mId = id;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "IdentifiedRouteState{" +

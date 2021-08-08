@@ -185,10 +185,15 @@ public class WelcomeActivity extends AppCompatActivity {
         final String savedSensorId = prefs.getString("sensor_id", null);
         if (savedStartTime != null && savedTabletId != null && savedSurveyorName != null && savedRouteName != null && savedSensorId != null) {
             mResumableRoute = new RouteState(savedStartTime, savedSurveyorName, savedRouteName, savedTabletId, savedSensorId);
-            resumeRouteDescription.setText(String.format("%s surveying %s", savedSurveyorName, savedRouteName));
-            resumeButton.setEnabled(true);
+            if (!mResumableRoute.isExpired()) {
+                resumeRouteDescription.setText(String.format("%s surveying %s", savedSurveyorName, savedRouteName));
+                resumeButton.setEnabled(true);
+            } else {
+                resumeRouteDescription.setText(R.string.no_previous_route);
+                resumeButton.setEnabled(false);
+            }
         } else {
-            resumeRouteDescription.setText("No previous route");
+            resumeRouteDescription.setText(R.string.no_previous_route);
             resumeButton.setEnabled(false);
         }
     }

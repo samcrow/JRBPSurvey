@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.ReadableDateTime;
 import org.samcrow.ridgesurvey.Objects;
 
@@ -12,6 +13,12 @@ import org.samcrow.ridgesurvey.Objects;
  * Information about the route that the user is currently surveying
  */
 public class RouteState implements Parcelable {
+
+    /**
+     * A route start older than this age is considered expired and will not let the user resume
+     * entering observations
+     */
+    private static final Duration EXPIRATION_TIME = Duration.standardHours(8);
 
     /**
      * The date and time when the user clicked on the start button
@@ -92,10 +99,17 @@ public class RouteState implements Parcelable {
     }
 
     @NonNull
-    public String getSensorId() { return mSensorId; };
+    public String getSensorId() { return mSensorId; }
 
     public boolean isTestMode() {
         return mTestMode;
+    }
+
+    /**
+     * @return true if this route state was created too long ago
+     */
+    public boolean isExpired() {
+        return mStartTime.withDurationAdded(EXPIRATION_TIME, 1).isBeforeNow();
     }
 
     @Override
