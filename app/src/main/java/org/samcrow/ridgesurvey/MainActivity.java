@@ -19,6 +19,7 @@
 
 package org.samcrow.ridgesurvey;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -40,11 +41,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
-import android.view.View;
 
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 
+import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
@@ -174,6 +175,21 @@ public class MainActivity extends AppCompatActivity {
         if (mRouteState == null) {
             throw new RuntimeException("Route state extra required");
         }
+        // Check that the route state isn't too old
+        if (mRouteState.isExpired()) {
+            new AlertDialog.Builder(this).setTitle("Verify route")
+                    .setMessage("Please go back and start a new route")
+                    .setCancelable(false)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // This should go back to the welcome activity
+                            finish();
+                        }
+                    }).show();
+            // Don't load the rest of the activity
+            return;
+        }
 
         // Check location permission
         final int permission = ActivityCompat.checkSelfPermission(this, LOCATION_PERMISSION);
@@ -232,25 +248,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        mMap.getModel().save(mPreferencesFacade);
-        mPreferencesFacade.save();
-
-        // Save selected colony
-        final Site selectedSite = mSelectionManager.getSelectedSite();
-        if (selectedSite != null) {
-            Log.d(TAG, "Saving selected site " + selectedSite.getId());
-            final Editor prefsEditor = mPreferences.edit();
-            prefsEditor.putInt(SELECTED_SITE_KEY, selectedSite.getId());
-            prefsEditor.apply();
+        if (mMap != null && mPreferencesFacade != null) {
+            mMap.getModel().save(mPreferencesFacade);
+            mPreferencesFacade.save();
         }
 
-        mLocationFinder.pause();
+        if (mSelectionManager != null && mPreferences != null) {
+            // Save selected colony
+            final Site selectedSite = mSelectionManager.getSelectedSite();
+            if (selectedSite != null) {
+                Log.d(TAG, "Saving selected site " + selectedSite.getId());
+                final Editor prefsEditor = mPreferences.edit();
+                prefsEditor.putInt(SELECTED_SITE_KEY, selectedSite.getId());
+                prefsEditor.apply();
+            }
+        }
+        if (mLocationFinder != null) {
+            mLocationFinder.pause();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mLocationFinder.resume();
+        if (mLocationFinder != null) {
+            mLocationFinder.resume();
+        }
     }
 
     @Override
@@ -476,7 +499,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         final UploadMenuItemController controller = new UploadMenuItemController(this, uploadItem);
-        mUploadStatusTracker.addListener(controller);
+        if (mUploadStatusTracker != null) {
+            mUploadStatusTracker.addListener(controller);
+        }
 
         return true;
     }
@@ -529,8 +554,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        mMap.destroyAll();
-        AndroidGraphicFactory.clearResourceMemoryCache();
+        if (mMap != null) {
+            mMap.destroyAll();
+            AndroidGraphicFactory.clearResourceMemoryCache();
+        }
         super.onDestroy();
     }
 
