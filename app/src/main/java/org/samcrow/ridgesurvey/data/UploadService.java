@@ -120,8 +120,8 @@ public class UploadService extends IntentService {
         map.put("Time", ISODateTimeFormat.dateTime().print(observation.getTime()));
         map.put("Event", "Observation");
         map.put("Test mode", observation.isTest() ? "1" : "0");
-        map.put("Route", observation.getRouteName());
-        map.put("Site", Integer.toString(observation.getSiteId()));
+        map.put("ROUTE", observation.getRouteName());
+        map.put("SURVEY LOCATION", Integer.toString(observation.getSiteId()));
 
         // Species (each species key is already a column name)
         for (Map.Entry<String, Boolean> species : observation.getSpecies().entrySet()) {
@@ -133,7 +133,7 @@ public class UploadService extends IntentService {
         }
 
         // Notes
-        map.put("Notes", observation.getNotes());
+        map.put("NOTES", observation.getNotes());
 
         return map;
     }
@@ -317,10 +317,10 @@ public class UploadService extends IntentService {
         final Map<String, String> map = new HashMap<>(4);
         map.put("Time", ISODateTimeFormat.dateTime().print(routeState.getStartTime()));
         map.put("Event", "Route start");
-        map.put("Surveyor name", routeState.getSurveyorName());
+        map.put("SURVEYOR", routeState.getSurveyorName());
         map.put("Tablet ID", routeState.getTabletId());
         map.put("Sensor ID", routeState.getSensorId());
-        map.put("Route", routeState.getRouteName());
+        map.put("ROUTE", routeState.getRouteName());
 
         uploadGeneric(url, map);
     }
