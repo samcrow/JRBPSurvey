@@ -23,4 +23,8 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <!-- Margins for timer -->
     <dimen name="timer_margin">8dp</dimen>
+    <dimen name="start_route_margin">20dp</dimen>
+    <dimen name="start_route_text_min_height">60dp</dimen>
+    <dimen name="welcome_divider_height">2dp</dimen>
+    <dimen name="welcome_divider_v_margin">20dp</dimen>
 </resources>

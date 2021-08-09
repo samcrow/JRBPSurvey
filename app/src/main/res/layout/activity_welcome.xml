@@ -38,51 +38,69 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Start new route"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-        <include
-            layout="@layout/start_route_form"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textSize="34sp" />
 
         <Button
             android:id="@+id/buttonStartNew"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Start" />
+            android:text="Start"
+            android:textSize="34sp" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/welcome_divider_height"
+            android:layout_marginBottom="@dimen/welcome_divider_v_margin"
+            android:layout_marginTop="@dimen/welcome_divider_v_margin"
+            android:background="?android:attr/listDivider" />
 
         <TextView
             android:id="@+id/textView4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Resume route"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textSize="34sp" />
 
         <TextView
             android:id="@+id/routeInformationView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Route information"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textSize="34sp" />
 
         <Button
             android:id="@+id/buttonResume"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Resume" />
+            android:text="Resume"
+            android:textSize="34sp" />
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/welcome_divider_height"
+            android:layout_marginBottom="@dimen/welcome_divider_v_margin"
+            android:layout_marginTop="@dimen/welcome_divider_v_margin"
+            android:background="?android:attr/listDivider" />
 
         <TextView
             android:id="@+id/textView6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Test mode"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textSize="34sp" />
 
         <Button
             android:id="@+id/buttonTestMode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Test" />
+            android:text="Test"
+            android:textSize="34sp" />
 
     </LinearLayout>
 
