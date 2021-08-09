@@ -21,7 +21,7 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#CE3E12</color>
 
     <!-- StatusBar colors -->
     <color name="status_bar_ok">#09A129</color>

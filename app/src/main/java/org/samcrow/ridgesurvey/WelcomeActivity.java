@@ -34,8 +34,6 @@ public class WelcomeActivity extends FragmentActivity {
         testModeButton = findViewById(R.id.buttonTestMode);
         resumeRouteDescription = findViewById(R.id.routeInformationView);
 
-
-
         // Look for a previous active route
         initResumableRoute();
 
