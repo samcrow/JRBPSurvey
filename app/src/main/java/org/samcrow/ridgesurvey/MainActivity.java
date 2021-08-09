@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
         mMap.getModel().displayModel.setFixedTileSize(256);
 
         // Start loading orthophoto images in the background
-        final TileFolderLoad loadTask = new TileFolderLoad(this, R.raw.tiles, "ortho_tiles",
+        final TileFolderLoad loadTask = new TileFolderLoad(this, R.raw.tiles, "ortho_tiles_v1",
                 "jpeg");
         loadTask.setDoneHandler(new DoneHandler() {
             @Override
