@@ -23,7 +23,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.samcrow.ridgesurvey">
 
-    <!-- Write external storage for tile cache -->
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -32,7 +32,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <activity android:name=".WelcomeActivity">
+        <activity
+            android:name=".WelcomeActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -46,13 +48,13 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity android:name=".DataEntryActivity"></activity>
+        <activity android:name=".DataEntryActivity" />
+        <activity android:name=".ObservationListActivity" />
+        <activity android:name=".ObservationEditActivity" />
 
-        <activity android:name=".ObservationListActivity"></activity>
-
-        <activity android:name=".ObservationEditActivity"></activity>
-
-        <receiver android:name=".data.NetworkBroadcastReceiver">
+        <receiver
+            android:name=".data.NetworkBroadcastReceiver"
+            android:exported="false">
             <intent-filter>
                 <!-- Try uploading/deleting when the network status changed -->
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
@@ -60,21 +62,25 @@
         </receiver>
         <service android:name=".data.UploadService" />
     </application>
+
+
+    <!-- Internet access for data upload -->
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+
     <!-- Location for navigation -->
     <uses-feature
         android:name="android.hardware.sensor.compass"
         android:required="false" />
-    <!-- Internet access for data upload -->
+
     <uses-feature
         android:name="android.hardware.touchscreen.multitouch "
         android:required="false" />
-
-    <uses-feature
-        android:name="android.hardware.location.gps"
-        android:required="false" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <!-- Write external storage for tile cache -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>
