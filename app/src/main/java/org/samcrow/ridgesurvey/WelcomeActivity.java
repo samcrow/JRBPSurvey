@@ -21,6 +21,7 @@ public class WelcomeActivity extends FragmentActivity {
     private Button testModeButton = null;
 
     private RouteState mResumableRoute = null;
+    private StartRouteDialogFragment mStartRouteDialog = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,7 +43,8 @@ public class WelcomeActivity extends FragmentActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new StartRouteDialogFragment().show(getSupportFragmentManager(), StartRouteDialogFragment.TAG);
+                mStartRouteDialog = new StartRouteDialogFragment();
+                mStartRouteDialog.show(getSupportFragmentManager(), StartRouteDialogFragment.TAG);
             }
         });
 
@@ -70,6 +72,11 @@ public class WelcomeActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         initResumableRoute();
+        // If the start route dialog is still visible from earlier, hide it
+        if (mStartRouteDialog != null) {
+            mStartRouteDialog.dismiss();
+            mStartRouteDialog = null;
+        }
     }
 
     private void initResumableRoute() {
