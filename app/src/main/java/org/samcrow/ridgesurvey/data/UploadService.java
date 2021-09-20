@@ -24,8 +24,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.SQLException;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.room.Room;
+
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
@@ -138,6 +140,16 @@ public class UploadService extends IntentService {
         return map;
     }
 
+    private static Map<String, String> formatSimpleTimedEvent(@NonNull SimpleTimedEvent event) {
+        Objects.requireNonNull(event);
+        final Map<String, String> map = new HashMap<>();
+
+        map.put("Time", ISODateTimeFormat.dateTime().print(event.getTime()));
+        map.put("Event", event.getName());
+
+        return map;
+    }
+
     /**
      * Determines if this observation should be uploaded
      *
@@ -165,6 +177,7 @@ public class UploadService extends IntentService {
 
         final ObservationDatabase db = new ObservationDatabase(this);
         final StartRouteDatabase startDb = new StartRouteDatabase(this);
+        final Database steDatabase = Room.databaseBuilder(this, Database.class, "events").build();
         try {
             // Part 1: Route start events
             while (true) {
@@ -177,7 +190,19 @@ public class UploadService extends IntentService {
                 startDb.deleteRouteState(routeState.mId);
             }
 
-            // Part 2: Observations
+            // Part 2: Simple timed events
+            while (true) {
+                final SimpleTimedEventDao dao = steDatabase.simpleTimedEventDao();
+                final SimpleTimedEvent event = dao.getOldest();
+                if (event == null) {
+                    break;
+                }
+                Log.d(TAG, "Trying to upload simple timed event " + event);
+                uploadSimpleTimedEvent(UPLOAD_URL, event);
+                dao.delete(event);
+            }
+
+            // Part 3: Observations
             final List<IdentifiedObservation> observations = db.getObservationsByTime();
             final DateTime deleteThreshold = DateTime.now().minus(DELETE_AGE);
 
@@ -323,6 +348,17 @@ public class UploadService extends IntentService {
         map.put("ROUTE", routeState.getRouteName());
 
         uploadGeneric(url, map);
+    }
+
+    private void uploadSimpleTimedEvent(@NonNull URL url, @NonNull SimpleTimedEvent event) throws ParseException, UploadException, IOException {
+        final Map<String, String> formData = formatSimpleTimedEvent(event);
+        // Add the tablet ID, if it was set up
+        final SharedPreferences prefs = getSharedPreferences("tablet_properties", MODE_PRIVATE);
+        final String tabletId = prefs.getString("tablet_id", null);
+        if (tabletId != null) {
+            formData.put("Tablet ID", tabletId);
+        }
+        uploadGeneric(url, formData);
     }
 
     private static class UploadException extends Exception {

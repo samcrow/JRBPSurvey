@@ -19,7 +19,7 @@
 
 package org.samcrow.ridgesurvey.data;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.joda.time.DateTime;
 import org.samcrow.ridgesurvey.Objects;

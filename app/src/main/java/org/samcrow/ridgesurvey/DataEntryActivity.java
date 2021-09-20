@@ -23,20 +23,12 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.samcrow.ridgesurvey.data.Observation;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
@@ -44,11 +36,10 @@ import org.samcrow.ridgesurvey.data.RouteState;
 import org.samcrow.ridgesurvey.data.UploadService;
 import org.samcrow.ridgesurvey.data.UploadStatusTracker;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /**
  * An activity that allows the user to enter information

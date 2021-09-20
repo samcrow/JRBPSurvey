@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2017 Sam Crow
   ~
   ~ This file is part of JRBP Survey.
@@ -18,9 +17,11 @@
   ~ along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<CheckBox android:id="@+id/species_check_box"
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="60dp"
-          android:layout_height="60dp"
-          android:background="?android:attr/listChoiceIndicatorMultiple"
-          android:button="@null"/>
+<CheckBox xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/species_check_box"
+    android:layout_width="wrap_content"
+    android:layout_height="60dp"
+    android:scaleX="2.5"
+    android:scaleY="2.5"
+    android:layout_marginLeft="15dp"
+    android:layout_marginRight="20dp"/>

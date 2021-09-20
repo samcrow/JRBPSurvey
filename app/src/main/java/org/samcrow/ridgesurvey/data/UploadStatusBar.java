@@ -20,7 +20,7 @@
 package org.samcrow.ridgesurvey.data;
 
 import android.content.Context;
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.view.View;
 

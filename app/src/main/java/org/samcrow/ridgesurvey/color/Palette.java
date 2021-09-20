@@ -20,8 +20,8 @@
 package org.samcrow.ridgesurvey.color;
 
 import android.graphics.Color;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 
 import org.samcrow.ridgesurvey.Objects;
 
