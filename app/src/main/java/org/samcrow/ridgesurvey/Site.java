@@ -21,7 +21,7 @@ package org.samcrow.ridgesurvey;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.mapsforge.core.model.LatLong;
 

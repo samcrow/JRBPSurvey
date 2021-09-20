@@ -23,7 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.SQLException;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.samcrow.ridgesurvey.Objects;
 import org.samcrow.ridgesurvey.data.UploadStatusListener.UploadState;

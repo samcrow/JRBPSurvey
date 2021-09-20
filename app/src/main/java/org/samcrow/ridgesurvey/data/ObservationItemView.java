@@ -21,19 +21,17 @@ package org.samcrow.ridgesurvey.data;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-import org.mapsforge.map.rendertheme.renderinstruction.Line;
 import org.samcrow.ridgesurvey.ObservationEditActivity;
 import org.samcrow.ridgesurvey.R;
 

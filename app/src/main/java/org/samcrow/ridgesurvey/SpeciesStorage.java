@@ -20,7 +20,7 @@
 package org.samcrow.ridgesurvey;
 
 import android.content.Context;
-import android.support.annotation.DrawableRes;
+import androidx.annotation.DrawableRes;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;

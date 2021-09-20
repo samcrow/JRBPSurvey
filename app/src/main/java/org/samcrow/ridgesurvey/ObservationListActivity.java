@@ -23,10 +23,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.SQLException;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AlertDialog.Builder;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +36,10 @@ import org.samcrow.ridgesurvey.data.ObservationListAdapter;
 import org.samcrow.ridgesurvey.data.UploadService;
 
 import java.util.List;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class ObservationListActivity extends AppCompatActivity {
 
@@ -87,7 +87,7 @@ public class ObservationListActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
 
-                new Builder(ObservationListActivity.this)
+                new AlertDialog.Builder(ObservationListActivity.this)
                         .setTitle(R.string.force_upload)
                         .setMessage(R.string.question_load_all_observations)
                         .setPositiveButton(android.R.string.ok, new OnClickListener() {

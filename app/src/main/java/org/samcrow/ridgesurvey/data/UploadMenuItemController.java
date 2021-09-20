@@ -20,13 +20,12 @@
 package org.samcrow.ridgesurvey.data;
 
 import android.content.Context;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import android.view.MenuItem;
 
 import org.samcrow.ridgesurvey.Objects;
 import org.samcrow.ridgesurvey.R;
-import org.samcrow.ridgesurvey.data.UploadStatusListener;
 
 /**
  * Controls a menu item that displays and controls the upload process

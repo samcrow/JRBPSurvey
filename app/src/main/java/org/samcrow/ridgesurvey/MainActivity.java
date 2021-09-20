@@ -30,22 +30,17 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.RawRes;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
+import android.widget.Toast;
 
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONException;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
@@ -66,10 +61,13 @@ import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.StreamRenderTheme;
 import org.mapsforge.map.rendertheme.XmlRenderTheme;
 import org.samcrow.ridgesurvey.color.Palette;
+import org.samcrow.ridgesurvey.data.Database;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
 import org.samcrow.ridgesurvey.data.RouteState;
+import org.samcrow.ridgesurvey.data.SimpleTimedEvent;
+import org.samcrow.ridgesurvey.data.SimpleTimedEventDao;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
 import org.samcrow.ridgesurvey.data.UploadService;
 import org.samcrow.ridgesurvey.data.UploadStatusListener;
@@ -88,29 +86,38 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RawRes;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.room.Room;
+
 public class MainActivity extends AppCompatActivity {
 
+    /**
+     * Key corresponding to a RouteState extra that must be provided when launching this activity
+     */
+    public static final String EXTRA_ROUTE_STATE = MainActivity.class.getName() + ".EXTRA_ROUTE_STATE";
     /**
      * A tag that identifies this class, used for logging and preferences
      */
     private static final String TAG = MainActivity.class.getSimpleName();
-
     /**
      * A permission request code used when requesting location permission
      */
     private static final int LOCATION_PERMISSION_CODE = 136;
-
     /**
      * A code used when starting a DataEntryActivity to get a result from it
      */
     private static final int REQUEST_CODE_ENTRY = 13393;
-
     /**
      * A code used when starting an ObservationListActivity (really used to get a callback when
      * the observation edit activity closes)
      */
     private static final int REQUEST_CODE_OBSERVATION_LIST = 13621;
-
     /**
      * The initial position of the map
      */
@@ -120,18 +127,15 @@ public class MainActivity extends AppCompatActivity {
      * The permission that allows the application to access the user's location
      */
     private static final String LOCATION_PERMISSION = "android.permission.ACCESS_FINE_LOCATION";
-
     private static final String SELECTED_SITE_KEY = MainActivity.class.getName() + ".SELECTED_SITE_KEY";
     /**
-     * Key corresponding to a RouteState extra that must be provided when launching this activity
+     * The executor that runs asynchronous layer site updates
      */
-    public static final String EXTRA_ROUTE_STATE = MainActivity.class.getName() + ".EXTRA_ROUTE_STATE";
-
+    private final ExecutorService mLayerUpdateExecutor = Executors.newSingleThreadExecutor();
     /**
      * The map view
      */
     private MapView mMap;
-
     /**
      * The preferences interface
      */
@@ -140,31 +144,24 @@ public class MainActivity extends AppCompatActivity {
      * The preferences facade (wrapping {@link #mPreferences} that the map view uses to save preferences
      */
     private PreferencesFacade mPreferencesFacade;
-
     /**
      * The location finder that gets heading information
      */
     private LocationFinder mLocationFinder;
-
     /**
      * The selection manager
      */
     private SelectionManager mSelectionManager;
-
     /**
      * The upload status tracker
      */
     private UploadStatusTracker mUploadStatusTracker;
-
-    /**
-     * The executor that runs asynchronous layer site updates
-     */
-    private final ExecutorService mLayerUpdateExecutor = Executors.newSingleThreadExecutor();
-
     /**
      * The active route / other information
      */
     private RouteState mRouteState;
+
+    private Database mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -241,6 +238,10 @@ public class MainActivity extends AppCompatActivity {
                     .show();
             Log.e(TAG, "Failed to set up map", e);
         }
+
+        mDatabase = Room.databaseBuilder(getApplicationContext(), Database.class, "events")
+                .allowMainThreadQueries()
+                .build();
 
         startUpload();
     }
@@ -372,13 +373,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Disable built-in zoom controls, unless running in an emulator or if the device
         // does not support basic multi-touch
-        if (Build.HARDWARE.equals("goldfish") || Build.HARDWARE.equals("ranchu")
+        mMap.setBuiltInZoomControls(Build.HARDWARE.equals("goldfish") || Build.HARDWARE.equals("ranchu")
                 || !(getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH))) {
-            mMap.setBuiltInZoomControls(true);
-        } else {
-            mMap.setBuiltInZoomControls(false);
-        }
+                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)));
 
         {
             // Load map with roads and trails
@@ -503,7 +500,34 @@ public class MainActivity extends AppCompatActivity {
             mUploadStatusTracker.addListener(controller);
         }
 
+        final MenuItem placeSensorItem = menu.findItem(R.id.home_item_place_sensor);
+        initSensorMenuItem(placeSensorItem, "Sensor placement time", "Sensor placed");
+        final MenuItem pickUpSensorItem = menu.findItem(R.id.home_item_pick_up_sensor);
+        initSensorMenuItem(pickUpSensorItem, "Sensor pickup time", "Sensor picked up");
+
         return true;
+    }
+
+    private void initSensorMenuItem(@NonNull MenuItem item, @NonNull String title, @NonNull String eventName) {
+        item.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                final TimePickerDialogFragment fragment = new TimePickerDialogFragment(title);
+                fragment.setOnTimePickedListener(new TimePickerDialogFragment.TimePickedListener() {
+                    @Override
+                    public void onTimePicked(@NonNull TimePickerDialogFragment fragment, @NonNull DateTime selectedDateTime) {
+                        final SimpleTimedEvent event = new SimpleTimedEvent(selectedDateTime, eventName);
+                        final SimpleTimedEventDao dao = mDatabase.simpleTimedEventDao();
+                        dao.insert(event);
+                        // Upload the new event if possible
+                        startUpload();
+                    }
+                });
+
+                fragment.show(getSupportFragmentManager(), title);
+                return true;
+            }
+        });
     }
 
     private void startObservationEditActivity(IdentifiedObservation observation) {

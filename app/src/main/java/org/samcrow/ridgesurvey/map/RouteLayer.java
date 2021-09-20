@@ -19,7 +19,7 @@
 
 package org.samcrow.ridgesurvey.map;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.mapsforge.core.graphics.Canvas;
 import org.mapsforge.core.graphics.Color;

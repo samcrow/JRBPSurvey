@@ -27,6 +27,16 @@
         android:id="@+id/upload_item"
         app:showAsAction="always" />
     <item
+        android:id="@+id/home_item_place_sensor"
+        android:icon="@drawable/outline_file_download_white_36"
+        android:title="Place sensor"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/home_item_pick_up_sensor"
+        android:icon="@drawable/outline_file_upload_white_36"
+        android:title="Pick up sensor"
+        app:showAsAction="ifRoom" />
+    <item
         android:icon="@drawable/ic_edit_white_24dp"
         android:title="@string/record_observation"
         android:id="@+id/edit_item"
