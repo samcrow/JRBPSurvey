@@ -358,6 +358,7 @@ public class UploadService extends IntentService {
         if (tabletId != null) {
             formData.put("Tablet ID", tabletId);
         }
+        formData.put("ROUTE", event.getRoute());
         uploadGeneric(url, formData);
     }
 
