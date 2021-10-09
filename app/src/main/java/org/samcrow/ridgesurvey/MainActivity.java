@@ -516,7 +516,9 @@ public class MainActivity extends AppCompatActivity {
                 fragment.setOnTimePickedListener(new TimePickerDialogFragment.TimePickedListener() {
                     @Override
                     public void onTimePicked(@NonNull TimePickerDialogFragment fragment, @NonNull DateTime selectedDateTime) {
-                        final SimpleTimedEvent event = new SimpleTimedEvent(selectedDateTime, eventName);
+                        final String activeRoute = mRouteState.getRouteName();
+
+                        final SimpleTimedEvent event = new SimpleTimedEvent(selectedDateTime, eventName, activeRoute);
                         final SimpleTimedEventDao dao = mDatabase.simpleTimedEventDao();
                         dao.insert(event);
                         // Upload the new event if possible

@@ -15,11 +15,14 @@ public class SimpleTimedEvent {
     private final String name;
     @NonNull
     private final DateTime time;
+    @NonNull
+    private final String route;
 
-    public SimpleTimedEvent(@NonNull DateTime time, @NonNull String name) {
+    public SimpleTimedEvent(@NonNull DateTime time, @NonNull String name, @NonNull String route) {
         this.id = 0;
         this.name = name;
         this.time = time;
+        this.route = route;
     }
 
     public int getId() {
@@ -39,12 +42,18 @@ public class SimpleTimedEvent {
         return time;
     }
 
+    @NonNull
+    public String getRoute() {
+        return route;
+    }
+
     @Override
     public String toString() {
         return "SimpleTimedEvent{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", time=" + time +
+                ", route='" + route + '\'' +
                 '}';
     }
 }
