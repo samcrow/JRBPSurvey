@@ -23,6 +23,8 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#CE3E12</color>
 
+    <color name="testModeToolbar">#0A0E0A</color>
+
     <!-- StatusBar colors -->
     <color name="status_bar_ok">#09A129</color>
     <color name="status_bar_need_upload">#F7B32B</color>

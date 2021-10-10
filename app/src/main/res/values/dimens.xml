@@ -27,4 +27,5 @@
     <dimen name="start_route_text_min_height">60dp</dimen>
     <dimen name="welcome_divider_height">2dp</dimen>
     <dimen name="welcome_divider_v_margin">20dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 </resources>
