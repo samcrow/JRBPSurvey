@@ -1,5 +1,6 @@
 package org.samcrow.ridgesurvey;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
@@ -25,10 +26,9 @@ public class MyTimedEventRecyclerViewAdapter extends RecyclerView.Adapter<MyTime
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
+    @NonNull
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(FragmentItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-
     }
 
     @SuppressLint("SetTextI18n")
@@ -47,7 +47,7 @@ public class MyTimedEventRecyclerViewAdapter extends RecyclerView.Adapter<MyTime
         return mEvents.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView mIdView;
         public final TextView mContentView;
         public SimpleTimedEvent mItem;
@@ -59,6 +59,7 @@ public class MyTimedEventRecyclerViewAdapter extends RecyclerView.Adapter<MyTime
         }
 
         @Override
+        @NonNull
         public String toString() {
             return super.toString() + " '" + mContentView.getText() + "'";
         }
