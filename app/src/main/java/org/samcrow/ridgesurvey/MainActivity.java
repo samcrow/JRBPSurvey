@@ -26,6 +26,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.graphics.Picture;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
@@ -34,12 +35,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.View;
 import android.widget.Toast;
 
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONException;
 import org.mapsforge.core.model.LatLong;
@@ -92,6 +98,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.room.Room;
 
@@ -188,6 +196,12 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        if (mRouteState.isTestMode()) {
+            setTitle("Map - Test Mode");
+        } else {
+            setTitle(String.format("%s - %s", getString(R.string.map), mRouteState.getRouteName()));
+        }
+
         // Check location permission
         final int permission = ActivityCompat.checkSelfPermission(this, LOCATION_PERMISSION);
         if (permission == PackageManager.PERMISSION_DENIED) {
@@ -203,6 +217,12 @@ public class MainActivity extends AppCompatActivity {
         final ActionBar bar = getSupportActionBar();
         if (bar != null) {
             bar.setDisplayHomeAsUpEnabled(true);
+            if (mRouteState.isTestMode()) {
+                final int color = getResources().getColor(R.color.testModeToolbar);
+                bar.setBackgroundDrawable(new ColorDrawable(color));
+                final View timerFragment = findViewById(R.id.timer_fragment);
+                timerFragment.setBackgroundColor(color);
+            }
         }
 
         mSelectionManager = new SelectionManager();
@@ -505,6 +525,16 @@ public class MainActivity extends AppCompatActivity {
         final MenuItem pickUpSensorItem = menu.findItem(R.id.home_item_pick_up_sensor);
         initSensorMenuItem(pickUpSensorItem, "Sensor pickup time", "Sensor picked up");
 
+        final MenuItem viewEventsItem = menu.findItem(R.id.view_events_item);
+        viewEventsItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                final TimedEventFragment fragment = TimedEventFragment.newInstance();
+                fragment.show(getSupportFragmentManager(), "timed events");
+                return true;
+            }
+        });
+
         return true;
     }
 
@@ -523,6 +553,14 @@ public class MainActivity extends AppCompatActivity {
                         dao.insert(event);
                         // Upload the new event if possible
                         startUpload();
+
+                        final String timeString = DateTimeFormat.shortTime().print(selectedDateTime);
+                        final Snackbar bar = Snackbar.make(
+                                mMap,
+                                String.format("Recorded \"%s\" at %s",eventName, timeString),
+                                BaseTransientBottomBar.LENGTH_LONG
+                        );
+                        bar.show();
                     }
                 });
 
