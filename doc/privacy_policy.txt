@@ -1,0 +1,26 @@
+Jasper Ridge Survey privacy policy
+
+Last updated: 2021-10-28
+
+Information collected
+
+When you use the Jasper Ridge Survey application, it collects the following information:
+
+* Your name, the tablet ID, the route name, and the sensor ID that you enter when starting a route
+* The date and time of each sensor placement and sensor pickup event that you enter
+* The date, time, route name, ant species, and any notes you enter for every observation
+  that you record
+
+The application uses your location only to display it on the map. The application never
+sends your location information off the device it is running on.
+
+Information handling
+
+The information collected is stored in a database accessible to a few people who
+manage the survey process. We use the information to verify the integrity of
+the observations, and we may contact users to ask questions about the observations
+they have entered.
+
+Information about which species were found at different survey locations may be
+shared publicly and analyzed. This shared information does not include your name or
+any other personally identifying information.
