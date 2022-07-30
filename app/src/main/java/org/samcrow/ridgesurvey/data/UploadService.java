@@ -146,6 +146,7 @@ public class UploadService extends IntentService {
 
         map.put("Time", ISODateTimeFormat.dateTime().print(event.getTime()));
         map.put("Event", event.getName());
+        map.put("ROUTE", event.getRoute());
 
         return map;
     }
