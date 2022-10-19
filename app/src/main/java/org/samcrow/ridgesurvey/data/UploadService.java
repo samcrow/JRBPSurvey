@@ -27,6 +27,8 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.room.Room;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import android.util.Log;
 
@@ -178,7 +180,14 @@ public class UploadService extends IntentService {
 
         final ObservationDatabase db = new ObservationDatabase(this);
         final StartRouteDatabase startDb = new StartRouteDatabase(this);
-        final Database steDatabase = Room.databaseBuilder(this, Database.class, "events").build();
+        final Database steDatabase = Room.databaseBuilder(this, Database.class, "events")
+                .addMigrations(new Migration(1, 2) {
+                    @Override
+                    public void migrate(@NonNull SupportSQLiteDatabase database) {
+                        database.execSQL("ALTER TABLE SimpleTimedEvent ADD COLUMN `route` TEXT NOT NULL DEFAULT ''");
+                    }
+                })
+                .build();
         try {
             // Part 1: Route start events
             while (true) {

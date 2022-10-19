@@ -27,8 +27,8 @@ android {
         applicationId "org.samcrow.jrbpsurvey"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 21
-        versionName "1.7.1"
+        versionCode 23
+        versionName "1.7.3"
 
         javaCompileOptions {
             annotationProcessorOptions {

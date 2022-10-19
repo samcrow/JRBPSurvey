@@ -4,6 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/JRBPSurvey.iml" filepath="$PROJECT_DIR$/JRBPSurvey.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/JRBPSurvey.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/JRBPSurvey.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/JRBPSurvey.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/JRBPSurvey.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/JRBPSurvey.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/JRBPSurvey.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/JRBPSurvey.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/JRBPSurvey.app.unitTest.iml" />
     </modules>
   </component>
 </project>
