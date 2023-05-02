@@ -29,7 +29,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
- * An observation that exists in a database and has an identifer
+ * An observation that exists in a database and has an identifier
  */
 public class IdentifiedObservation extends Observation implements Parcelable {
 
@@ -48,7 +48,6 @@ public class IdentifiedObservation extends Observation implements Parcelable {
 
     /**
      * Returns the ID of this observation
-     * @return
      */
     public int getId() {
         return mId;
