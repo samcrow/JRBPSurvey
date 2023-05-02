@@ -25,7 +25,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import androidx.annotation.NonNull;
 import android.util.Log;
 
 import org.joda.time.DateTime;
@@ -41,12 +40,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+
 /**
  * Stores {@link Observation} objects in local persistent storage
  */
 public final class ObservationDatabase {
-    private static final String TAG = ObservationDatabase.class.getSimpleName();
     public static final String TABLE_NAME = "observations";
+    private static final String TAG = ObservationDatabase.class.getSimpleName();
     /*
      * Schema:
      * id: Observation ID, INTEGER PRIMARY KEY
@@ -57,8 +58,8 @@ public final class ObservationDatabase {
      * species: JSON-formatted map from column name to boolean present, TEXT
      * notes: Notes, TEXT
      * test_mode: 1/0 recorded in test mode or not, INTEGER
+     * observed: 1/0 observed or not, INTEGER
      */
-
     /**
      * The open helper used to access the database
      */
@@ -73,6 +74,89 @@ public final class ObservationDatabase {
     public ObservationDatabase(@NonNull Context context) {
         Objects.requireNonNull(context);
         mOpenHelper = new ObservationOpenHelper(context);
+    }
+
+    private static ContentValues createContentValues(@NonNull Observation observation) {
+        final ContentValues values = new ContentValues();
+        values.put("uploaded", observation.isUploaded() ? 1 : 0);
+        values.put("site", observation.getSiteId());
+        values.put("route", observation.getRouteName());
+
+        final DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
+        values.put("time", formatter.print(observation.getTime()));
+
+        // Convert species to JSON
+        final JSONObject species = new JSONObject();
+        try {
+            for (Map.Entry<String, Boolean> entry : observation.getSpecies().entrySet()) {
+                species.put(entry.getKey(), entry.getValue().booleanValue());
+            }
+            values.put("species", species.toString(0));
+        } catch (JSONException e) {
+            final SQLException e1 = new SQLException("JSON problem");
+            //noinspection UnnecessaryInitCause (the cause constructor requires API 16)
+            e1.initCause(e);
+            throw e1;
+        }
+
+        values.put("notes", observation.getNotes());
+        values.put("test_mode", observation.isTest());
+        values.put("observed", observation.isObserved());
+
+        return values;
+    }
+
+    private static IdentifiedObservation createObservation(Cursor result) throws SQLException {
+        final int idIndex = result.getColumnIndexOrThrow("id");
+        final int uploadedIndex = result.getColumnIndexOrThrow("uploaded");
+        final int siteIndex = result.getColumnIndexOrThrow("site");
+        final int routeIndex = result.getColumnIndexOrThrow("route");
+        final int timeIndex = result.getColumnIndexOrThrow("time");
+        final int speciesIndex = result.getColumnIndexOrThrow("species");
+        final int notesIndex = result.getColumnIndexOrThrow("notes");
+        final int testModeIndex = result.getColumnIndexOrThrow("test_mode");
+        final int observedIndex = result.getColumnIndexOrThrow("observed");
+
+        final int id = result.getInt(idIndex);
+        final boolean uploaded = result.getInt(uploadedIndex) == 1;
+
+        final int site = result.getInt(siteIndex);
+        final String route = result.getString(routeIndex);
+
+        final DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
+        final String timeString = result.getString(timeIndex);
+        DateTime time;
+        try {
+            time = formatter.parseDateTime(timeString);
+        } catch (IllegalArgumentException e) {
+            final SQLException e1 = new SQLException("Invalid date/time value: " + timeString);
+            //noinspection UnnecessaryInitCause
+            e1.initCause(e);
+            throw e1;
+        }
+
+        final String speciesJson = result.getString(speciesIndex);
+
+        final Map<String, Boolean> speciesPresent = new HashMap<>();
+        // Try to parse
+        try {
+            final JSONObject species = new JSONObject(speciesJson);
+            for (Iterator<String> iter = species.keys(); iter.hasNext(); ) {
+                final String speciesName = iter.next();
+                final boolean present = species.getBoolean(speciesName);
+                speciesPresent.put(speciesName, present);
+            }
+        } catch (JSONException e) {
+            final SQLException e1 = new SQLException("Species JSON could not be parsed", e);
+            throw e1;
+        }
+
+        final String notes = result.getString(notesIndex);
+
+        final boolean testMode = result.getInt(testModeIndex) != 0;
+        final boolean observed = result.getInt(observedIndex) != 0;
+
+        return new IdentifiedObservation(time, uploaded, site, route, speciesPresent, notes, id, observed, testMode);
     }
 
     /**
@@ -107,36 +191,6 @@ public final class ObservationDatabase {
             db.close();
         }
     }
-
-    private static ContentValues createContentValues(@NonNull Observation observation) {
-        final ContentValues values = new ContentValues();
-        values.put("uploaded", observation.isUploaded() ? 1 : 0);
-        values.put("site", observation.getSiteId());
-        values.put("route", observation.getRouteName());
-
-        final DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
-        values.put("time", formatter.print(observation.getTime()));
-
-        // Convert species to JSON
-        final JSONObject species = new JSONObject();
-        try {
-            for (Map.Entry<String, Boolean> entry : observation.getSpecies().entrySet()) {
-                species.put(entry.getKey(), entry.getValue().booleanValue());
-            }
-            values.put("species", species.toString(0));
-        } catch (JSONException e) {
-            final SQLException e1 = new SQLException("JSON problem");
-            //noinspection UnnecessaryInitCause (the cause constructor requires API 16)
-            e1.initCause(e);
-            throw e1;
-        }
-
-        values.put("notes", observation.getNotes());
-        values.put("test_mode", observation.isTest());
-
-        return values;
-    }
-
 
     /**
      * Loads and returns one observation from the database
@@ -224,57 +278,6 @@ public final class ObservationDatabase {
         return observations;
     }
 
-    private static IdentifiedObservation createObservation(Cursor result) throws SQLException {
-        final int idIndex = result.getColumnIndexOrThrow("id");
-        final int uploadedIndex = result.getColumnIndexOrThrow("uploaded");
-        final int siteIndex = result.getColumnIndexOrThrow("site");
-        final int routeIndex = result.getColumnIndexOrThrow("route");
-        final int timeIndex = result.getColumnIndexOrThrow("time");
-        final int speciesIndex = result.getColumnIndexOrThrow("species");
-        final int notesIndex = result.getColumnIndexOrThrow("notes");
-        final int testModeIndex = result.getColumnIndexOrThrow("test_mode");
-
-        final int id = result.getInt(idIndex);
-        final boolean uploaded = result.getInt(uploadedIndex) == 1;
-
-        final int site = result.getInt(siteIndex);
-        final String route = result.getString(routeIndex);
-
-        final DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
-        final String timeString = result.getString(timeIndex);
-        DateTime time;
-        try {
-            time = formatter.parseDateTime(timeString);
-        } catch (IllegalArgumentException e) {
-            final SQLException e1 = new SQLException("Invalid date/time value: " + timeString);
-            //noinspection UnnecessaryInitCause
-            e1.initCause(e);
-            throw e1;
-        }
-
-        final String speciesJson = result.getString(speciesIndex);
-
-        final Map<String, Boolean> speciesPresent = new HashMap<>();
-        // Try to parse
-        try {
-            final JSONObject species = new JSONObject(speciesJson);
-            for (Iterator<String> iter = species.keys(); iter.hasNext(); ) {
-                final String speciesName = iter.next();
-                final boolean present = species.getBoolean(speciesName);
-                speciesPresent.put(speciesName, present);
-            }
-        } catch (JSONException e) {
-            final SQLException e1 = new SQLException("Species JSON could not be parsed", e);
-            throw e1;
-        }
-
-        final String notes = result.getString(notesIndex);
-
-        final boolean testMode = result.getInt(testModeIndex) != 0;
-
-        return new IdentifiedObservation(time, uploaded, site, route, speciesPresent, notes, id, testMode);
-    }
-
     /**
      * Deletes an observation from the database. Has no effect if the database does not have an
      * observation equal to the provided observation.
@@ -299,10 +302,29 @@ public final class ObservationDatabase {
 
         private static final String NAME = "observations";
 
-        private static final int VERSION = 3;
+        private static final int VERSION = 4;
 
         ObservationOpenHelper(Context context) {
             super(context, NAME, null, VERSION);
+        }
+
+        /**
+         * Returns the create table syntax for the table with the specified name
+         *
+         * @param tableName the name of the table to create
+         * @return SQL to create the table
+         */
+        private static String createSyntax(String tableName) {
+            return "CREATE TABLE " + tableName + " (" +
+                    "id INTEGER NOT NULL PRIMARY KEY, " +
+                    "uploaded INTEGER NOT NULL DEFAULT 0 CHECK (uploaded = 0 OR uploaded = 1), " +
+                    "site INTEGER NOT NULL, " +
+                    "route TEXT NOT NULL, " +
+                    "time TEXT NOT NULL, " +
+                    "species TEXT NOT NULL, " +
+                    "notes TEXT NOT NULL," +
+                    "test_mode INTEGER NOT NULL DEFAULT 0 CHECK (test_mode = 0 OR test_mode = 1)," +
+                    "observed INTEGER NOT NULL DEFAULT 0 CHECK (observed = 0 OR observed = 1) )";
         }
 
         @Override
@@ -327,27 +349,12 @@ public final class ObservationDatabase {
             } else if (oldVersion == 2 && newVersion == 3) {
                 db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " +
                         "test_mode INTEGER NOT NULL DEFAULT 0 CHECK (test_mode = 0 OR test_mode = 1)");
+            } else if (oldVersion == 3 && newVersion == 4) {
+                db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " +
+                        "observed INTEGER NOT NULL DEFAULT 0 CHECK (observed = 0 OR observed = 1)");
             } else {
                 throw new RuntimeException("Unsupported combination of database versions");
             }
-        }
-
-        /**
-         * Returns the create table syntax for the table with the specified name
-         *
-         * @param tableName the name of the table to create
-         * @return SQL to create the table
-         */
-        private static String createSyntax(String tableName) {
-            return "CREATE TABLE " + tableName + " (" +
-                    "id INTEGER NOT NULL PRIMARY KEY, " +
-                    "uploaded INTEGER NOT NULL DEFAULT 0 CHECK (uploaded = 0 OR uploaded = 1), " +
-                    "site INTEGER NOT NULL, " +
-                    "route TEXT NOT NULL, " +
-                    "time TEXT NOT NULL, " +
-                    "species TEXT NOT NULL, " +
-                    "notes TEXT NOT NULL," +
-                    "test_mode INTEGER NOT NULL DEFAULT 0 CHECK (test_mode = 0 OR test_mode = 1) )";
         }
     }
 }

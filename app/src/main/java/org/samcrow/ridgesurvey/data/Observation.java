@@ -62,6 +62,13 @@ public class Observation {
     private final Map<String, Boolean> mSpecies;
 
     /**
+     * If someone was able to observe this site
+     *
+     * If this is false, mSpecies must be empty.
+     */
+    private final boolean mObserved;
+
+    /**
      * If the observation was recorded in test mode
      */
     private final boolean mTest;
@@ -73,7 +80,7 @@ public class Observation {
     private final String mNotes;
 
     public Observation(@NonNull DateTime time, boolean uploaded, int siteId, @NonNull String routeName,
-                       @NonNull Map<String, Boolean> species, @NonNull String notes, boolean test) {
+                       @NonNull Map<String, Boolean> species, @NonNull String notes, boolean observed, boolean test) {
         Objects.requireAllNonNull(time, routeName, species, notes);
         for (Boolean value : species.values()) {
             Objects.requireNonNull(value);
@@ -84,6 +91,7 @@ public class Observation {
         mRouteName = routeName;
         mSpecies = new HashMap<>(species);
         mNotes = notes;
+        mObserved = observed;
         mTest = test;
     }
 
@@ -117,5 +125,9 @@ public class Observation {
 
     public boolean isTest() {
         return mTest;
+    }
+
+    public boolean isObserved() {
+        return mObserved;
     }
 }

@@ -61,6 +61,8 @@ public class ObservationEditActivity extends ObservationActivity {
         }
 
         // Set up user interface based on the observation
+        mObservedSwitch.setChecked(mObservation.isObserved());
+
         final Map<String, Boolean> species = mObservation.getSpecies();
         for (int i = 0; i < mSpeciesContainer.getChildCount(); i++) {
             final View child = mSpeciesContainer.getChildAt(i);
@@ -95,19 +97,24 @@ public class ObservationEditActivity extends ObservationActivity {
     }
 
     private void submit() {
+        final boolean observed = mObservedSwitch.isChecked();
         // Collect species data
         final Map<String, Boolean> speciesData = mObservation.getSpecies();
-        for (int i = 0; i < mSpeciesContainer.getChildCount(); i++) {
-            final View view = mSpeciesContainer.getChildAt(i);
-            if (view instanceof SpeciesView && !isNoSpeciesView((SpeciesView) view)) {
-                final SpeciesView speciesView = (SpeciesView) view;
-                speciesData.put(speciesView.getSpecies().getColumn(), speciesView.isChecked());
+        if (observed) {
+            for (int i = 0; i < mSpeciesContainer.getChildCount(); i++) {
+                final View view = mSpeciesContainer.getChildAt(i);
+                if (view instanceof SpeciesView && !isNoSpeciesView((SpeciesView) view)) {
+                    final SpeciesView speciesView = (SpeciesView) view;
+                    speciesData.put(speciesView.getSpecies().getColumn(), speciesView.isChecked());
+                }
             }
+        } else {
+            speciesData.clear();
         }
         final String notes = mNotesField.getText().toString();
 
         final IdentifiedObservation edited = new IdentifiedObservation(DateTime.now(), false, mObservation.getSiteId(), mObservation.getRouteName(),
-                speciesData, notes, mObservation.getId(), mObservation.isTest());
+                speciesData, notes, mObservation.getId(), observed, mObservation.isTest());
 
         // Store
         try {

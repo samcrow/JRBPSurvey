@@ -124,6 +124,7 @@ public class UploadService extends IntentService {
         map.put("Time", ISODateTimeFormat.dateTime().print(observation.getTime()));
         map.put("Event", "Observation");
         map.put("Test mode", observation.isTest() ? "1" : "0");
+        map.put("Observed", observation.isObserved() ? "1" : "0");
         map.put("ROUTE", observation.getRouteName());
         map.put("SURVEY LOCATION", Integer.toString(observation.getSiteId()));
 
@@ -226,7 +227,7 @@ public class UploadService extends IntentService {
                     final IdentifiedObservation uploaded = new IdentifiedObservation(
                             observation.getTime(), true, observation.getSiteId(),
                             observation.getRouteName(), observation.getSpecies(),
-                            observation.getNotes(), observation.getId(), observation.isTest());
+                            observation.getNotes(), observation.getId(), observation.isObserved(), observation.isTest());
                     db.updateObservation(uploaded);
                 } else if (!observation.isUploaded()) {
                     Log.d(TAG, "Not uploading observation " + observation.getId() + " because it is not old enough");

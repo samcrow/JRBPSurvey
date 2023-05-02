@@ -122,20 +122,23 @@ public class DataEntryActivity extends ObservationActivity {
     }
 
     private void submit() {
+        final boolean observed = mObservedSwitch.isChecked();
         // Collect species data
         final Map<String, Boolean> speciesData = new HashMap<>();
-        for (int i = 0; i < mSpeciesContainer.getChildCount(); i++) {
-            final View view = mSpeciesContainer.getChildAt(i);
-            if (view instanceof SpeciesView && !isNoSpeciesView((SpeciesView) view)) {
-                final SpeciesView speciesView = (SpeciesView) view;
-                speciesData.put(speciesView.getSpecies().getColumn(), speciesView.isChecked());
+        if (observed) {
+            for (int i = 0; i < mSpeciesContainer.getChildCount(); i++) {
+                final View view = mSpeciesContainer.getChildAt(i);
+                if (view instanceof SpeciesView && !isNoSpeciesView((SpeciesView) view)) {
+                    final SpeciesView speciesView = (SpeciesView) view;
+                    speciesData.put(speciesView.getSpecies().getColumn(), speciesView.isChecked());
+                }
             }
         }
         final String notes = mNotesField.getText().toString();
 
         final boolean testMode = mRouteState.isTestMode();
         final Observation observation = new Observation(DateTime.now(), false, mSite.getId(), mRouteName,
-                speciesData, notes, testMode);
+                speciesData, notes, observed, testMode);
 
         // Store
         try {

@@ -19,8 +19,7 @@
   ~ along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<ScrollView
-    android:id="@+id/scrollView"
+<ScrollView android:id="@+id/scrollView"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -42,11 +41,20 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin">
 
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/observed_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:checked="true"
+            android:text="@string/observed"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
         <LinearLayout
             android:id="@+id/species_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"/>
+            android:orientation="vertical" />
 
         <EditText
             android:id="@+id/notes_field"
@@ -54,6 +62,9 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="@string/notes"
-            android:inputType="textMultiLine|textCapSentences"/>
+            android:inputType="textMultiLine|textCapSentences"
+            android:minHeight="48dp"
+            android:importantForAutofill="no"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
     </LinearLayout>
 </ScrollView>

@@ -25,6 +25,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -52,6 +53,11 @@ public abstract class ObservationActivity extends AppCompatActivity {
      * The group that contains the SpeciesViews and potentially other views
      */
     protected ViewGroup mSpeciesContainer;
+
+    /**
+     * The switch used to select whether the site was observed
+     */
+    protected CompoundButton mObservedSwitch;
     /**
      * The field used to enter notes
      */
@@ -101,6 +107,14 @@ public abstract class ObservationActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        mObservedSwitch = findViewById(R.id.observed_switch);
+        mObservedSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                mSpeciesContainer.setVisibility(View.VISIBLE);
+            } else {
+                mSpeciesContainer.setVisibility(View.GONE);
+            }
+        });
         mNotesField = findViewById(R.id.notes_field);
 
 
