@@ -21,16 +21,16 @@ package org.samcrow.ridgesurvey;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 
 import org.mapsforge.core.model.LatLong;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
 
 /**
  * Requests and provides location information
@@ -45,40 +45,26 @@ public class LocationFinder {
      * Minimum movement between location updates, in meters
      */
     private static final float MIN_DISTANCE = 0.0f;
-
-    public interface LocationListener {
-        /**
-         * Called when a new location is received
-         * @param position the location
-         * @param accuracy the approximate accuracy of the location, in meters
-         */
-        void newLocation(@NonNull LatLong position, double accuracy);
-    }
-
     /**
      * The context
      */
     @NonNull
     private final Context mContext;
-
     /**
      * The location manager that provides access to location services
      */
     @NonNull
     private final LocationManager mLocationManager;
-
     /**
      * The location listener that receives updates
      */
     @NonNull
     private final android.location.LocationListener mLocationListener;
-
     /**
      * The location listeners that get notified with new locations
      */
     @NonNull
     private final Set<LocationListener> mListeners;
-
     /**
      * If location updates are currently enabled
      */
@@ -94,18 +80,8 @@ public class LocationFinder {
     }
 
     private void requestLocation() throws SecurityException {
-        final Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        final String providerName = mLocationManager.getBestProvider(criteria, true);
-        if (providerName != null) {
-            // Found provider
-            final Location lastLocation = mLocationManager.getLastKnownLocation(providerName);
-            if (lastLocation != null) {
-                notifyListeners(lastLocation);
-            }
-            mLocationManager.requestLocationUpdates(providerName, MIN_TIME, MIN_DISTANCE,
-                    mLocationListener);
-        }
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DISTANCE,
+                mLocationListener);
     }
 
     /**
@@ -153,6 +129,15 @@ public class LocationFinder {
         }
     }
 
+    public interface LocationListener {
+        /**
+         * Called when a new location is received
+         *
+         * @param position the location
+         * @param accuracy the approximate accuracy of the location, in meters
+         */
+        void newLocation(@NonNull LatLong position, double accuracy);
+    }
 
     private class MyLocationListener implements android.location.LocationListener {
 
