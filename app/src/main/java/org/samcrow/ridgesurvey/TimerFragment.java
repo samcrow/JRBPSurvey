@@ -20,6 +20,7 @@
 package org.samcrow.ridgesurvey;
 
 
+import android.app.Activity;
 import android.app.Notification;
 import android.content.ContentResolver;
 import android.net.Uri;
@@ -29,6 +30,7 @@ import androidx.core.app.NotificationCompat.Builder;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -150,10 +152,16 @@ public class TimerFragment extends Fragment {
             mTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
+                    final Activity activity = getActivity();
+                    if (activity == null) {
+                        Log.w(TAG, "Activity gone, canceling timer");
+                        mTimer.cancel();
+                        return;
+                    }
                     final Duration newDuration = mCurrentDuration.plus(Duration.standardSeconds(1));
                     mCurrentDuration = newDuration;
 
-                    getActivity().runOnUiThread(new Runnable() {
+                    activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             showTime(newDuration);
@@ -161,7 +169,7 @@ public class TimerFragment extends Fragment {
                     });
 
                     if (newDuration.isEqual(HALF_PERIOD)) {
-                        getActivity().runOnUiThread(new Runnable() {
+                        activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 notifyHalfPeriod();
@@ -171,7 +179,7 @@ public class TimerFragment extends Fragment {
 
                     if (newDuration.isEqual(COUNT_UP_PERIOD) || newDuration.isLongerThan(COUNT_UP_PERIOD)) {
                         mTimer.cancel();
-                        getActivity().runOnUiThread(new Runnable() {
+                        activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 notifyStopped();

@@ -110,8 +110,14 @@ public class LocationFinder {
                 // TODO: Request permission?
                 new AlertDialog.Builder(mContext)
                         .setTitle("Location not available")
-                        .setMessage(
-                                "Please give the application permission to access your location")
+                        .setMessage("Please give the application permission to access your location")
+                        .setNeutralButton(android.R.string.ok, null)
+                        .show();
+            } catch (IllegalArgumentException e) {
+                new AlertDialog.Builder(mContext)
+                        .setTitle("GPS location provider not available")
+                        .setMessage("Please enable GPS")
+                        .setNeutralButton(android.R.string.ok, null)
                         .show();
             }
         }
