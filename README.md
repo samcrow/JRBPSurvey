@@ -18,9 +18,6 @@ The current version uploads data to the spreadsheet at <https://docs.google.com/
 Documentation files (in the `doc` folder) are licensed under the GNU Free Documentation License,
 version 1.3 ([GFDL.txt](GFDL.txt)).
 
-Other files in the project are licensed under the GNU General Public
-License, version 3.0 or (at your option) any later version ([GPL.txt](GPL.txt)).
-
 The source code of this project is available at
 [https://github.com/samcrow/JRBPSurvey](https://github.com/samcrow/JRBPSurvey).
 
@@ -44,6 +41,3 @@ licensed under the [Apache License, version 2.0](http://www.joda.org/joda-time/l
 
 This software uses the [Apache Commons IO](https://commons.apache.org/proper/commons-io/) library,
 which is licensed under the [Apache License, version 2.0](http://www.joda.org/joda-time/license.html).
-
-This software uses the [Jcoord](http://www.jstott.me.uk/jcoord/) library, which is licensed under
-the [GNU General Public License, version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).

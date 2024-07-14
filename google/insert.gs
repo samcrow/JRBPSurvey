@@ -1,23 +1,4 @@
 /*
- * Copyright 2016 Sam Crow
- *
- * This file is part of JRBP Survey.
- *
- * JRBP Survey is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * JRBP Survey is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/*
  * This Google script accepts key/value pairs from an HTTP POST request and inserts them into the first sheet of a spreadsheet.
  *
  * The script looks for headers in row 1 of the spreadsheet. For each HTTP POST parameter that matches a header,

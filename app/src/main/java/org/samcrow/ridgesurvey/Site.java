@@ -1,22 +1,3 @@
-/*
- * Copyright 2017 Sam Crow
- *
- * This file is part of JRBP Survey.
- *
- * JRBP Survey is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * JRBP Survey is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JRBP Survey.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package org.samcrow.ridgesurvey;
 
 import android.os.Parcel;
@@ -24,9 +5,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 import org.mapsforge.core.model.LatLong;
-
-import uk.me.jstott.jcoord.LatLng;
-import uk.me.jstott.jcoord.UTMRef;
+import org.samcrow.utm.ConvertedLatLon;
 
 /**
  * Represents a site that can be visited
@@ -58,16 +37,15 @@ public final class Site implements Parcelable {
 
     /**
      * Creates a Site with a position converted from UTM coordinates
-     * @param latZone the UTM latitude zone
+     * @param hemisphere the hemisphere of the coordinates
      * @param longZone the UTM longitude zone
      * @param easting the east coordinate, in meters
      * @param northing the west coordinate, in meters
      * @return a Site at the provided location
      */
-    public static Site fromUtm(char latZone, int longZone, double easting, double northing, int id) {
-        final UTMRef utm = new UTMRef(easting, northing, latZone, longZone);
-        final LatLng ll = utm.toLatLng();
-        return new Site(new LatLong(ll.getLat(), ll.getLng()), id);
+    public static Site fromUtm(ConvertedLatLon.Hemisphere hemisphere, int longZone, double easting, double northing, int id) {
+        final ConvertedLatLon converted = ConvertedLatLon.Companion.fromUtm(hemisphere, longZone, easting, northing);
+        return new Site(new LatLong(converted.getLatitude(), converted.getLongitude()), id);
     }
 
     /**
