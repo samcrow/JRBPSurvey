@@ -46,12 +46,19 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONException;
+import org.maplibre.android.MapLibre;
+import org.maplibre.android.camera.CameraPosition;
+import org.maplibre.android.geometry.LatLng;
+import org.maplibre.android.geometry.LatLngBounds;
+import org.maplibre.android.maps.MapView;
+import org.maplibre.android.maps.Style;
+import org.maplibre.android.style.layers.RasterLayer;
+import org.maplibre.android.style.sources.RasterSource;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.util.AndroidPreferences;
 import org.mapsforge.map.android.util.AndroidUtil;
-import org.mapsforge.map.android.view.MapView;
 import org.mapsforge.map.layer.Layer;
 import org.mapsforge.map.layer.LayerManager;
 import org.mapsforge.map.layer.cache.InMemoryTileCache;
@@ -208,6 +215,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Set up map graphics
+        MapLibre.getInstance(this);
         AndroidGraphicFactory.createInstance(getApplication());
 
         setContentView(R.layout.activity_main);
@@ -265,10 +273,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        mMap.onStart();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
+        mMap.onPause();
+
         if (mMap != null && mPreferencesFacade != null) {
-            mMap.getModel().save(mPreferencesFacade);
+//            mMap.getModel().save(mPreferencesFacade);
             mPreferencesFacade.save();
         }
 
@@ -290,9 +306,28 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        mMap.onResume();
         if (mLocationFinder != null) {
             mLocationFinder.resume();
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mMap.onStop();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMap.onLowMemory();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mMap.onSaveInstanceState(outState);
     }
 
     @Override
@@ -317,148 +352,161 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param tileFolder the folder to get tiles from
      */
-    private void addOrthophotos(@NonNull TileFolder tileFolder) {
-        final TileCache orthoCache = new TwoLevelTileCache(new InMemoryTileCache(512), tileFolder);
-        final Model model = mMap.getModel();
-        final TileStoreLayer orthoLayer = new TileStoreLayer(orthoCache, model.mapViewPosition,
-                AndroidGraphicFactory.INSTANCE, false);
+//    private void addOrthophotos(@NonNull TileFolder tileFolder) {
+//        final TileCache orthoCache = new TwoLevelTileCache(new InMemoryTileCache(512), tileFolder);
+//        final Model model = mMap.getModel();
+//        final TileStoreLayer orthoLayer = new TileStoreLayer(orthoCache, model.mapViewPosition,
+//                AndroidGraphicFactory.INSTANCE, false);
+//
+//        final LayerManager layerManager = mMap.getLayerManager();
+//        layerManager.getLayers().add(0, orthoLayer);
+//    }
 
-        final LayerManager layerManager = mMap.getLayerManager();
-        layerManager.getLayers().add(0, orthoLayer);
-    }
+//    private void addVectorMaps() {
+//        try {
+//            addVectorMapLayer(R.raw.creek, R.raw.creek_render_theme);
+//        } catch (IOException e) {
+//            Log.w(TAG, "Failed to load creek map file", e);
+//        }
+//        try {
+//            addVectorMapLayer(R.raw.roads_trails, R.raw.roads_trails_render_theme);
+//        } catch (IOException e) {
+//            Log.w(TAG, "Failed to load roads/trails map file", e);
+//        }
+//    }
 
-    private void addVectorMaps() {
-        try {
-            addVectorMapLayer(R.raw.creek, R.raw.creek_render_theme);
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to load creek map file", e);
-        }
-        try {
-            addVectorMapLayer(R.raw.roads_trails, R.raw.roads_trails_render_theme);
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to load roads/trails map file", e);
-        }
-    }
-
-    private void addVectorMapLayer(@RawRes int map_file, @RawRes int theme_file) throws IOException {
-        MapFile mapFile = new MapFile(
-                Storage.getResourceAsFile(this, map_file));
-
-        // Display the map over the aerial imagery
-        final InMemoryTileCache memoryTileCache = new InMemoryTileCache(AndroidUtil.getMinimumCacheSize(this,
-                mMap.getModel().displayModel.getTileSize(),
-                mMap.getModel().frameBufferModel.getOverdrawFactor(), 0.9f));
-
-        // Custom render theme from XML
-        final XmlRenderTheme customTheme = new StreamRenderTheme("",
-                getResources().openRawResource(theme_file));
-
-        final TileRendererLayer mapTiles = AndroidUtil.createTileRendererLayer(
-                memoryTileCache,
-                mMap.getModel().mapViewPosition,
-                mapFile,
-                customTheme,
-                true,
-                false,
-                false
-        );
-        mMap.getLayerManager().getLayers().add(1, mapTiles);
-    }
+//    private void addVectorMapLayer(@RawRes int map_file, @RawRes int theme_file) throws IOException {
+//        MapFile mapFile = new MapFile(
+//                Storage.getResourceAsFile(this, map_file));
+//
+//        // Display the map over the aerial imagery
+//        final InMemoryTileCache memoryTileCache = new InMemoryTileCache(AndroidUtil.getMinimumCacheSize(this,
+//                mMap.getModel().displayModel.getTileSize(),
+//                mMap.getModel().frameBufferModel.getOverdrawFactor(), 0.9f));
+//
+//        // Custom render theme from XML
+//        final XmlRenderTheme customTheme = new StreamRenderTheme("",
+//                getResources().openRawResource(theme_file));
+//
+//        final TileRendererLayer mapTiles = AndroidUtil.createTileRendererLayer(
+//                memoryTileCache,
+//                mMap.getModel().mapViewPosition,
+//                mapFile,
+//                customTheme,
+//                true,
+//                false,
+//                false
+//        );
+//        mMap.getLayerManager().getLayers().add(1, mapTiles);
+//    }
 
     /**
      * Sets up the map view in {@link #mMap}
      */
     private void setUpMap() throws IOException {
         mMap = findViewById(R.id.map);
-        // Set fixed tile size to make orthopthoto tiles display correctly
-        mMap.getModel().displayModel.setFixedTileSize(256);
+        mMap.getMapAsync(map -> {
+//            final RasterSource imagery = new RasterSource("imagery_pmtiles", "pmtiles://asset://usgs_aerial.pmtiles");
+            final RasterSource imagery = new RasterSource("imagery", "asset://usgs_local.json");
+            final RasterLayer imageryLayer = new RasterLayer("imagery", "imagery");
+            map.setStyle(new Style.Builder()
+                            .withSource(imagery)
+                    .withLayer(imageryLayer)
+            );
 
-        // Start loading orthophoto images in the background
-        final TileFolderLoad loadTask = new TileFolderLoad(this, R.raw.tiles, "ortho_tiles_v1",
-                "jpeg");
-        loadTask.setDoneHandler(new DoneHandler() {
-            @Override
-            public void done(TileFolder result) {
-                addOrthophotos(result);
-                // Finish map setup
-                addVectorMaps();
-                mMap.setCenter(START_POSITION.latLong);
-                mMap.setZoomLevel(START_POSITION.zoomLevel);
-            }
+            final CameraPosition initialCamera = map.getCameraForLatLngBounds(new LatLngBounds(37.4175457, -122.1919819, 37.3909509, -122.2600484));
+            assert initialCamera != null;
+            map.setCameraPosition(initialCamera);
         });
-        loadTask.execute();
-
-
-        // Disable built-in zoom controls, unless running in an emulator or if the device
-        // does not support basic multi-touch
-        mMap.setBuiltInZoomControls(Build.HARDWARE.equals("goldfish") || Build.HARDWARE.equals("ranchu")
-                || !(getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)));
-
-        {
-            // Load map with roads and trails
-            MapFile mapFile = new MapFile(
-                    Storage.getResourceAsFile(this, R.raw.roads_trails));
-            try {
-
-                // Limit view to the bounds of the map file
-                mMap.getModel().mapViewPosition.setMapLimit(mapFile.boundingBox());
-                mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
-
-            } finally {
-                mapFile.close();
-            }
-        }
-
-        // Get colors
-        final Iterator<Integer> colors = Palette.getColorsRepeating();
-
-        final List<Layer> routeLayers = new ArrayList<>();
-        // Try to load sites
-        List<Route> routes = null;
-        try {
-            routes = SiteStorage.readRoutes(
-                    getResources().openRawResource(R.raw.sites));
-            final ObservationDatabase db = new ObservationDatabase(this);
-            for (Route route : routes) {
-                final int color = colors.next();
-                final Layer routeLayer = new RouteLayer(db, route, color,
-                        mSelectionManager);
-                routeLayers.add(routeLayer);
-
-            }
-        } catch (IOException | JSONException e) {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.failed_to_load_sites)
-                    .setMessage(e.getLocalizedMessage())
-                    .show();
-            Log.e(TAG, "Failed to load sites", e);
-        }
-
-        // Location layers
+//        // Set fixed tile size to make orthopthoto tiles display correctly
+//        mMap.getModel().displayModel.setFixedTileSize(256);
+//
+//        // Start loading orthophoto images in the background
+//        final TileFolderLoad loadTask = new TileFolderLoad(this, R.raw.tiles, "ortho_tiles_v1",
+//                "jpeg");
+//        loadTask.setDoneHandler(new DoneHandler() {
+//            @Override
+//            public void done(TileFolder result) {
+//                addOrthophotos(result);
+//                // Finish map setup
+//                addVectorMaps();
+//                mMap.setCenter(START_POSITION.latLong);
+//                mMap.setZoomLevel(START_POSITION.zoomLevel);
+//            }
+//        });
+//        loadTask.execute();
+//
+//
+//        // Disable built-in zoom controls, unless running in an emulator or if the device
+//        // does not support basic multi-touch
+//        mMap.setBuiltInZoomControls(Build.HARDWARE.equals("goldfish") || Build.HARDWARE.equals("ranchu")
+//                || !(getPackageManager().hasSystemFeature(
+//                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)));
+//
+//        {
+//            // Load map with roads and trails
+//            MapFile mapFile = new MapFile(
+//                    Storage.getResourceAsFile(this, R.raw.roads_trails));
+//            try {
+//
+//                // Limit view to the bounds of the map file
+//                mMap.getModel().mapViewPosition.setMapLimit(mapFile.boundingBox());
+//                mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
+//
+//            } finally {
+//                mapFile.close();
+//            }
+//        }
+//
+//        // Get colors
+//        final Iterator<Integer> colors = Palette.getColorsRepeating();
+//
+//        final List<Layer> routeLayers = new ArrayList<>();
+//        // Try to load sites
+//        List<Route> routes = null;
+//        try {
+//            routes = SiteStorage.readRoutes(
+//                    getResources().openRawResource(R.raw.sites));
+//            final ObservationDatabase db = new ObservationDatabase(this);
+//            for (Route route : routes) {
+//                final int color = colors.next();
+//                final Layer routeLayer = new RouteLayer(db, route, color,
+//                        mSelectionManager);
+//                routeLayers.add(routeLayer);
+//
+//            }
+//        } catch (IOException | JSONException e) {
+//            new AlertDialog.Builder(this)
+//                    .setTitle(R.string.failed_to_load_sites)
+//                    .setMessage(e.getLocalizedMessage())
+//                    .show();
+//            Log.e(TAG, "Failed to load sites", e);
+//        }
+//
+//        // Location layers
         final RouteLineLayer routeLineLayer = new RouteLineLayer(this);
         mSelectionManager.addSelectionListener(routeLineLayer);
         mLocationFinder.addListener(routeLineLayer);
         final MyLocationLayer locationLayer = new MyLocationLayer(getMyLocationDrawable());
         mLocationFinder.addListener(locationLayer);
-
-        // If a selected site was saved, restore it
-        if (routes != null && mPreferences.contains(SELECTED_SITE_KEY)) {
-            final int selectedSiteId = mPreferences.getInt(SELECTED_SITE_KEY, 0);
-            for (Route route : routes) {
-                for (Site site : route.getSites()) {
-                    if (site.getId() == selectedSiteId) {
-                        Log.d(TAG, "Restoring selected site " + selectedSiteId);
-                        mSelectionManager.setSelectedSite(site, route);
-                    }
-                }
-            }
-        }
-
-        // Add layers to the map
-        mMap.getLayerManager().getLayers().add(routeLineLayer);
-        mMap.getLayerManager().getLayers().addAll(routeLayers);
-        mMap.getLayerManager().getLayers().add(locationLayer);
+//
+//        // If a selected site was saved, restore it
+//        if (routes != null && mPreferences.contains(SELECTED_SITE_KEY)) {
+//            final int selectedSiteId = mPreferences.getInt(SELECTED_SITE_KEY, 0);
+//            for (Route route : routes) {
+//                for (Site site : route.getSites()) {
+//                    if (site.getId() == selectedSiteId) {
+//                        Log.d(TAG, "Restoring selected site " + selectedSiteId);
+//                        mSelectionManager.setSelectedSite(site, route);
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Add layers to the map
+//        mMap.getLayerManager().getLayers().add(routeLineLayer);
+//        mMap.getLayerManager().getLayers().addAll(routeLayers);
+//        mMap.getLayerManager().getLayers().add(locationLayer);
     }
 
     @Override
@@ -599,12 +647,12 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     // Tell all route layers to update the visited sites
-                    for (Layer layer : mMap.getLayerManager().getLayers()) {
-                        if (layer instanceof RouteLayer) {
-                            ((RouteLayer) layer).updateVisitedSites();
-                        }
-                    }
-                    mMap.getLayerManager().redrawLayers();
+//                    for (Layer layer : mMap.getLayerManager().getLayers()) {
+//                        if (layer instanceof RouteLayer) {
+//                            ((RouteLayer) layer).updateVisitedSites();
+//                        }
+//                    }
+//                    mMap.getLayerManager().redrawLayers();
                 }
             });
         }
@@ -616,11 +664,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        if (mMap != null) {
-            mMap.destroyAll();
-            AndroidGraphicFactory.clearResourceMemoryCache();
-        }
+//        if (mMap != null) {
+//            mMap.destroyAll();
+//            AndroidGraphicFactory.clearResourceMemoryCache();
+//        }
         super.onDestroy();
+        mMap.onDestroy();
     }
 
     /**

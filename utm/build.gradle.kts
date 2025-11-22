@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.support.kotlinCompilerOptions
+
 /*
  * Copyright (c) 2025 Sam Crow
  *
@@ -23,4 +25,7 @@ plugins {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+}
+kotlin {
+    jvmToolchain(17)
 }
