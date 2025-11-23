@@ -27,14 +27,20 @@ import android.graphics.Picture;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.room.Room;
 
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
@@ -43,12 +49,8 @@ import com.google.android.material.snackbar.Snackbar;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-import org.json.JSONException;
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.camera.CameraPosition;
-import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.geometry.LatLngBounds;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
@@ -58,20 +60,7 @@ import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.util.AndroidPreferences;
-import org.mapsforge.map.android.util.AndroidUtil;
-import org.mapsforge.map.layer.Layer;
-import org.mapsforge.map.layer.LayerManager;
-import org.mapsforge.map.layer.cache.InMemoryTileCache;
-import org.mapsforge.map.layer.cache.TileCache;
-import org.mapsforge.map.layer.cache.TwoLevelTileCache;
-import org.mapsforge.map.layer.renderer.TileRendererLayer;
-import org.mapsforge.map.layer.tilestore.TileStoreLayer;
-import org.mapsforge.map.model.Model;
 import org.mapsforge.map.model.common.PreferencesFacade;
-import org.mapsforge.map.reader.MapFile;
-import org.mapsforge.map.rendertheme.StreamRenderTheme;
-import org.mapsforge.map.rendertheme.XmlRenderTheme;
-import org.samcrow.ridgesurvey.color.Palette;
 import org.samcrow.ridgesurvey.data.Database;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
@@ -84,29 +73,12 @@ import org.samcrow.ridgesurvey.data.UploadService;
 import org.samcrow.ridgesurvey.data.UploadStatusListener;
 import org.samcrow.ridgesurvey.data.UploadStatusTracker;
 import org.samcrow.ridgesurvey.map.MyLocationLayer;
-import org.samcrow.ridgesurvey.map.RouteLayer;
 import org.samcrow.ridgesurvey.map.RouteLineLayer;
-import org.samcrow.ridgesurvey.map.TileFolder;
-import org.samcrow.ridgesurvey.map.TileFolderLoad;
-import org.samcrow.ridgesurvey.map.TileFolderLoad.DoneHandler;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.RawRes;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.room.Room;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -411,11 +383,16 @@ public class MainActivity extends AppCompatActivity {
     private void setUpMap() throws IOException {
         mMap = findViewById(R.id.map);
         mMap.getMapAsync(map -> {
-            final RasterSource imagery = new RasterSource("imagery", tileServer.getTileJsonUrl());
+            final String tileJsonUrl;
+            try {
+                tileJsonUrl = tileServer.getTileJsonUrl().get();
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            final RasterSource imagery = new RasterSource("imagery", tileJsonUrl);
             final RasterLayer imageryLayer = new RasterLayer("imagery", "imagery");
             map.setStyle(new Style.Builder()
-//                            .fromUri("https://demotiles.maplibre.org/style.json")
-                            .withSource(imagery)
+                    .withSource(imagery)
                     .withLayer(imageryLayer)
             );
 
@@ -423,31 +400,6 @@ public class MainActivity extends AppCompatActivity {
             assert initialCamera != null;
             map.setCameraPosition(initialCamera);
         });
-//        // Set fixed tile size to make orthopthoto tiles display correctly
-//        mMap.getModel().displayModel.setFixedTileSize(256);
-//
-//        // Start loading orthophoto images in the background
-//        final TileFolderLoad loadTask = new TileFolderLoad(this, R.raw.tiles, "ortho_tiles_v1",
-//                "jpeg");
-//        loadTask.setDoneHandler(new DoneHandler() {
-//            @Override
-//            public void done(TileFolder result) {
-//                addOrthophotos(result);
-//                // Finish map setup
-//                addVectorMaps();
-//                mMap.setCenter(START_POSITION.latLong);
-//                mMap.setZoomLevel(START_POSITION.zoomLevel);
-//            }
-//        });
-//        loadTask.execute();
-//
-//
-//        // Disable built-in zoom controls, unless running in an emulator or if the device
-//        // does not support basic multi-touch
-//        mMap.setBuiltInZoomControls(Build.HARDWARE.equals("goldfish") || Build.HARDWARE.equals("ranchu")
-//                || !(getPackageManager().hasSystemFeature(
-//                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)));
-//
 //        {
 //            // Load map with roads and trails
 //            MapFile mapFile = new MapFile(

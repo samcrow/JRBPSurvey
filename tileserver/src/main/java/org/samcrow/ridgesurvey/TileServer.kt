@@ -18,8 +18,6 @@
 package org.samcrow.ridgesurvey
 
 import android.content.Context
-import android.content.res.AssetManager
-import android.os.StrictMode
 import android.util.Log
 import org.eclipse.jetty.server.Handler
 import org.eclipse.jetty.server.Server
@@ -27,6 +25,9 @@ import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.handler.ResourceHandler
 import org.eclipse.jetty.util.resource.ResourceFactory
 import java.io.Closeable
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.FutureTask
 
 internal const val TAG: String = "TileServer"
 
@@ -39,14 +40,12 @@ internal const val TAG: String = "TileServer"
  */
 class TileServer : Closeable {
     private val server: Server
-    private val connector: ServerConnector
-    private val assets: AssetManager
 
     /**
      * A URL that a map rendering library can access to get a TileJSON file with the URL pattern
      * for the other tiles
      */
-    val tileJsonUrl: String
+    val tileJsonUrl: Future<String>
 
     /**
      * Creates and starts a server
@@ -55,31 +54,33 @@ class TileServer : Closeable {
      * for each available zoom level
      */
     constructor(context: Context, relativeAssetPath: String) {
-        assets = context.assets
-        // Temporary, for testing only
-        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX)
         server = Server()
-        connector = ServerConnector(server)
+        val connector = ServerConnector(server)
         connector.host = "127.0.0.1"
         server.connectors = arrayOf(connector)
 
-        connector.start()
-        val port = connector.localPort
-        val baseUrl = "http://localhost:$port"
-        tileJsonUrl = "$baseUrl/tiles.json"
+        val executor = Executors.newSingleThreadExecutor()
+        tileJsonUrl = FutureTask {
+            connector.start()
+            val port = connector.localPort
+            val baseUrl = "http://localhost:$port"
 
-        val tileJson = TileJsonHandler(context, relativeAssetPath, baseUrl, "webp")
+            val tileJson = TileJsonHandler(context, relativeAssetPath, baseUrl, "webp")
 
-        val factory = AssetFactory(context, relativeAssetPath)
-        ResourceFactory.registerResourceFactory("http", factory)
-        val handler = ResourceHandler()
-        handler.isDirAllowed = false
-        handler.cacheControl = "public, max-age=86400"
-        handler.baseResource = ResourceFactory.of(handler).newResource("http:///")
+            val factory = AssetFactory(context, relativeAssetPath)
+            ResourceFactory.registerResourceFactory("http", factory)
+            val handler = ResourceHandler()
+            handler.isDirAllowed = false
+            handler.cacheControl = "public, max-age=86400"
+            handler.baseResource = ResourceFactory.of(handler).newResource("http:///")
 
-        server.setHandler(Handler.Sequence(tileJson, handler))
-        server.start()
-        Log.i(TAG, "Started server on port $port")
+            server.setHandler(Handler.Sequence(tileJson, handler))
+            server.start()
+            Log.i(TAG, "Started server on port $port")
+            return@FutureTask "$baseUrl/tiles.json"
+        }
+        executor.submit(tileJsonUrl)
+        executor.shutdown()
     }
 
     override fun close() {
