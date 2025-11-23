@@ -1,9 +1,0 @@
-{
-  "tilejson": "2.1.0",
-  "tiles": [
-    "asset://tiles-jpeg/{z}/{x}/{y}.jpeg"
-  ],
-  "minzoom": 8,
-  "maxzoom": 17,
-  "bounds": [-122.2600484, 37.3909509, -122.1919819, 37.4175457]
-}
