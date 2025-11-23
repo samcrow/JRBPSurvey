@@ -176,6 +176,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Database mDatabase;
 
+    // For testing
+    private TileServer tileServer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -270,6 +273,8 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         startUpload();
+
+        tileServer = new TileServer(this, "tiles-jpeg");
     }
 
     @Override
@@ -406,10 +411,10 @@ public class MainActivity extends AppCompatActivity {
     private void setUpMap() throws IOException {
         mMap = findViewById(R.id.map);
         mMap.getMapAsync(map -> {
-//            final RasterSource imagery = new RasterSource("imagery_pmtiles", "pmtiles://asset://usgs_aerial.pmtiles");
-            final RasterSource imagery = new RasterSource("imagery", "asset://usgs_local.json");
+            final RasterSource imagery = new RasterSource("imagery", tileServer.getTileJsonUrl());
             final RasterLayer imageryLayer = new RasterLayer("imagery", "imagery");
             map.setStyle(new Style.Builder()
+//                            .fromUri("https://demotiles.maplibre.org/style.json")
                             .withSource(imagery)
                     .withLayer(imageryLayer)
             );

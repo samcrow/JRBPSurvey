@@ -267,6 +267,8 @@ public class UploadService extends IntentService {
             Log.e(TAG, "Unknown upload error", e);
             LocalBroadcastManager.getInstance(this)
                     .sendBroadcast(new Intent(UploadStatusTracker.ACTION_UPLOAD_FAILED));
+        } finally {
+            steDatabase.close();
         }
     }
 
