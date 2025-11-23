@@ -274,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
 
         startUpload();
 
-        tileServer = new TileServer(this, "tiles-jpeg");
+        tileServer = new TileServer(this, "tiles-webp");
     }
 
     @Override

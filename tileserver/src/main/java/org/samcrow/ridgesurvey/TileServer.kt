@@ -60,21 +60,22 @@ class TileServer : Closeable {
         StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX)
         server = Server()
         connector = ServerConnector(server)
-        // TODO: Bind to 127.0.0.1 only
+        connector.host = "127.0.0.1"
         server.connectors = arrayOf(connector)
 
         connector.start()
         val port = connector.localPort
-        val base = "http://localhost:$port"
-        tileJsonUrl = "$base/tiles.json"
+        val baseUrl = "http://localhost:$port"
+        tileJsonUrl = "$baseUrl/tiles.json"
 
-        val tileJson = TileJsonHandler(base, "jpg")
+        val tileJson = TileJsonHandler(context, relativeAssetPath, baseUrl, "webp")
 
         val factory = AssetFactory(context, relativeAssetPath)
         ResourceFactory.registerResourceFactory("http", factory)
         val handler = ResourceHandler()
         handler.isDirAllowed = false
-        handler.baseResource = ResourceFactory.of(handler).newResource("http://localhost/")
+        handler.cacheControl = "public, max-age=86400"
+        handler.baseResource = ResourceFactory.of(handler).newResource("http:///")
 
         server.setHandler(Handler.Sequence(tileJson, handler))
         server.start()

@@ -26,18 +26,21 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
-import java.nio.channels.ReadableByteChannel
 import java.nio.file.Path
-import java.time.Instant
 import java.util.Collections
 import kotlin.io.path.Path
+
+/**
+ * A ResourceFactory that creates resources backed by assets in an application
+ *
+ * @param context a context that can provide assets
+ * @param basePath an asset path that is the root directory to serve
+ */
 internal class AssetFactory(context: Context, private val basePath: String) : ResourceFactory {
     private val assets: AssetManager = context.assets
     override fun newResource(uri: URI): Resource {
-        Log.d(TAG, "newResource $uri")
         val path = Path(basePath, uri.path)
-        Log.d(TAG, "base $basePath + URI ${uri.path} = $path")
-        return ResourceWrapper(AssetResource(assets, path))
+        return AssetResource(assets, path)
     }
 
 }
@@ -48,10 +51,8 @@ private class AssetResource(private val assets: AssetManager, private val path: 
     }
 
     override fun isDirectory(): Boolean {
-        Log.d(TAG, "isDirectory() $path")
         try {
             val entries = assets.list(path.toString())
-            Log.d(TAG, "Entries list: ${entries.contentToString()}")
             return entries != null && entries.isNotEmpty()
         } catch (_: IOException) {
             return false
@@ -76,12 +77,10 @@ private class AssetResource(private val assets: AssetManager, private val path: 
 
     override fun resolve(subUriPath: String): Resource {
         val resolvedPath = Path(path.toString(), subUriPath)
-        Log.d(TAG, "Resolve relative to $path : $subUriPath = $resolvedPath")
-        return ResourceWrapper(AssetResource(assets, resolvedPath))
+        return AssetResource(assets, resolvedPath)
     }
 
     override fun exists(): Boolean {
-        Log.d(TAG, "exists() $path")
         try {
             val stream = assets.open(path.toString())
             stream.close()
@@ -106,7 +105,6 @@ private class AssetResource(private val assets: AssetManager, private val path: 
     }
 
     override fun newInputStream(): InputStream {
-        Log.d(TAG, "newInputStream $path")
         return assets.open(path.toString(), AssetManager.ACCESS_STREAMING)
     }
 
@@ -123,128 +121,5 @@ private class AssetResource(private val assets: AssetManager, private val path: 
         } catch (_: IOException) {
             return Collections.emptyList()
         }
-    }
-}
-
-private class ResourceWrapper(private val inner: Resource) : Resource() {
-    private val innerClass = inner.javaClass.simpleName
-    override fun getPath(): Path? {
-        val path = inner.path
-        Log.d(TAG, "$innerClass getPath() returned $path")
-        return path
-    }
-
-    override fun isDirectory(): Boolean {
-        val value = inner.isDirectory
-        Log.d(TAG, "$innerClass isDirectory() returned $value")
-        return value
-    }
-
-    override fun isReadable(): Boolean {
-        val value = inner.isReadable
-        Log.d(TAG, "$innerClass isReadable() returned $value")
-        return value
-    }
-
-    override fun getURI(): URI? {
-        val value = inner.uri
-        Log.d(TAG, "$innerClass getURI() returned $value")
-        return value
-    }
-
-    override fun getName(): String? {
-        val value = inner.name
-        Log.d(TAG, "$innerClass getName() returned $value")
-        return value
-    }
-
-    override fun getFileName(): String? {
-        val value = inner.fileName
-        Log.d(TAG, "$innerClass getFileName() returned $value")
-        return value
-    }
-
-    override fun resolve(subUriPath: String?): Resource? {
-        val value = inner.resolve(subUriPath)
-        Log.d(TAG, "$innerClass resolve($subUriPath) returned $value")
-        return value
-    }
-
-    override fun isContainedIn(container: Resource?): Boolean {
-        val value = inner.isContainedIn(container)
-        Log.d(TAG, "$innerClass isContainedIn(container) returned $value")
-        return value
-    }
-
-    override fun contains(other: Resource?): Boolean {
-        val value = inner.contains(other)
-        Log.d(TAG, "$innerClass contains($other) returned $value")
-        return value
-    }
-
-    override fun getPathTo(other: Resource?): Path? {
-        val value = inner.getPathTo(other)
-        Log.d(TAG, "$innerClass getPathTo($other) returned $value")
-        return value
-    }
-
-    override fun iterator(): MutableIterator<Resource?> {
-        val value = inner.iterator()
-        Log.d(TAG, "$innerClass iterator() returned $value")
-        return value
-    }
-
-    override fun exists(): Boolean {
-        val value = inner.exists()
-        Log.d(TAG, "$innerClass exists() returned $value")
-        return value
-    }
-
-    override fun lastModified(): Instant? {
-        val value = inner.lastModified()
-        Log.d(TAG, "$innerClass lastModified() returned $value")
-        return value
-    }
-
-    override fun length(): Long {
-        val value = inner.length()
-        Log.d(TAG, "$innerClass length() returned $value")
-        return value
-    }
-
-    override fun newInputStream(): InputStream? {
-        val value = inner.newInputStream()
-        Log.d(TAG, "$innerClass newInputStream() returned $value")
-        return value
-    }
-
-    override fun newReadableByteChannel(): ReadableByteChannel? {
-        val value = inner.newReadableByteChannel()
-        Log.d(TAG, "$innerClass newReadableByteChannel() returned $value")
-        return value
-    }
-
-    override fun list(): List<Resource?>? {
-        val value = inner.list()
-        Log.d(TAG, "$innerClass list() returned $value")
-        return value
-    }
-
-    override fun isAlias(): Boolean {
-        val value = inner.isAlias
-        Log.d(TAG, "$innerClass isAlias() returned $value")
-        return value
-    }
-
-    override fun getRealURI(): URI? {
-        val value = inner.realURI
-        Log.d(TAG, "$innerClass getRealURI() returned $value")
-        return value
-    }
-
-    override fun isSameFile(path: Path?): Boolean {
-        val value = inner.isSameFile(path)
-        Log.d(TAG, "$innerClass isSameFile($path) returned $value")
-        return value
     }
 }
