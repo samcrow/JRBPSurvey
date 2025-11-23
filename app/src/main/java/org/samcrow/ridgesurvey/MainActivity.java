@@ -54,7 +54,6 @@ import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.geometry.LatLngBounds;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
-import org.maplibre.android.style.layers.RasterLayer;
 import org.maplibre.android.style.sources.RasterSource;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
@@ -149,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     private Database mDatabase;
 
     // For testing
-    private TileServer tileServer;
+    private TileServer mTileServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -213,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
         // Set up upload status tracker
         mUploadStatusTracker = new UploadStatusTracker(this);
         mUploadStatusTracker.addListener(
-                (UploadStatusListener) findViewById(R.id.upload_status_bar));
+                findViewById(R.id.upload_status_bar));
 
         final LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         final IntentFilter filter = new IntentFilter();
@@ -246,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
 
         startUpload();
 
-        tileServer = new TileServer(this, "tiles-webp");
+        mTileServer = new TileServer(this, "tiles-webp");
     }
 
     @Override
@@ -325,59 +324,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Adds orthophoto imagery from the provided tile folder to the map
-     *
-     * @param tileFolder the folder to get tiles from
-     */
-//    private void addOrthophotos(@NonNull TileFolder tileFolder) {
-//        final TileCache orthoCache = new TwoLevelTileCache(new InMemoryTileCache(512), tileFolder);
-//        final Model model = mMap.getModel();
-//        final TileStoreLayer orthoLayer = new TileStoreLayer(orthoCache, model.mapViewPosition,
-//                AndroidGraphicFactory.INSTANCE, false);
-//
-//        final LayerManager layerManager = mMap.getLayerManager();
-//        layerManager.getLayers().add(0, orthoLayer);
-//    }
-
-//    private void addVectorMaps() {
-//        try {
-//            addVectorMapLayer(R.raw.creek, R.raw.creek_render_theme);
-//        } catch (IOException e) {
-//            Log.w(TAG, "Failed to load creek map file", e);
-//        }
-//        try {
-//            addVectorMapLayer(R.raw.roads_trails, R.raw.roads_trails_render_theme);
-//        } catch (IOException e) {
-//            Log.w(TAG, "Failed to load roads/trails map file", e);
-//        }
-//    }
-
-//    private void addVectorMapLayer(@RawRes int map_file, @RawRes int theme_file) throws IOException {
-//        MapFile mapFile = new MapFile(
-//                Storage.getResourceAsFile(this, map_file));
-//
-//        // Display the map over the aerial imagery
-//        final InMemoryTileCache memoryTileCache = new InMemoryTileCache(AndroidUtil.getMinimumCacheSize(this,
-//                mMap.getModel().displayModel.getTileSize(),
-//                mMap.getModel().frameBufferModel.getOverdrawFactor(), 0.9f));
-//
-//        // Custom render theme from XML
-//        final XmlRenderTheme customTheme = new StreamRenderTheme("",
-//                getResources().openRawResource(theme_file));
-//
-//        final TileRendererLayer mapTiles = AndroidUtil.createTileRendererLayer(
-//                memoryTileCache,
-//                mMap.getModel().mapViewPosition,
-//                mapFile,
-//                customTheme,
-//                true,
-//                false,
-//                false
-//        );
-//        mMap.getLayerManager().getLayers().add(1, mapTiles);
-//    }
-
-    /**
      * Sets up the map view in {@link #mMap}
      */
     private void setUpMap() throws IOException {
@@ -385,35 +331,20 @@ public class MainActivity extends AppCompatActivity {
         mMap.getMapAsync(map -> {
             final String tileJsonUrl;
             try {
-                tileJsonUrl = tileServer.getTileJsonUrl().get();
+                tileJsonUrl = mTileServer.getTileJsonUrl().get();
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            final RasterSource imagery = new RasterSource("imagery", tileJsonUrl);
-            final RasterLayer imageryLayer = new RasterLayer("imagery", "imagery");
+            final RasterSource imagery = new RasterSource("usgs_tiles", tileJsonUrl);
             map.setStyle(new Style.Builder()
+                    .fromUri("asset://map_style.json")
                     .withSource(imagery)
-                    .withLayer(imageryLayer)
             );
 
             final CameraPosition initialCamera = map.getCameraForLatLngBounds(new LatLngBounds(37.4175457, -122.1919819, 37.3909509, -122.2600484));
             assert initialCamera != null;
             map.setCameraPosition(initialCamera);
         });
-//        {
-//            // Load map with roads and trails
-//            MapFile mapFile = new MapFile(
-//                    Storage.getResourceAsFile(this, R.raw.roads_trails));
-//            try {
-//
-//                // Limit view to the bounds of the map file
-//                mMap.getModel().mapViewPosition.setMapLimit(mapFile.boundingBox());
-//                mMap.getModel().mapViewPosition.setZoomLevelMin(START_POSITION.zoomLevel);
-//
-//            } finally {
-//                mapFile.close();
-//            }
-//        }
 //
 //        // Get colors
 //        final Iterator<Integer> colors = Palette.getColorsRepeating();
@@ -560,7 +491,7 @@ public class MainActivity extends AppCompatActivity {
                         final String timeString = DateTimeFormat.shortTime().print(selectedDateTime);
                         final Snackbar bar = Snackbar.make(
                                 mMap,
-                                String.format("Recorded \"%s\" at %s",eventName, timeString),
+                                String.format("Recorded \"%s\" at %s", eventName, timeString),
                                 BaseTransientBottomBar.LENGTH_LONG
                         );
                         bar.show();
@@ -621,12 +552,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-//        if (mMap != null) {
-//            mMap.destroyAll();
-//            AndroidGraphicFactory.clearResourceMemoryCache();
-//        }
         super.onDestroy();
         mMap.onDestroy();
+        mTileServer.close();
     }
 
     /**
