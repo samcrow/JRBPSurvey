@@ -15,6 +15,10 @@
     "site_points": {
       "type": "geojson",
       "data": "asset://map_vectors/sites_wgs84.geojson"
+    },
+    "route_centroids": {
+      "type": "geojson",
+      "data": "asset://map_vectors/route_centroids.geojson"
     }
   },
   "sprite": "",
@@ -104,6 +108,23 @@
         "circle-radius": 5,
         "circle-color": "rgba(161, 81, 152, 1)",
         "circle-blur": 0
+      }
+    },
+    {
+      "id": "route_labels",
+      "type": "symbol",
+      "source": "route_centroids",
+      "maxzoom": 15,
+      "layout": {
+        "text-field": ["get", "route"],
+        "text-anchor": "center",
+        "text-size": 25
+      },
+      "paint": {
+        "text-color": "white",
+        "text-halo-color": "rgba(54, 54, 54, 1)",
+        "text-halo-width": 3,
+        "text-halo-blur": 1
       }
     }
   ]

@@ -1,0 +1,32 @@
+{
+"type": "FeatureCollection",
+"name": "route_centroids_wgs84",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"xy_coordinate_resolution": 1e-15,
+"features": [
+{ "type": "Feature", "properties": { "route": "Mapache" }, "geometry": { "type": "Point", "coordinates": [ -122.232838362895237, 37.397464158288663 ] } },
+{ "type": "Feature", "properties": { "route": "Hermit" }, "geometry": { "type": "Point", "coordinates": [ -122.220180677828566, 37.399848713756484 ] } },
+{ "type": "Feature", "properties": { "route": "Mansion" }, "geometry": { "type": "Point", "coordinates": [ -122.217871209761938, 37.399322898734447 ] } },
+{ "type": "Feature", "properties": { "route": "Teasel" }, "geometry": { "type": "Point", "coordinates": [ -122.228409829233073, 37.399648682750787 ] } },
+{ "type": "Feature", "properties": { "route": "Fringe Pond" }, "geometry": { "type": "Point", "coordinates": [ -122.23426216383848, 37.400291928650695 ] } },
+{ "type": "Feature", "properties": { "route": "Escobar" }, "geometry": { "type": "Point", "coordinates": [ -122.211945170380361, 37.40087826235748 ] } },
+{ "type": "Feature", "properties": { "route": "Leonards Bridge" }, "geometry": { "type": "Point", "coordinates": [ -122.237315571710198, 37.401599322367716 ] } },
+{ "type": "Feature", "properties": { "route": "Open Grassland" }, "geometry": { "type": "Point", "coordinates": [ -122.223024139984886, 37.402278863785654 ] } },
+{ "type": "Feature", "properties": { "route": "Machine" }, "geometry": { "type": "Point", "coordinates": [ -122.241722855864822, 37.402529030753641 ] } },
+{ "type": "Feature", "properties": { "route": "Chapparal" }, "geometry": { "type": "Point", "coordinates": [ -122.229316507410729, 37.403049719404038 ] } },
+{ "type": "Feature", "properties": { "route": "Tulip" }, "geometry": { "type": "Point", "coordinates": [ -122.220624862325266, 37.404044330293715 ] } },
+{ "type": "Feature", "properties": { "route": "Sand Hill" }, "geometry": { "type": "Point", "coordinates": [ -122.244248315794835, 37.406724235638947 ] } },
+{ "type": "Feature", "properties": { "route": "Global Change" }, "geometry": { "type": "Point", "coordinates": [ -122.241052678389636, 37.404477678466002 ] } },
+{ "type": "Feature", "properties": { "route": "Lakeside" }, "geometry": { "type": "Point", "coordinates": [ -122.236530386839803, 37.40474901584345 ] } },
+{ "type": "Feature", "properties": { "route": "Serpentine" }, "geometry": { "type": "Point", "coordinates": [ -122.226690937717692, 37.405955165806603 ] } },
+{ "type": "Feature", "properties": { "route": "Broom Loop" }, "geometry": { "type": "Point", "coordinates": [ -122.241267217159134, 37.406950967428415 ] } },
+{ "type": "Feature", "properties": { "route": "Contact" }, "geometry": { "type": "Point", "coordinates": [ -122.236867679228581, 37.408566949854368 ] } },
+{ "type": "Feature", "properties": { "route": "Blue Oak" }, "geometry": { "type": "Point", "coordinates": [ -122.232641906647331, 37.407427921075829 ] } },
+{ "type": "Feature", "properties": { "route": "Woodland" }, "geometry": { "type": "Point", "coordinates": [ -122.226464196679686, 37.408002226071602 ] } },
+{ "type": "Feature", "properties": { "route": "Horse" }, "geometry": { "type": "Point", "coordinates": [ -122.241274447744701, 37.409093206666675 ] } },
+{ "type": "Feature", "properties": { "route": "Redwood" }, "geometry": { "type": "Point", "coordinates": [ -122.22657896246848, 37.410993849249515 ] } },
+{ "type": "Feature", "properties": { "route": "Whiskey Hill" }, "geometry": { "type": "Point", "coordinates": [ -122.238487792530435, 37.411296497149969 ] } },
+{ "type": "Feature", "properties": { "route": "SLAC West" }, "geometry": { "type": "Point", "coordinates": [ -122.232772118823846, 37.411806796143765 ] } },
+{ "type": "Feature", "properties": { "route": "SLAC East" }, "geometry": { "type": "Point", "coordinates": [ -122.224925431432581, 37.412455238890288 ] } }
+]
+}
