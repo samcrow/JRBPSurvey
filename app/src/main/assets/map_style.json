@@ -2,6 +2,7 @@
   "version": 8,
   "name": "Jasper Ridge map",
   "metadata": {},
+  "glyphs": "asset://font/{fontstack}/{range}.pbf",
   "sources": {
     "openstreetmap_streams": {
       "type": "geojson",
@@ -75,6 +76,24 @@
         "line-width": 3,
         "line-gap-width": 0,
         "line-blur": 0
+      }
+    },
+    {
+      "id": "all_site_labels",
+      "type": "symbol",
+      "source": "site_points",
+      "minzoom": 15,
+      "layout": {
+        "text-field": ["get", "name"],
+        "text-anchor": "top",
+        "text-offset": [0, 0.5],
+        "text-size": 20
+      },
+      "paint": {
+        "text-color": "white",
+        "text-halo-color": "rgba(54, 54, 54, 1)",
+        "text-halo-width": 2,
+        "text-halo-blur": 1
       }
     },
     {
