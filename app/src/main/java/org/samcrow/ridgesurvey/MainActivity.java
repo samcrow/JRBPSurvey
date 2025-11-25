@@ -69,7 +69,6 @@ import org.samcrow.ridgesurvey.data.SimpleTimedEvent;
 import org.samcrow.ridgesurvey.data.SimpleTimedEventDao;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
 import org.samcrow.ridgesurvey.data.UploadService;
-import org.samcrow.ridgesurvey.data.UploadStatusListener;
 import org.samcrow.ridgesurvey.data.UploadStatusTracker;
 import org.samcrow.ridgesurvey.map.MyLocationLayer;
 import org.samcrow.ridgesurvey.map.RouteLineLayer;
@@ -336,6 +335,7 @@ public class MainActivity extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
             final RasterSource imagery = new RasterSource("usgs_tiles", tileJsonUrl);
+
             map.setStyle(new Style.Builder()
                     .fromUri("asset://map_style.json")
                     .withSource(imagery)
@@ -344,6 +344,7 @@ public class MainActivity extends AppCompatActivity {
             final CameraPosition initialCamera = map.getCameraForLatLngBounds(new LatLngBounds(37.4175457, -122.1919819, 37.3909509, -122.2600484));
             assert initialCamera != null;
             map.setCameraPosition(initialCamera);
+            map.getUiSettings().setRotateGesturesEnabled(false);
         });
 //
 //        // Get colors
