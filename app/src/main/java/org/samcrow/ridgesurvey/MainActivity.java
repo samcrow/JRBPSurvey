@@ -17,6 +17,8 @@
 
 package org.samcrow.ridgesurvey;
 
+import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.createRouteLines;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -54,7 +56,9 @@ import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.geometry.LatLngBounds;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
+import org.maplibre.android.style.sources.GeoJsonSource;
 import org.maplibre.android.style.sources.RasterSource;
+import org.maplibre.geojson.FeatureCollection;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
@@ -335,10 +339,12 @@ public class MainActivity extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
             final RasterSource imagery = new RasterSource("usgs_tiles", tileJsonUrl);
+            final FeatureCollection routeLineFeatures = createRouteLines(this);
+            final GeoJsonSource routeLines = new GeoJsonSource("route_lines", routeLineFeatures);
 
             map.setStyle(new Style.Builder()
                     .fromUri("asset://map_style.json")
-                    .withSource(imagery)
+                    .withSources(imagery, routeLines)
             );
 
             final CameraPosition initialCamera = map.getCameraForLatLngBounds(new LatLngBounds(37.4175457, -122.1919819, 37.3909509, -122.2600484));

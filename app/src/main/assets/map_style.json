@@ -83,6 +83,15 @@
       }
     },
     {
+      "id": "all_route_lines",
+      "type": "line",
+      "source": "route_lines",
+      "paint": {
+        "line-color": "white",
+        "line-width": 3
+      }
+    },
+    {
       "id": "all_site_labels",
       "type": "symbol",
       "source": "site_points",
@@ -118,7 +127,7 @@
       "layout": {
         "text-field": ["get", "route"],
         "text-anchor": "center",
-        "text-size": 25
+        "text-size": 22
       },
       "paint": {
         "text-color": "white",
