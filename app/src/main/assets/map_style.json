@@ -4,9 +4,9 @@
   "metadata": {},
   "glyphs": "asset://font/{fontstack}/{range}.pbf",
   "sources": {
-    "openstreetmap_streams": {
+    "streams": {
       "type": "geojson",
-      "data": "asset://map_vectors/openstreetmap_streams.geojson"
+      "data": "asset://map_vectors/streams.geojson"
     },
     "jasper_ridge_roads_trails": {
       "type": "geojson",
@@ -31,7 +31,7 @@
     {
       "id": "streams",
       "type": "line",
-      "source": "openstreetmap_streams",
+      "source": "streams",
       "filter": ["all", ["==", "waterway", "stream"]],
       "paint": {
         "line-color": "rgba(103, 126, 206, 1)",

@@ -18,15 +18,30 @@
 package org.samcrow.ridgesurvey.map
 
 import android.content.Context
+import android.graphics.Color
 import android.util.Log
+import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import org.apache.commons.io.IOUtils
-import org.json.JSONObject
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.expressions.Expression.color
+import org.maplibre.android.style.expressions.Expression.eq
+import org.maplibre.android.style.expressions.Expression.get
+import org.maplibre.android.style.expressions.Expression.literal
+import org.maplibre.android.style.expressions.Expression.switchCase
+import org.maplibre.android.style.layers.CircleLayer
+import org.maplibre.android.style.layers.Layer
+import org.maplibre.android.style.layers.LineLayer
+import org.maplibre.android.style.layers.PropertyFactory.circleColor
+import org.maplibre.android.style.layers.PropertyFactory.circleRadius
+import org.maplibre.android.style.layers.PropertyFactory.lineColor
+import org.maplibre.android.style.layers.PropertyFactory.lineWidth
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.LineString
 import org.maplibre.geojson.Point
 import org.samcrow.ridgesurvey.R
+import org.samcrow.ridgesurvey.color.Palette
 import java.util.TreeMap
 
 /** Asset path to a GeoJSON file containing the sites */
@@ -44,7 +59,7 @@ internal fun createRouteLines(context: Context): FeatureCollection {
 
     for ((routeName, siteNames) in routeOrders) {
         val lineString = lookUpRoute(siteNames, sites)
-        val properties = JsonObject().apply { addProperty("name", routeName) }
+        val properties = JsonObject().apply { addProperty("route", routeName) }
         val feature = Feature.fromGeometry(lineString, properties)
         features.add(feature)
     }
@@ -61,18 +76,14 @@ internal fun createRouteLines(context: Context): FeatureCollection {
  * reasonable walking order for that route
  */
 private fun parseRouteOrders(context: Context): Map<String, List<String>> {
-    val routeOrderJson: JSONObject
-    context.resources.openRawResource(R.raw.route_order).use { stream ->
-        routeOrderJson = JSONObject(IOUtils.toString(stream))
+    val routeOrderJson: JsonObject
+    context.resources.openRawResource(R.raw.route_order).reader().use { stream ->
+        routeOrderJson = Gson().fromJson(stream, JsonObject::class.java)
     }
     val routeOrders: MutableMap<String, List<String>> = TreeMap()
-    for (routeName in routeOrderJson.keys()) {
-        val sitesJson = routeOrderJson.getJSONArray(routeName)
-        val sites: MutableList<String> = ArrayList(sitesJson.length())
-        for (i in 0..<sitesJson.length()) {
-            val name = sitesJson.get(i).toString()
-            sites.add(name)
-        }
+    for ((routeName, sitesJson) in routeOrderJson.entrySet()) {
+        sitesJson as JsonArray
+        val sites = sitesJson.map { it.toString() }
         val prevRoute = routeOrders.put(routeName, sites)
         if (prevRoute != null) {
             throw IllegalStateException("Duplicate route $routeName")
@@ -85,18 +96,18 @@ private fun parseRouteOrders(context: Context): Map<String, List<String>> {
  * Returns a map where each key is a site name, corresponding to the site position
  */
 private fun parseSites(context: Context): MutableMap<String, Point> {
-    val root: JSONObject
-    context.assets.open(SITES_PATH).use { stream ->
-        root = JSONObject(IOUtils.toString(stream))
+    val root: JsonObject
+    context.assets.open(SITES_PATH).reader().use { stream ->
+        root = Gson().fromJson(stream, JsonObject::class.java)
     }
     val sites: MutableMap<String, Point> = TreeMap()
-    val features = root.getJSONArray("features")
-    for (i in 0..<features.length()) {
-        val feature = features.getJSONObject(i)
-        val siteName = feature.getJSONObject("properties").getString("name")
-        val coordinates = feature.getJSONObject("geometry").getJSONArray("coordinates")
-        val longitude = coordinates.getDouble(0)
-        val latitude = coordinates.getDouble(1)
+    val features = root.getAsJsonArray("features")!!
+    for (feature in features) {
+        feature as JsonObject
+        val siteName = feature.getAsJsonObject("properties").get("name").asString
+        val coordinates = feature.getAsJsonObject("geometry").getAsJsonArray("coordinates")
+        val longitude = coordinates[0].asDouble
+        val latitude = coordinates[1].asDouble
         val prevSite = sites.put(siteName, Point.fromLngLat(longitude, latitude))
         if (prevSite != null) {
             throw IllegalStateException("Duplicate site $siteName")
@@ -107,9 +118,40 @@ private fun parseSites(context: Context): MutableMap<String, Point> {
 
 private fun lookUpRoute(siteNames: List<String>, sites: MutableMap<String, Point>): LineString {
     val sitePoints = siteNames.map { name ->
-        sites.remove(name) ?: throw IllegalStateException("Site $name missing or already used in another route")
+        sites.remove(name)
+            ?: throw IllegalStateException("Site $name missing or already used in another route")
     }
     return LineString.fromLngLats(sitePoints)
 }
 
+internal fun createRouteLayers(context: Context): List<Layer> {
+    val color = createRouteColor(context)
 
+    val lineLayer = LineLayer("per_route_lines", "route_lines")
+    lineLayer.setProperties(
+        lineWidth(literal(3)),
+        lineColor(color)
+    )
+
+    val circleLayer = CircleLayer("per_route_circles", "site_points")
+    circleLayer.setProperties(
+        circleRadius(literal(8)),
+        circleColor(color)
+    )
+
+    return listOf(lineLayer, circleLayer)
+}
+
+private fun createRouteColor(context: Context): Expression {
+    val routeNames = parseRouteOrders(context).keys
+    val colors = Palette.getColorsRepeating()
+    val colorCases: MutableList<Expression> = ArrayList(routeNames.size * 2 + 1)
+    for (name in routeNames) {
+        val routeColor = colors.next()
+        colorCases.add(eq(get("route"), literal(name)))
+        colorCases.add(color(routeColor))
+    }
+    // Default to white
+    colorCases.add(color(Color.WHITE))
+    return switchCase(*colorCases.toTypedArray())
+}

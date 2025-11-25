@@ -17,6 +17,7 @@
 
 package org.samcrow.ridgesurvey;
 
+import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.createRouteLayers;
 import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.createRouteLines;
 
 import android.content.DialogInterface;
@@ -56,6 +57,7 @@ import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.geometry.LatLngBounds;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
+import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.sources.GeoJsonSource;
 import org.maplibre.android.style.sources.RasterSource;
 import org.maplibre.geojson.FeatureCollection;
@@ -342,42 +344,20 @@ public class MainActivity extends AppCompatActivity {
             final FeatureCollection routeLineFeatures = createRouteLines(this);
             final GeoJsonSource routeLines = new GeoJsonSource("route_lines", routeLineFeatures);
 
-            map.setStyle(new Style.Builder()
+            final Style.Builder style = new Style.Builder()
                     .fromUri("asset://map_style.json")
-                    .withSources(imagery, routeLines)
-            );
+                    .withSources(imagery, routeLines);
+            for (Layer layer : createRouteLayers(this)) {
+                style.withLayer(layer);
+            }
+            map.setStyle(style);
 
             final CameraPosition initialCamera = map.getCameraForLatLngBounds(new LatLngBounds(37.4175457, -122.1919819, 37.3909509, -122.2600484));
             assert initialCamera != null;
             map.setCameraPosition(initialCamera);
             map.getUiSettings().setRotateGesturesEnabled(false);
         });
-//
-//        // Get colors
-//        final Iterator<Integer> colors = Palette.getColorsRepeating();
-//
-//        final List<Layer> routeLayers = new ArrayList<>();
-//        // Try to load sites
-//        List<Route> routes = null;
-//        try {
-//            routes = SiteStorage.readRoutes(
-//                    getResources().openRawResource(R.raw.sites));
-//            final ObservationDatabase db = new ObservationDatabase(this);
-//            for (Route route : routes) {
-//                final int color = colors.next();
-//                final Layer routeLayer = new RouteLayer(db, route, color,
-//                        mSelectionManager);
-//                routeLayers.add(routeLayer);
-//
-//            }
-//        } catch (IOException | JSONException e) {
-//            new AlertDialog.Builder(this)
-//                    .setTitle(R.string.failed_to_load_sites)
-//                    .setMessage(e.getLocalizedMessage())
-//                    .show();
-//            Log.e(TAG, "Failed to load sites", e);
-//        }
-//
+
 //        // Location layers
         final RouteLineLayer routeLineLayer = new RouteLineLayer(this);
         mSelectionManager.addSelectionListener(routeLineLayer);
