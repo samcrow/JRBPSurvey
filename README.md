@@ -52,3 +52,10 @@ licensed under the [Apache License, version 2.0](http://www.joda.org/joda-time/l
 
 This software uses the [Apache Commons IO](https://commons.apache.org/proper/commons-io/) library,
 which is licensed under the [Apache License, version 2.0](http://www.joda.org/joda-time/license.html).
+
+### Fonts
+
+The files under `app/src/main/assets/assets/font` are a repackaged version of the
+[GNU FreeFont family](https://www.gnu.org/software/freefont/), released under the
+[GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.html), version 3 or later.
+

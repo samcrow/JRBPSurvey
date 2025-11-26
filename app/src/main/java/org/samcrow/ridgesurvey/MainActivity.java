@@ -76,8 +76,6 @@ import org.samcrow.ridgesurvey.data.SimpleTimedEventDao;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
 import org.samcrow.ridgesurvey.data.UploadService;
 import org.samcrow.ridgesurvey.data.UploadStatusTracker;
-import org.samcrow.ridgesurvey.map.MyLocationLayer;
-import org.samcrow.ridgesurvey.map.RouteLineLayer;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -133,10 +131,6 @@ public class MainActivity extends AppCompatActivity {
      * The preferences facade (wrapping {@link #mPreferences} that the map view uses to save preferences
      */
     private PreferencesFacade mPreferencesFacade;
-    /**
-     * The location finder that gets heading information
-     */
-    private LocationFinder mLocationFinder;
     /**
      * The selection manager
      */
@@ -212,8 +206,6 @@ public class MainActivity extends AppCompatActivity {
 
         mSelectionManager = new SelectionManager();
 
-        mLocationFinder = new LocationFinder(this);
-
         // Set up upload status tracker
         mUploadStatusTracker = new UploadStatusTracker(this);
         mUploadStatusTracker.addListener(
@@ -250,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
 
         startUpload();
 
-        mTileServer = new TileServer(this, "tiles-webp");
+        mTileServer = new TileServer(this, "tiles-smco-2022");
     }
 
     @Override
@@ -279,18 +271,12 @@ public class MainActivity extends AppCompatActivity {
                 prefsEditor.apply();
             }
         }
-        if (mLocationFinder != null) {
-            mLocationFinder.pause();
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mMap.onResume();
-        if (mLocationFinder != null) {
-            mLocationFinder.resume();
-        }
     }
 
     @Override
@@ -322,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
                 // If location access was granted, start location finding
                 if (permission.equals(
                         LOCATION_PERMISSION) && result == PackageManager.PERMISSION_GRANTED) {
-                    mLocationFinder.resume();
+                    // TODO: Request location
                 }
             }
         }
@@ -340,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            final RasterSource imagery = new RasterSource("usgs_tiles", tileJsonUrl);
+            final RasterSource imagery = new RasterSource("smco_2022_tiles", tileJsonUrl);
             final FeatureCollection routeLineFeatures = createRouteLines(this);
             final GeoJsonSource routeLines = new GeoJsonSource("route_lines", routeLineFeatures);
 
@@ -356,14 +342,13 @@ public class MainActivity extends AppCompatActivity {
             assert initialCamera != null;
             map.setCameraPosition(initialCamera);
             map.getUiSettings().setRotateGesturesEnabled(false);
+            map.getUiSettings().setAttributionEnabled(false);
+            map.getUiSettings().setLogoEnabled(false);
         });
 
-//        // Location layers
-        final RouteLineLayer routeLineLayer = new RouteLineLayer(this);
-        mSelectionManager.addSelectionListener(routeLineLayer);
-        mLocationFinder.addListener(routeLineLayer);
-        final MyLocationLayer locationLayer = new MyLocationLayer(getMyLocationDrawable());
-        mLocationFinder.addListener(locationLayer);
+        // Location layer
+
+
 //
 //        // If a selected site was saved, restore it
 //        if (routes != null && mPreferences.contains(SELECTED_SITE_KEY)) {
