@@ -25,10 +25,10 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.expressions.Expression.color
-import org.maplibre.android.style.expressions.Expression.eq
 import org.maplibre.android.style.expressions.Expression.get
 import org.maplibre.android.style.expressions.Expression.literal
-import org.maplibre.android.style.expressions.Expression.switchCase
+import org.maplibre.android.style.expressions.Expression.match
+import org.maplibre.android.style.expressions.Expression.stop
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.Layer
 import org.maplibre.android.style.layers.LineLayer
@@ -145,13 +145,10 @@ internal fun createRouteLayers(context: Context): List<Layer> {
 private fun createRouteColor(context: Context): Expression {
     val routeNames = parseRouteOrders(context).keys
     val colors = Palette.getColorsRepeating()
-    val colorCases: MutableList<Expression> = ArrayList(routeNames.size * 2 + 1)
-    for (name in routeNames) {
+    val colorStops = routeNames.map { name ->
         val routeColor = colors.next()
-        colorCases.add(eq(get("route"), literal(name)))
-        colorCases.add(color(routeColor))
+        stop(literal(name), color(routeColor))
     }
-    // Default to white
-    colorCases.add(color(Color.WHITE))
-    return switchCase(*colorCases.toTypedArray())
+    val defaultColor = color(Color.WHITE)
+    return match(get("route"), defaultColor, *colorStops.toTypedArray())
 }
