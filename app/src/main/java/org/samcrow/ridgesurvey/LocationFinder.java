@@ -23,12 +23,12 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 
-import org.mapsforge.core.model.LatLong;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import androidx.annotation.NonNull;
+
+import org.maplibre.android.geometry.LatLng;
 
 /**
  * Requests and provides location information
@@ -126,7 +126,7 @@ public class LocationFinder {
     }
 
     private void notifyListeners(Location location) {
-        final LatLong ll = new LatLong(location.getLatitude(), location.getLongitude());
+        final LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
         final double accuracy = location.getAccuracy();
         for (LocationListener listener : mListeners) {
             listener.newLocation(ll, accuracy);
@@ -140,7 +140,7 @@ public class LocationFinder {
          * @param position the location
          * @param accuracy the approximate accuracy of the location, in meters
          */
-        void newLocation(@NonNull LatLong position, double accuracy);
+        void newLocation(@NonNull LatLng position, double accuracy);
     }
 
     private class MyLocationListener implements android.location.LocationListener {

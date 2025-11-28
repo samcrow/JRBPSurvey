@@ -30,4 +30,5 @@
 
     <!-- Map colors -->
     <color name="map_route_line">#CCC</color>
+    <color name="selected_circle">#86FFFFFF</color>
 </resources>

@@ -18,19 +18,14 @@
 package org.samcrow.ridgesurvey.map;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import org.mapsforge.core.graphics.Canvas;
-import org.mapsforge.core.graphics.Color;
-import org.mapsforge.core.graphics.FontFamily;
-import org.mapsforge.core.graphics.FontStyle;
-import org.mapsforge.core.graphics.Paint;
-import org.mapsforge.core.graphics.Style;
-import org.mapsforge.core.model.BoundingBox;
-import org.mapsforge.core.model.LatLong;
-import org.mapsforge.core.model.Point;
-import org.mapsforge.core.util.MercatorProjection;
-import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
-import org.mapsforge.map.layer.Layer;
+import org.maplibre.android.geometry.LatLng;
+import org.maplibre.android.style.sources.GeoJsonSource;
+import org.maplibre.geojson.Feature;
+import org.maplibre.geojson.FeatureCollection;
+import org.maplibre.geojson.LineString;
+import org.maplibre.geojson.Point;
 import org.samcrow.ridgesurvey.Objects;
 import org.samcrow.ridgesurvey.Route;
 import org.samcrow.ridgesurvey.SelectionManager;
@@ -40,48 +35,29 @@ import org.samcrow.ridgesurvey.data.ObservationDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
- * A layer that displays a route
+ * A dynamic data source for routes and sites
+ * <p>
+ * This manages a dynamic {@link org.maplibre.android.style.sources.GeoJsonSource} that contains
+ * a feature collection with a point feature for each site and a line string for a route connecting
+ * the sites on each route.
+ * <p>
+ * Each site point has these properties:
+ * <ul>
+ *     <li>name, string: The site name (usually a number)</li>
+ *     <li>route, string: The name of the route that contains the site</li>
+ *     <li>selected, boolean (optional): If the user has selected this site</li>
+ *     <li>visited, boolean (optional): If the user has recently visited this site and recorded an
+ *     observation</li>
+ * </ul>
+ * Each route has these properties:
+ * <ul><li>route, string: The route name</li></ul>
  */
-public class RouteLayer extends Layer {
-
-    /**
-     * The radius of a site marker, in meters
-     */
-    private static final float MARKER_RADIUS = 10;
-
-    /**
-     * The radius of a marker for a visited site, in meters
-     */
-    private static final float MARKER_RADIUS_VISITED = 6;
-
-    /**
-     * The width of site-connecting lines, in meters
-     */
-    private static final float LINE_WIDTH = 3;
-    /**
-     * The height of site label text, in meters
-     */
-    private static final float SITE_LABEL_HEIGHT = 40;
-
-    /**
-     * Latitude/longitude distance, in degrees, that is the tolerance for clicking to select a site
-     */
-    private static final double CLICK_DISTANCE_THRESHOLD = 0.0005;
-    /**
-     * Radius of the selected site marker, in meters
-     */
-    private static final float SELECTED_RADIUS = 20;
-    /**
-     * Route label text height, pixels
-     */
-    private static final int ROUTE_LABEL_HEIGHT = 24;
-    /**
-     * Threshold to switch between showing route labels and showing site labels
-     */
-    private static final byte LABEL_THRESHOLD = 16;
+public class RouteLayer implements SelectionManager.SelectionListener {
+    public static final String SOURCE_NAME = "sites_routes_dynamic";
 
     /**
      * The observation database
@@ -90,283 +66,64 @@ public class RouteLayer extends Layer {
     private final ObservationDatabase mDatabase;
 
     /**
-     * The approximate center of the route, derived from the route sites
+     * The routes to display
+     * <p>
+     * Each key is a route name.
      */
     @NonNull
-    private final LatLong mCenter;
+    private final Map<String, List<VisitedSite>> mRoutes;
+    /** The current selected site */
+    private @Nullable Site mSelectedSite;
 
-    /**
-     * The paint used to draw site markers
-     */
-    @NonNull
-    private final Paint mPaint;
-
-    /**
-     * A paint used to draw markers for sites that have been visited
-     */
-    @NonNull
-    private final Paint mVisitedPaint;
-
-    /**
-     * The paint used to draw site IDs
-     */
-    @NonNull
-    private final Paint mIdPaint;
-    /**
-     * The paint used to draw contrasting backgrounds of site IDs
-     */
-    @NonNull
-    private final Paint mIdBackgroundPaint;
-
-    /**
-     * The paint used to draw the route name
-     */
-    @NonNull
-    private final Paint mRouteNamePaint;
-
-    /**
-     * The paint used to draw a contrasting background of the route name
-     */
-    @NonNull
-    private final Paint mRouteNameBackgroundPaint;
-
-    /**
-     * A paint used to indicate the selected site
-     */
-    @NonNull
-    private final Paint mSelectedPaint;
-
-    /**
-     * The route to display (not ordered)
-     */
-    @NonNull
-    private final Route mRoute;
-
-    /**
-     * The sites in the route
-     */
-    @NonNull
-    private final List<VisitedSite> mSites;
-
-    /**
-     * The selection manager that tracks the selected site
-     */
-    @NonNull
-    private final SelectionManager mSelectionManager;
+    private final @NonNull GeoJsonSource mSource;
 
     /**
      * Creates a new route layer
      *
      * @param database         an observation database to use. Must not be null.
-     * @param route            the route to display. Must not be null.
-     * @param color            the color to use for this route, in the format used by {@link android.graphics.Color}
+     * @param routes           the routes to display
      * @param selectionManager A selection manager to track the selected site. Must not be null.
      */
-    public RouteLayer(@NonNull ObservationDatabase database, @NonNull Route route, int color,
+    public RouteLayer(@NonNull ObservationDatabase database, @NonNull List<Route> routes,
                       @NonNull SelectionManager selectionManager) {
-        Objects.requireAllNonNull(database, route, selectionManager);
+        Objects.requireAllNonNull(database, routes, selectionManager);
         mDatabase = database;
-        mRoute = route;
-        mCenter = route.getCenter();
 
         // Copy sites in, initially not visited
-        final List<Site> sites = route.getSites();
-        mSites = new ArrayList<>(sites.size());
-        for (Site site : sites) {
-            mSites.add(new VisitedSite(site, false));
+        mRoutes = new TreeMap<>();
+        for (Route route : routes) {
+            final List<VisitedSite> sites = new ArrayList<>(route.getSites().size());
+            for (Site site : route.getSites()) {
+                sites.add(new VisitedSite(site, false));
+            }
+            mRoutes.put(route.getName(), sites);
         }
-
-        mSelectionManager = selectionManager;
-
-        mPaint = AndroidGraphicFactory.INSTANCE.createPaint();
-        mPaint.setColor(color);
-
-        mVisitedPaint = AndroidGraphicFactory.INSTANCE.createPaint();
-        mVisitedPaint.setColor(android.graphics.Color.BLACK);
-
-        mIdPaint = AndroidGraphicFactory.INSTANCE.createPaint();
-        mIdPaint.setColor(Color.BLACK);
-        mIdPaint.setTypeface(FontFamily.SANS_SERIF, FontStyle.BOLD);
-
-        mIdBackgroundPaint = AndroidGraphicFactory.INSTANCE.createPaint();
-        mIdBackgroundPaint.setColor(Color.WHITE);
-        mIdBackgroundPaint.setStyle(Style.STROKE);
-        mIdBackgroundPaint.setTypeface(FontFamily.SANS_SERIF, FontStyle.BOLD);
-
-        mSelectedPaint = AndroidGraphicFactory.INSTANCE.createPaint();
-        mSelectedPaint.setColor(android.graphics.Color.argb(0x40, 0xFF, 0x0, 0x0));
-
-        mRouteNamePaint = AndroidGraphicFactory.INSTANCE.createPaint();
-        mRouteNamePaint.setColor(Color.BLACK);
-        mRouteNamePaint.setTypeface(FontFamily.SANS_SERIF, FontStyle.BOLD);
-        mRouteNamePaint.setTextSize(ROUTE_LABEL_HEIGHT);
-
-        mRouteNameBackgroundPaint = AndroidGraphicFactory.INSTANCE.createPaint(mRouteNamePaint);
-        mRouteNameBackgroundPaint.setColor(Color.WHITE);
-        mRouteNameBackgroundPaint.setStyle(Style.STROKE);
-        mRouteNameBackgroundPaint.setStrokeWidth(4);
-
+        mSelectedSite = null;
+        mSource = new GeoJsonSource(SOURCE_NAME);
         updateVisitedSites();
     }
 
     /**
      * Updates the visited state of each site from the database
      */
-    public synchronized void updateVisitedSites() {
-        for (VisitedSite site : mSites) {
-            final IdentifiedObservation observation = mDatabase.getObservationForSite(site.getSite().getId());
-            if (observation != null) {
-                site.setVisited(true);
-            } else {
-                site.setVisited(false);
+    public void updateVisitedSites() {
+        for (List<VisitedSite> sites : mRoutes.values()) {
+            for (VisitedSite site : sites) {
+                final IdentifiedObservation observation = mDatabase.getObservationForSite(site.getSite().getId());
+                site.setVisited(observation != null);
             }
         }
+        mSource.setGeoJson(makeFeatures(mRoutes, mSelectedSite));
+    }
+
+    public GeoJsonSource getSource() {
+        return mSource;
     }
 
     @Override
-    public synchronized boolean onTap(LatLong tapLatLong, Point layerXY, Point tapXY) {
-        for (VisitedSite visitedSite : mSites) {
-            final Site site = visitedSite.getSite();
-            final double distance = tapLatLong.distance(site.getPosition());
-            if (distance < CLICK_DISTANCE_THRESHOLD) {
-                mSelectionManager.setSelectedSite(site, mRoute);
-                requestRedraw();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public synchronized void draw(BoundingBox boundingBox, byte zoomLevel, Canvas canvas,
-                                  Point topLeftPoint) {
-        final long mapSize = MercatorProjection.getMapSize(zoomLevel, displayModel.getTileSize());
-
-        // Draw lines between sites
-        drawLines(canvas, topLeftPoint, mapSize);
-
-        // Draw sites
-        drawSites(canvas, topLeftPoint, mapSize);
-
-        if (zoomLevel > LABEL_THRESHOLD) {
-            // Draw site labels
-            drawSiteLabels(canvas, topLeftPoint, mapSize);
-        } else {
-            // Draw route name
-            drawRouteLabel(canvas, topLeftPoint, mapSize);
-        }
-    }
-
-    /**
-     * Draws lines between sites
-     */
-    private void drawLines(Canvas canvas, Point topLeftPoint, long mapSize) {
-        Point lastPoint = null;
-        for (VisitedSite visitedSite : mSites) {
-            final Site site = visitedSite.getSite();
-            final LatLong ll = site.getPosition();
-            // Update paint
-            mPaint.setStrokeWidth(
-                    (float) MercatorProjection.metersToPixels(LINE_WIDTH, ll.latitude, mapSize));
-            final double pixelX = MercatorProjection.longitudeToPixelX(ll.longitude,
-                    mapSize) - topLeftPoint.x;
-            final double pixelY = MercatorProjection.latitudeToPixelY(ll.latitude,
-                    mapSize) - topLeftPoint.y;
-
-
-
-            // Draw a line from the previous site to this one
-            if (lastPoint != null) {
-                canvas.drawLine((int) lastPoint.x, (int) lastPoint.y, (int) pixelX,
-                        (int) pixelY, mPaint);
-            }
-            lastPoint = new Point(pixelX, pixelY);
-        }
-    }
-
-    /**
-     * Draws site markers
-     */
-    private void drawSites(Canvas canvas, Point topLeftPoint, long mapSize) {
-        for (VisitedSite visitedSite : mSites) {
-            final Site site = visitedSite.getSite();
-            final LatLong ll = site.getPosition();
-
-            // Update paint
-            mPaint.setStrokeWidth(
-                    (float) MercatorProjection.metersToPixels(LINE_WIDTH, ll.latitude, mapSize));
-            final float markerRadiusMeters = visitedSite.isVisited() ? MARKER_RADIUS_VISITED : MARKER_RADIUS;
-            final int markerRadius = (int) Math.ceil(
-                    MercatorProjection.metersToPixels(markerRadiusMeters, ll.latitude, mapSize));
-
-            final double pixelX = MercatorProjection.longitudeToPixelX(ll.longitude,
-                    mapSize) - topLeftPoint.x;
-            final double pixelY = MercatorProjection.latitudeToPixelY(ll.latitude,
-                    mapSize) - topLeftPoint.y;
-
-
-            // Indicate selected site
-            if (site == mSelectionManager.getSelectedSite()) {
-                final double selectedRadius = MercatorProjection.metersToPixels(SELECTED_RADIUS,
-                        ll.latitude, mapSize);
-                canvas.drawCircle((int) pixelX, (int) pixelY, (int) selectedRadius, mSelectedPaint);
-            }
-
-            // Draw the marker circle: White stroke, then fill
-            canvas.drawCircle((int) pixelX, (int) pixelY, markerRadius, mIdBackgroundPaint);
-            // Different marker for visited sites
-            if (visitedSite.isVisited()) {
-                canvas.drawCircle((int) pixelX, (int) pixelY, markerRadius, mVisitedPaint);
-            } else {
-                canvas.drawCircle((int) pixelX, (int) pixelY, markerRadius, mPaint);
-            }
-        }
-    }
-
-    /**
-     * Draws a label for each site
-     */
-    private void drawSiteLabels(Canvas canvas, Point topLeftPoint, long mapSize) {
-        for (VisitedSite visitedSite : mSites) {
-            final Site site = visitedSite.getSite();
-            final LatLong ll = site.getPosition();
-
-            // Update paint
-            final float textSize = (float) MercatorProjection.metersToPixels(SITE_LABEL_HEIGHT,
-                    ll.latitude,
-                    mapSize);
-            mIdPaint.setTextSize(textSize);
-            mIdBackgroundPaint.setTextSize(textSize);
-            mIdBackgroundPaint.setStrokeWidth(4);
-
-            final int markerRadius = (int) Math.ceil(
-                    MercatorProjection.metersToPixels(MARKER_RADIUS, ll.latitude, mapSize));
-
-            final double pixelX = MercatorProjection.longitudeToPixelX(ll.longitude,
-                    mapSize) - topLeftPoint.x;
-            final double pixelY = MercatorProjection.latitudeToPixelY(ll.latitude,
-                    mapSize) - topLeftPoint.y;
-
-
-            // Draw the site ID centered below the marker
-            final String idString = String.format(Locale.getDefault(), "%d", site.getId());
-            final int textWidth = mIdPaint.getTextWidth(idString);
-            final int textHeight = mIdPaint.getTextHeight(idString);
-            // Stroke with a contrasting background and then fill
-            final int textX = (int) (pixelX - textWidth / 2.0f);
-            final int textY = (int) (pixelY + 1.5 * markerRadius + textHeight);
-            canvas.drawText(idString, textX, textY, mIdBackgroundPaint);
-            canvas.drawText(idString, textX, textY, mIdPaint);
-        }
-    }
-
-    private void drawRouteLabel(Canvas canvas, Point topLeftPoint, long mapSize) {
-        final double centerX= MercatorProjection.longitudeToPixelX(mCenter.getLongitude(), mapSize)
-                - topLeftPoint.x;
-        final double centerY = MercatorProjection.latitudeToPixelY(mCenter.getLatitude(), mapSize)
-                - topLeftPoint.y;
-        canvas.drawText(mRoute.getName(), (int) centerX, (int) centerY, mRouteNameBackgroundPaint);
-        canvas.drawText(mRoute.getName(), (int) centerX, (int) centerY, mRouteNamePaint);
+    public void selectionChanged(@Nullable Site newSelection, @Nullable Route siteRoute) {
+        mSelectedSite = newSelection;
+        mSource.setGeoJson(makeFeatures(mRoutes, mSelectedSite));
     }
 
     /**
@@ -386,7 +143,8 @@ public class RouteLayer extends Layer {
 
         /**
          * Creates a VisitedSite
-         * @param site the site
+         *
+         * @param site    the site
          * @param visited if the site is visited
          */
         VisitedSite(@NonNull Site site, boolean visited) {
@@ -396,6 +154,7 @@ public class RouteLayer extends Layer {
 
         /**
          * Returns the site
+         *
          * @return the site
          */
         @NonNull
@@ -405,6 +164,7 @@ public class RouteLayer extends Layer {
 
         /**
          * Returns whether the site has been visited
+         *
          * @return whether the site has been visited
          */
         boolean isVisited() {
@@ -413,10 +173,49 @@ public class RouteLayer extends Layer {
 
         /**
          * Sets the visited status of the site
+         *
          * @param visited if the site has been visited
          */
         void setVisited(boolean visited) {
             mVisited = visited;
         }
+    }
+
+    private static @NonNull FeatureCollection makeFeatures(@NonNull Map<String, List<VisitedSite>> routes, @Nullable Site selectedSite) {
+        final List<Feature> geometry = makeRoutePoints(routes, selectedSite);
+        geometry.addAll(makeRouteLines(routes));
+        return FeatureCollection.fromFeatures(geometry);
+    }
+
+    private static @NonNull List<Feature> makeRoutePoints(@NonNull Map<String, List<VisitedSite>> routes, @Nullable Site selectedSite) {
+        final List<Feature> points = new ArrayList<>();
+        for (Map.Entry<String, List<VisitedSite>> entry : routes.entrySet()) {
+            final String routeName = entry.getKey();
+            for (VisitedSite site : entry.getValue()) {
+                final Feature siteFeature = site.getSite().asGeoJson();
+                siteFeature.addStringProperty("route", routeName);
+                siteFeature.addBooleanProperty("visited", site.isVisited());
+                siteFeature.addBooleanProperty("selected",
+                        selectedSite != null && selectedSite.getId() == site.getSite().getId());
+                points.add(siteFeature);
+            }
+        }
+        return points;
+    }
+
+    private static @NonNull List<Feature> makeRouteLines(@NonNull Map<String, List<VisitedSite>> routes) {
+        final List<Feature> lines = new ArrayList<>(routes.size());
+        for (Map.Entry<String, List<VisitedSite>> entry : routes.entrySet()) {
+            final String routeName = entry.getKey();
+            final List<Point> routePoints = new ArrayList<>(entry.getValue().size());
+            for (VisitedSite site : entry.getValue()) {
+                final LatLng sitePosition = site.getSite().getPosition();
+                routePoints.add(Point.fromLngLat(sitePosition.getLongitude(), sitePosition.getLatitude()));
+            }
+            final Feature routeFeature = Feature.fromGeometry(LineString.fromLngLats(routePoints));
+            routeFeature.addStringProperty("route", routeName);
+            lines.add(routeFeature);
+        }
+        return lines;
     }
 }

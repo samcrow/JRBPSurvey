@@ -19,6 +19,7 @@ package org.samcrow.ridgesurvey;
 
 import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.createRouteLayers;
 import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.createRouteLines;
+import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.readRoutes;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -45,8 +46,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.room.Room;
 
-import com.caverock.androidsvg.SVG;
-import com.caverock.androidsvg.SVGParseException;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -61,11 +60,6 @@ import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.sources.GeoJsonSource;
 import org.maplibre.android.style.sources.RasterSource;
 import org.maplibre.geojson.FeatureCollection;
-import org.mapsforge.core.model.LatLong;
-import org.mapsforge.core.model.MapPosition;
-import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
-import org.mapsforge.map.android.util.AndroidPreferences;
-import org.mapsforge.map.model.common.PreferencesFacade;
 import org.samcrow.ridgesurvey.data.Database;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
@@ -76,8 +70,10 @@ import org.samcrow.ridgesurvey.data.SimpleTimedEventDao;
 import org.samcrow.ridgesurvey.data.UploadMenuItemController;
 import org.samcrow.ridgesurvey.data.UploadService;
 import org.samcrow.ridgesurvey.data.UploadStatusTracker;
+import org.samcrow.ridgesurvey.map.RouteLayer;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -108,8 +104,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * The initial position of the map
      */
-    private static final MapPosition START_POSITION = new MapPosition(
-            new LatLong(37.4037, -122.2269), (byte) 15);
+    public static final LatLngBounds START_POSITION = new LatLngBounds(37.4175457, -122.1919819, 37.3909509, -122.2600484);
     /**
      * The permission that allows the application to access the user's location
      */
@@ -123,14 +118,17 @@ public class MainActivity extends AppCompatActivity {
      * The map view
      */
     private MapView mMap;
+
+    /**
+     * An immutable list of all routes, with their sites
+     * <p>
+     * This is always non-null after {@link #onCreate(Bundle)}.
+     */
+    private List<Route> mRoutes;
     /**
      * The preferences interface
      */
     private SharedPreferences mPreferences;
-    /**
-     * The preferences facade (wrapping {@link #mPreferences} that the map view uses to save preferences
-     */
-    private PreferencesFacade mPreferencesFacade;
     /**
      * The selection manager
      */
@@ -189,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up map graphics
         MapLibre.getInstance(this);
-        AndroidGraphicFactory.createInstance(getApplication());
 
         setContentView(R.layout.activity_main);
 
@@ -204,7 +201,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        mSelectionManager = new SelectionManager();
+        mRoutes = readRoutes(this);
+        mSelectionManager = new SelectionManager(mRoutes);
 
         // Set up upload status tracker
         mUploadStatusTracker = new UploadStatusTracker(this);
@@ -225,7 +223,6 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(new NetworkBroadcastReceiver(), tickFilter);
 
         mPreferences = getSharedPreferences(TAG, MODE_PRIVATE);
-        mPreferencesFacade = new AndroidPreferences(mPreferences);
         try {
             setUpMap();
         } catch (IOException e) {
@@ -255,11 +252,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         mMap.onPause();
-
-        if (mMap != null && mPreferencesFacade != null) {
-//            mMap.getModel().save(mPreferencesFacade);
-            mPreferencesFacade.save();
-        }
 
         if (mSelectionManager != null && mPreferences != null) {
             // Save selected colony
@@ -320,6 +312,8 @@ public class MainActivity extends AppCompatActivity {
     private void setUpMap() throws IOException {
         mMap = findViewById(R.id.map);
         mMap.getMapAsync(map -> {
+            final RouteLayer routeLayer = new RouteLayer(new ObservationDatabase(this), mRoutes, mSelectionManager);
+            mSelectionManager.addSelectionListener(routeLayer);
             final String tileJsonUrl;
             try {
                 tileJsonUrl = mTileServer.getTileJsonUrl().get();
@@ -327,23 +321,22 @@ public class MainActivity extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
             final RasterSource imagery = new RasterSource("smco_2022_tiles", tileJsonUrl);
-            final FeatureCollection routeLineFeatures = createRouteLines(this);
-            final GeoJsonSource routeLines = new GeoJsonSource("route_lines", routeLineFeatures);
 
             final Style.Builder style = new Style.Builder()
                     .fromUri("asset://map_style.json")
-                    .withSources(imagery, routeLines);
+                    .withSources(imagery, routeLayer.getSource());
             for (Layer layer : createRouteLayers(this)) {
                 style.withLayer(layer);
             }
             map.setStyle(style);
 
-            final CameraPosition initialCamera = map.getCameraForLatLngBounds(new LatLngBounds(37.4175457, -122.1919819, 37.3909509, -122.2600484));
+            final CameraPosition initialCamera = map.getCameraForLatLngBounds(START_POSITION);
             assert initialCamera != null;
             map.setCameraPosition(initialCamera);
             map.getUiSettings().setRotateGesturesEnabled(false);
             map.getUiSettings().setAttributionEnabled(false);
             map.getUiSettings().setLogoEnabled(false);
+            map.addOnMapClickListener(mSelectionManager);
         });
 
         // Location layer
@@ -527,25 +520,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         mMap.onDestroy();
         mTileServer.close();
-    }
-
-    /**
-     * Returns a drawable that represents an icon used to display the user's location
-     *
-     * @return an icon drawable
-     */
-    private Drawable getMyLocationDrawable() {
-        try {
-            final SVG svg = SVG.getFromResource(getResources(), R.raw.my_location_icon);
-            // Resize based on screen density
-            final float density = getResources().getDisplayMetrics().density;
-            svg.setDocumentWidth(svg.getDocumentWidth() * density);
-            svg.setDocumentHeight(svg.getDocumentHeight() * density);
-            final Picture picture = svg.renderToPicture();
-            return new PictureDrawable(picture);
-        } catch (SVGParseException e) {
-            throw new RuntimeException("Could not load my location image", e);
-        }
     }
 
     /**

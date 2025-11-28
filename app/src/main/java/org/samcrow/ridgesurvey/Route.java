@@ -19,7 +19,9 @@ package org.samcrow.ridgesurvey;
 
 import androidx.annotation.NonNull;
 
-import org.mapsforge.core.model.LatLong;
+import org.maplibre.android.geometry.LatLng;
+import org.maplibre.geojson.Feature;
+import org.maplibre.geojson.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,50 +78,15 @@ public class Route {
         return new ArrayList<>(mSites);
     }
 
-    /**
-     * Returns the center point of this route, calculated from the sites with an implementation-
-     * defined method
-     * @return the center point
-     */
-    @NonNull
-    public LatLong getCenter() {
-        if (mSites.isEmpty()) {
-            throw new IllegalStateException("Can't get the center of an empty route");
-        }
-        double latitudeSum = 0;
-        double longitudeSum = 0;
-
-        // For implementation, try the average
-        for (Site site : mSites) {
-            latitudeSum += site.getPosition().latitude;
-            longitudeSum += site.getPosition().longitude;
-        }
-
-        return new LatLong(latitudeSum / mSites.size(), longitudeSum / mSites.size());
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
+        if (o == null || getClass() != o.getClass()) return false;
         Route route = (Route) o;
-
-        if (!mName.equals(route.mName)) {
-            return false;
-        }
-        return mSites.equals(route.mSites);
-
+        return java.util.Objects.equals(mName, route.mName) && java.util.Objects.equals(mSites, route.mSites);
     }
 
     @Override
     public int hashCode() {
-        int result = mName.hashCode();
-        result = 31 * result + mSites.hashCode();
-        return result;
+        return java.util.Objects.hash(mName, mSites);
     }
 }

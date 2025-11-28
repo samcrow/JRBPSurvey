@@ -20,13 +20,15 @@ package org.samcrow.ridgesurvey;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
+import androidx.core.os.ParcelCompat;
 
-import org.mapsforge.core.model.LatLong;
-import org.samcrow.utm.ConvertedLatLon;
+import org.maplibre.android.geometry.LatLng;
+import org.maplibre.geojson.Feature;
+import org.maplibre.geojson.Point;
 
 /**
  * Represents a site that can be visited
- *
+ * <p>
  * Instances of this class are immutable.
  */
 public final class Site implements Parcelable {
@@ -39,30 +41,16 @@ public final class Site implements Parcelable {
     /**
      * The position of this site
      */
-    @NonNull
-    private final LatLong mPosition;
+    private final @NonNull LatLng mPosition;
 
     /**
      * Creates a new site at a position
      * @param position the position
      */
-    public Site(@NonNull LatLong position, int id) {
+    public Site(@NonNull LatLng position, int id) {
         Objects.requireNonNull(position);
         mPosition = position;
         mId = id;
-    }
-
-    /**
-     * Creates a Site with a position converted from UTM coordinates
-     * @param hemisphere the hemisphere of the coordinates
-     * @param longZone the UTM longitude zone
-     * @param easting the east coordinate, in meters
-     * @param northing the west coordinate, in meters
-     * @return a Site at the provided location
-     */
-    public static Site fromUtm(ConvertedLatLon.Hemisphere hemisphere, int longZone, double easting, double northing, int id) {
-        final ConvertedLatLon converted = ConvertedLatLon.Companion.fromUtm(hemisphere, longZone, easting, northing);
-        return new Site(new LatLong(converted.getLatitude(), converted.getLongitude()), id);
     }
 
     /**
@@ -70,7 +58,7 @@ public final class Site implements Parcelable {
      * @return the position
      */
     @NonNull
-    public LatLong getPosition() {
+    public LatLng getPosition() {
         return mPosition;
     }
 
@@ -82,6 +70,14 @@ public final class Site implements Parcelable {
         return mId;
     }
 
+    public @NonNull Feature asGeoJson() {
+        final Feature feature = Feature.fromGeometry(Point.fromLngLat(mPosition.getLongitude(), mPosition.getLatitude()));
+        feature.addStringProperty("name", Integer.toString(mId));
+        feature.addBooleanProperty("visited", false);
+        return feature;
+    }
+
+    @NonNull
     @Override
     public String toString() {
         return "Site{" +
@@ -119,17 +115,15 @@ public final class Site implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mId);
-        dest.writeDouble(mPosition.getLatitude());
-        dest.writeDouble(mPosition.getLongitude());
+        dest.writeParcelable(mPosition, 0);
     }
 
     public static Parcelable.Creator<Site> CREATOR = new Creator<Site>() {
         @Override
         public Site createFromParcel(Parcel source) {
             final int id = source.readInt();
-            final double latitude = source.readDouble();
-            final double longitude = source.readDouble();
-            final LatLong position = new LatLong(latitude, longitude);
+            final LatLng position = ParcelCompat.readParcelable(source, LatLng.class.getClassLoader(), LatLng.class);
+            Objects.requireNonNull(position);
             return new Site(position, id);
         }
 

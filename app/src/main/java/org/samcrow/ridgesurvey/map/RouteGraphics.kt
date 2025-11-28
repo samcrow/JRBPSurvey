@@ -23,8 +23,10 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.expressions.Expression.color
+import org.maplibre.android.style.expressions.Expression.eq
 import org.maplibre.android.style.expressions.Expression.get
 import org.maplibre.android.style.expressions.Expression.literal
 import org.maplibre.android.style.expressions.Expression.match
@@ -41,7 +43,10 @@ import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.LineString
 import org.maplibre.geojson.Point
 import org.samcrow.ridgesurvey.R
+import org.samcrow.ridgesurvey.Route
+import org.samcrow.ridgesurvey.Site
 import org.samcrow.ridgesurvey.color.Palette
+import java.util.Collections
 import java.util.TreeMap
 
 /** Asset path to a GeoJSON file containing the sites */
@@ -72,18 +77,39 @@ internal fun createRouteLines(context: Context): FeatureCollection {
 }
 
 /**
+ * Reads routes from embedded resources/assets and returns an immutable list of routes
+ */
+internal fun readRoutes(context: Context): List<Route> {
+    val sites = parseSites(context)
+    val routeOrders = parseRouteOrders(context)
+
+    val routes = routeOrders.map { (routeName, siteNames) ->
+        val sites = siteNames.map { name ->
+            val sitePoint = sites.remove(name) ?:  throw IllegalStateException("Site $name missing or already used in another route")
+            Site(LatLng(sitePoint.latitude(), sitePoint.longitude()), name)
+        }
+        Route(routeName, sites)
+    }
+
+    if (sites.isNotEmpty()) {
+        Log.w(TAG, "Sites are not in any route: ${sites.keys}")
+    }
+    return Collections.unmodifiableList(routes);
+}
+
+/**
  * Returns a map where each key is a route name, corresponding to a list of site names in a
  * reasonable walking order for that route
  */
-private fun parseRouteOrders(context: Context): Map<String, List<String>> {
+private fun parseRouteOrders(context: Context): Map<String, List<Int>> {
     val routeOrderJson: JsonObject
     context.resources.openRawResource(R.raw.route_order).reader().use { stream ->
         routeOrderJson = Gson().fromJson(stream, JsonObject::class.java)
     }
-    val routeOrders: MutableMap<String, List<String>> = TreeMap()
+    val routeOrders: MutableMap<String, List<Int>> = TreeMap()
     for ((routeName, sitesJson) in routeOrderJson.entrySet()) {
         sitesJson as JsonArray
-        val sites = sitesJson.map { it.toString() }
+        val sites = sitesJson.map { it.asInt }
         val prevRoute = routeOrders.put(routeName, sites)
         if (prevRoute != null) {
             throw IllegalStateException("Duplicate route $routeName")
@@ -95,16 +121,16 @@ private fun parseRouteOrders(context: Context): Map<String, List<String>> {
 /**
  * Returns a map where each key is a site name, corresponding to the site position
  */
-private fun parseSites(context: Context): MutableMap<String, Point> {
+private fun parseSites(context: Context): MutableMap<Int, Point> {
     val root: JsonObject
     context.assets.open(SITES_PATH).reader().use { stream ->
         root = Gson().fromJson(stream, JsonObject::class.java)
     }
-    val sites: MutableMap<String, Point> = TreeMap()
+    val sites: MutableMap<Int, Point> = TreeMap()
     val features = root.getAsJsonArray("features")!!
     for (feature in features) {
         feature as JsonObject
-        val siteName = feature.getAsJsonObject("properties").get("name").asString
+        val siteName = feature.getAsJsonObject("properties").get("name").asInt
         val coordinates = feature.getAsJsonObject("geometry").getAsJsonArray("coordinates")
         val longitude = coordinates[0].asDouble
         val latitude = coordinates[1].asDouble
@@ -116,7 +142,7 @@ private fun parseSites(context: Context): MutableMap<String, Point> {
     return sites
 }
 
-private fun lookUpRoute(siteNames: List<String>, sites: MutableMap<String, Point>): LineString {
+private fun lookUpRoute(siteNames: List<Int>, sites: MutableMap<Int, Point>): LineString {
     val sitePoints = siteNames.map { name ->
         sites.remove(name)
             ?: throw IllegalStateException("Site $name missing or already used in another route")
@@ -125,21 +151,28 @@ private fun lookUpRoute(siteNames: List<String>, sites: MutableMap<String, Point
 }
 
 internal fun createRouteLayers(context: Context): List<Layer> {
+    val selectedCircle = CircleLayer("route_selected_circle", RouteLayer.SOURCE_NAME)
+    selectedCircle.setProperties(
+        circleRadius(literal(16)),
+        circleColor(context.getColor(R.color.selected_circle))
+    )
+    selectedCircle.setFilter(eq(get("selected"), literal(true)))
+
     val color = createRouteColor(context)
 
-    val lineLayer = LineLayer("per_route_lines", "route_lines")
+    val lineLayer = LineLayer("per_route_lines", RouteLayer.SOURCE_NAME)
     lineLayer.setProperties(
         lineWidth(literal(3)),
         lineColor(color)
     )
 
-    val circleLayer = CircleLayer("per_route_circles", "site_points")
+    val circleLayer = CircleLayer("per_route_circles", RouteLayer.SOURCE_NAME)
     circleLayer.setProperties(
         circleRadius(literal(8)),
         circleColor(color)
     )
 
-    return listOf(lineLayer, circleLayer)
+    return listOf(selectedCircle, lineLayer, circleLayer)
 }
 
 private fun createRouteColor(context: Context): Expression {

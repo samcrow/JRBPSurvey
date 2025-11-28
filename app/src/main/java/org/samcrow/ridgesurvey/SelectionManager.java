@@ -17,16 +17,34 @@
 
 package org.samcrow.ridgesurvey;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.maplibre.android.geometry.LatLng;
+import org.maplibre.android.maps.MapLibreMap;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Tracks a selected site
  */
-public class SelectionManager {
+public class SelectionManager implements MapLibreMap.OnMapClickListener {
+    /**
+     * Maximum distance between a click location and a site to select the site
+     * <p>
+     * If the click location is further than this from any site, it will not change the selection.
+     */
+    public static final double CLICK_MAX_DISTANCE_M = 40.0;
+    private static final String TAG = "SelectionManager";
+    private final @NonNull List<RawSite> mSites;
 
     /**
      * The current selected site, or null if none is selected
@@ -59,7 +77,10 @@ public class SelectionManager {
     /**
      * Creates a new SelectionManager with no site selected
      */
-    public SelectionManager() {
+    public SelectionManager(@NonNull List<Route> routes) {
+        final Stream<RawSite> sitesStream = routes.stream()
+                .flatMap(route -> route.getSites().stream().map(site -> new RawSite(site, route)));
+        mSites = sitesStream.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         mSelectedSite = null;
         mSelectedSiteRoute = null;
         mListeners = new LinkedHashSet<>();
@@ -112,5 +133,34 @@ public class SelectionManager {
         mListeners.add(listener);
         // Initialize the selection
         listener.selectionChanged(mSelectedSite, mSelectedSiteRoute);
+    }
+
+    /**
+     * Handles a click on the map. If the click location is near a site, this updates the selection
+     * and notifies the listeners.
+     *
+     * @param clickLocation the map location
+     * @return true if the click location is near a site
+     */
+    @Override
+    public boolean onMapClick(@NonNull LatLng clickLocation) {
+        final Optional<RawSite> maybeClosestSite = mSites.stream()
+                .min(Comparator.comparingDouble(
+                        site -> clickLocation.distanceTo(site.site.getPosition())));
+        if (maybeClosestSite.isPresent()) {
+            final @NonNull RawSite closestSite = maybeClosestSite.get();
+            if (closestSite.site.getPosition().distanceTo(clickLocation) <= CLICK_MAX_DISTANCE_M) {
+                Log.d(TAG, "Clicked on " + closestSite.site.getId());
+                setSelectedSite(closestSite.site, closestSite.route);
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private record RawSite(@NonNull Site site, @NonNull Route route) {
     }
 }

@@ -17,6 +17,8 @@
 
 package org.samcrow.ridgesurvey;
 
+import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.readRoutes;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -65,7 +67,7 @@ public class StartRouteDialogFragment extends AppCompatDialogFragment {
         newRouteNameDisplay = dialog.findViewById(R.id.labelSelectedRoute);
         startButton = dialog.findViewById(R.id.newRouteFormStartButton);
 
-        final Activity activity = Objects.requireNonNull(getActivity());
+        final Activity activity = requireActivity();
         final SharedPreferences prefs = activity.getPreferences(Context.MODE_PRIVATE);
 
         final String savedTabletId = prefs.getString("tablet_id", null);
@@ -154,8 +156,7 @@ public class StartRouteDialogFragment extends AppCompatDialogFragment {
 
     @NonNull
     private String[] loadRouteNames() throws IOException, JSONException {
-        final List<Route> routes = SiteStorage.readRoutes(
-                getResources().openRawResource(R.raw.sites));
+        final List<Route> routes = readRoutes(requireContext());
         final String[] routeNames = new String[routes.size()];
         for (int i = 0; i < routes.size(); i++) {
             routeNames[i] = routes.get(i).getName();
@@ -164,13 +165,13 @@ public class StartRouteDialogFragment extends AppCompatDialogFragment {
     }
 
     private void saveGlobalTabletId(String tabletId) {
-        final SharedPreferences globalPrefs = Objects.requireNonNull(getContext()).getSharedPreferences("tablet_properties", Context.MODE_PRIVATE);
+        final SharedPreferences globalPrefs = requireContext().getSharedPreferences("tablet_properties", Context.MODE_PRIVATE);
         final SharedPreferences.Editor editor = globalPrefs.edit();
         editor.putString("tablet_id", tabletId);
         editor.apply();
     }
 
     private void showValueRequiredDialog(String fieldName) {
-        new AlertDialog.Builder(Objects.requireNonNull(getActivity())).setMessage(String.format("Please fill in the \"%s\" field", fieldName)).show();
+        new AlertDialog.Builder(requireActivity()).setMessage(String.format("Please fill in the \"%s\" field", fieldName)).show();
     }
 }
