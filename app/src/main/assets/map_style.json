@@ -110,16 +110,6 @@
       }
     },
     {
-      "id": "all_site_circles",
-      "type": "circle",
-      "source": "site_points",
-      "paint": {
-        "circle-radius": 5,
-        "circle-color": "rgba(161, 81, 152, 1)",
-        "circle-blur": 0
-      }
-    },
-    {
       "id": "route_labels",
       "type": "symbol",
       "source": "route_centroids",

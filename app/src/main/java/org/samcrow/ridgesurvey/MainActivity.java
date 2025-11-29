@@ -320,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
                     .fromUri("asset://map_style.json")
                     .withSources(imagery, mRouteLayer.getSource());
             for (Layer layer : createRouteLayers(this)) {
-                style.withLayer(layer);
+                style.withLayerBelow(layer, "all_site_labels");
             }
             map.setStyle(style);
 
