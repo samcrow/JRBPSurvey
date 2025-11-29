@@ -34,6 +34,7 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
@@ -88,15 +89,6 @@ public class MainActivity extends AppCompatActivity {
      */
     private static final String TAG = MainActivity.class.getSimpleName();
     /**
-     * A code used when starting a DataEntryActivity to get a result from it
-     */
-    private static final int REQUEST_CODE_ENTRY = 13393;
-    /**
-     * A code used when starting an ObservationListActivity (really used to get a callback when
-     * the observation edit activity closes)
-     */
-    private static final int REQUEST_CODE_OBSERVATION_LIST = 13621;
-    /**
      * The initial position of the map
      */
     public static final LatLngBounds START_POSITION = new LatLngBounds(37.4175457, -122.1919819, 37.3909509, -122.2600484);
@@ -135,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
     private Database mDatabase;
     private RouteLayer mRouteLayer;
     private PermissionsManager mLocationPermissions;
+    private ActivityResultLauncher<DataEntryActivity.Arguments> mDataEntryLauncher;
+    private ActivityResultLauncher<IdentifiedObservation> mObservationEditLauncher;
+    private ActivityResultLauncher<Void> mObservationListLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,6 +162,14 @@ public class MainActivity extends AppCompatActivity {
             setTitle(String.format("%s - %s", getString(R.string.map), mRouteState.getRouteName()));
         }
 
+        mDataEntryLauncher = registerForActivityResult(new DataEntryActivity.EntryContract(),
+                this::onDataEntryClosed);
+        mObservationEditLauncher =
+                registerForActivityResult(new ObservationEditActivity.EditContract(),
+                        this::onDataEntryClosed);
+        mObservationListLauncher = registerForActivityResult(new ObservationListActivity.Contract(),
+                (unused) -> onObservationListClosed());
+
         // Set up map graphics
         MapLibre.getInstance(this);
 
@@ -176,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
         if (bar != null) {
             bar.setDisplayHomeAsUpEnabled(true);
             if (mRouteState.isTestMode()) {
-                final int color = getResources().getColor(R.color.testModeToolbar);
+                final int color = getResources().getColor(R.color.testModeToolbar, null);
                 bar.setBackgroundDrawable(new ColorDrawable(color));
                 final View timerFragment = findViewById(R.id.timer_fragment);
                 timerFragment.setBackgroundColor(color);
@@ -374,7 +377,7 @@ public class MainActivity extends AppCompatActivity {
         final MenuItem editItem = menu.findItem(R.id.edit_item);
         editItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
+            public boolean onMenuItemClick(@NonNull MenuItem item) {
                 final Site selectedSite = mSelectionManager.getSelectedSite();
                 final Route selectedSiteRoute = mSelectionManager.getSelectedSiteRoute();
                 if (selectedSite != null && selectedSiteRoute != null) {
@@ -383,10 +386,12 @@ public class MainActivity extends AppCompatActivity {
                     final IdentifiedObservation lastObservation = database.getObservationForSite(selectedSite.getId());
                     // If this site has been visited, edit the most recent observation
                     if (lastObservation != null) {
-                        startObservationEditActivity(lastObservation);
+                        mObservationEditLauncher.launch(lastObservation);
                     } else {
                         // Otherwise create a new observation
-                        startDataEntryActivity(selectedSite, selectedSiteRoute);
+                        mDataEntryLauncher.launch(new DataEntryActivity.Arguments(selectedSite,
+                                selectedSiteRoute,
+                                mRouteState));
                     }
                 } else {
                     new AlertDialog.Builder(MainActivity.this)
@@ -402,9 +407,8 @@ public class MainActivity extends AppCompatActivity {
         final MenuItem viewObservationsItem = menu.findItem(R.id.view_observations_item);
         viewObservationsItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                final Intent intent = new Intent(MainActivity.this, ObservationListActivity.class);
-                startActivityForResult(intent, REQUEST_CODE_OBSERVATION_LIST);
+            public boolean onMenuItemClick(@NonNull MenuItem item) {
+                mObservationListLauncher.launch(null);
                 return true;
             }
         });
@@ -412,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
         final MenuItem uploadItem = menu.findItem(R.id.upload_item);
         uploadItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
+            public boolean onMenuItemClick(@NonNull MenuItem item) {
                 // Start the upload service
                 startUpload();
                 return true;
@@ -431,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
         final MenuItem viewEventsItem = menu.findItem(R.id.view_events_item);
         viewEventsItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
+            public boolean onMenuItemClick(@NonNull MenuItem item) {
                 final TimedEventFragment fragment = TimedEventFragment.newInstance();
                 fragment.show(getSupportFragmentManager(), "timed events");
                 return true;
@@ -444,7 +448,7 @@ public class MainActivity extends AppCompatActivity {
     private void initSensorMenuItem(@NonNull MenuItem item, @NonNull String title, @NonNull String eventName) {
         item.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
+            public boolean onMenuItemClick(@NonNull MenuItem item) {
                 final TimePickerDialogFragment fragment = new TimePickerDialogFragment(title);
                 fragment.setOnTimePickedListener(new TimePickerDialogFragment.TimePickedListener() {
                     @Override
@@ -472,38 +476,23 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void startObservationEditActivity(IdentifiedObservation observation) {
-        final Intent intent = new Intent(this, ObservationEditActivity.class);
-        intent.putExtra(ObservationEditActivity.EXTRA_OBSERVATION, observation);
-        startActivityForResult(intent, REQUEST_CODE_ENTRY);
-    }
-
     /**
-     * Starts an activity to record a new observation for the selected site
+     * The data entry or observation edit activity closed, and we may need to update the map
      */
-    private void startDataEntryActivity(Site selectedSite, Route selectedSiteRoute) {
-        final Intent intent = new Intent(this, DataEntryActivity.class);
-        intent.putExtra(DataEntryActivity.ARG_SITE, selectedSite);
-        intent.putExtra(DataEntryActivity.ARG_ROUTE, selectedSiteRoute.getName());
-        intent.putExtra(DataEntryActivity.ARG_ROUTE_STATE, mRouteState);
-        startActivityForResult(intent, REQUEST_CODE_ENTRY);
+    private void onDataEntryClosed(boolean createdOrUpdated) {
+        if (!createdOrUpdated) {
+            return;
+        }
+        // The data entry activity just returned and an observation was recorded
+        // Deselect the site so that the user does not accidentally enter an observation
+        // for it after moving to another site
+        mSelectionManager.setSelectedSite(null, null);
+        mRouteLayer.updateVisitedSites();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_ENTRY && resultCode == RESULT_OK) {
-            // The data entry activity just returned and an observation was recorded
-
-            // Deselect the site so that the user does not accidentally enter an observation
-            // for it after moving to another site
-            mSelectionManager.setSelectedSite(null, null);
-            mRouteLayer.updateVisitedSites();
-        }
-        if (requestCode == REQUEST_CODE_OBSERVATION_LIST) {
-            // Observation list has closed, clear selection
-            mSelectionManager.setSelectedSite(null, null);
-        }
+    private void onObservationListClosed() {
+        // Observation list has closed, clear selection
+        mSelectionManager.setSelectedSite(null, null);
     }
 
     @Override

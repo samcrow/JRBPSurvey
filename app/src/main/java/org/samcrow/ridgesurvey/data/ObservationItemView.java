@@ -19,7 +19,6 @@ package org.samcrow.ridgesurvey.data;
 
 import android.content.Context;
 import android.content.Intent;
-import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -27,6 +26,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -40,7 +41,7 @@ import java.util.Locale;
  */
 public class ObservationItemView extends LinearLayout {
 
-    private final int PADDING = 30;
+    private static final int PADDING = 30;
 
     /**
      * The observation to display
@@ -82,14 +83,14 @@ public class ObservationItemView extends LinearLayout {
         setOrientation(HORIZONTAL);
 
         mPrimaryText = new TextView(getContext());
-        mPrimaryText.setTextAppearance(getContext(), android.R.style.TextAppearance_Large);
+        mPrimaryText.setTextAppearance(android.R.style.TextAppearance_Large);
         final LayoutParams primaryParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         primaryParams.setMargins(PADDING, PADDING, PADDING, PADDING);
         primaryParams.gravity = Gravity.START | Gravity.CENTER_VERTICAL;
 
         mSecondaryText = new TextView(getContext());
-        mSecondaryText.setTextAppearance(getContext(), android.R.style.TextAppearance_Medium);
+        mSecondaryText.setTextAppearance(android.R.style.TextAppearance_Medium);
         final LayoutParams secondaryParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         secondaryParams.setMargins(PADDING, PADDING, PADDING, PADDING);
@@ -155,8 +156,8 @@ public class ObservationItemView extends LinearLayout {
      * Opens an activity to edit the observation
      */
     private void openEditActivity() {
-        final Intent intent = new Intent(getContext(), ObservationEditActivity.class);
-        intent.putExtra(ObservationEditActivity.EXTRA_OBSERVATION, mObservation);
+        final Intent intent =
+                new ObservationEditActivity.EditContract().createIntent(getContext(), mObservation);
         getContext().startActivity(intent);
     }
 }

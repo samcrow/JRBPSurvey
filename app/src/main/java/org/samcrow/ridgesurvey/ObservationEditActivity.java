@@ -17,7 +17,9 @@
 
 package org.samcrow.ridgesurvey;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
@@ -27,6 +29,10 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
@@ -39,12 +45,31 @@ public class ObservationEditActivity extends ObservationActivity {
     /**
      * An extra key for the observation to edit
      */
-    public static String EXTRA_OBSERVATION = ObservationEditActivity.class.getName() + ".EXTRA_OBSERVATION";
+    private static final String EXTRA_OBSERVATION = ObservationEditActivity.class.getName() + ".EXTRA_OBSERVATION";
 
     /**
      * The observation being edited
      */
     private IdentifiedObservation mObservation;
+
+    /**
+     * This activity's contract requires a non-null {@link IdentifiedObservation} and returns
+     * true if the activity created/updated an observation, or false otherwise
+     */
+    public static class EditContract extends ActivityResultContract<IdentifiedObservation, Boolean> {
+        @NonNull
+        @Override
+        public Intent createIntent(@NonNull Context context, IdentifiedObservation observation) {
+            final Intent intent = new Intent(context, ObservationEditActivity.class);
+            intent.putExtra(ObservationEditActivity.EXTRA_OBSERVATION, observation);
+            return intent;
+        }
+
+        @Override
+        public Boolean parseResult(int i, @Nullable Intent intent) {
+            return i == Activity.RESULT_OK;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

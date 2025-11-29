@@ -17,6 +17,7 @@
 
 package org.samcrow.ridgesurvey;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -28,6 +29,7 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.Nullable;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
 import org.samcrow.ridgesurvey.data.ObservationListAdapter;
@@ -35,11 +37,27 @@ import org.samcrow.ridgesurvey.data.UploadService;
 
 import java.util.List;
 
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class ObservationListActivity extends AppCompatActivity {
+
+    public static class Contract extends ActivityResultContract<Void, Void> {
+
+        @NonNull
+        @Override
+        public Intent createIntent(@NonNull Context context, Void unused) {
+            return new Intent(context, ObservationListActivity.class);
+        }
+
+        @Override
+        public Void parseResult(int i, @Nullable Intent intent) {
+            return null;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

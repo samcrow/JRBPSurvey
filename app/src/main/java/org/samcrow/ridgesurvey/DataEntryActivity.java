@@ -18,6 +18,7 @@
 package org.samcrow.ridgesurvey;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.samcrow.ridgesurvey.data.Observation;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
@@ -37,6 +39,8 @@ import org.samcrow.ridgesurvey.data.UploadStatusTracker;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /**
@@ -56,12 +60,31 @@ public class DataEntryActivity extends ObservationActivity {
     /**
      * The argument key used to provide a site
      */
-    public static final String ARG_SITE = DataEntryActivity.class.getName() + ".ARG_SITE";
+    private static final String ARG_SITE = DataEntryActivity.class.getName() + ".ARG_SITE";
     /**
      * The argument key used to provide the name of the route that the site is on
      */
-    public static final String ARG_ROUTE = DataEntryActivity.class.getName() + ".ARG_ROUTE";
-    public static final String ARG_ROUTE_STATE = DataEntryActivity.class.getName() + ".ARG_ROUTE_STATE";
+    private static final String ARG_ROUTE = DataEntryActivity.class.getName() + ".ARG_ROUTE";
+    private static final String ARG_ROUTE_STATE = DataEntryActivity.class.getName() + ".ARG_ROUTE_STATE";
+
+    public record Arguments(@NonNull Site site, @NonNull Route route, @NonNull RouteState routeState) {}
+    public static class EntryContract extends ActivityResultContract<Arguments, Boolean> {
+        @NonNull
+        @Override
+        public Intent createIntent(@NonNull Context context, Arguments arguments) {
+            final Intent intent = new Intent(context, DataEntryActivity.class);
+            intent.putExtra(ARG_SITE, arguments.site);
+            intent.putExtra(ARG_ROUTE, arguments.route.getName());
+            intent.putExtra(ARG_ROUTE_STATE, arguments.routeState);
+            return intent;
+        }
+
+        @Override
+        public Boolean parseResult(int i, @Nullable Intent intent) {
+            return i == DataEntryActivity.RESULT_OK;
+        }
+    }
+
     /**
      * The site where the entry is taking place
      */
