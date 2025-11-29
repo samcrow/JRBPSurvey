@@ -234,7 +234,8 @@ public final class ObservationDatabase {
                     new String[]{Integer.toString(siteId)},
                     null,
                     null,
-                    "time DESC")) {
+                    "time DESC",
+                    "1")) {
                 if (result.moveToNext()) {
                     return createObservation(result);
                 } else {

@@ -20,6 +20,8 @@ package org.samcrow.ridgesurvey;
 import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.createRouteLayers;
 import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.readRoutes;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -33,8 +35,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,6 +55,12 @@ import org.joda.time.format.DateTimeFormat;
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.geometry.LatLngBounds;
+import org.maplibre.android.location.LocationComponent;
+import org.maplibre.android.location.LocationComponentActivationOptions;
+import org.maplibre.android.location.LocationComponentOptions;
+import org.maplibre.android.location.engine.LocationEngineRequest;
+import org.maplibre.android.location.permissions.PermissionsListener;
+import org.maplibre.android.location.permissions.PermissionsManager;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.style.layers.Layer;
@@ -69,8 +80,6 @@ import org.samcrow.ridgesurvey.map.RouteLayer;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -105,10 +114,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String LOCATION_PERMISSION = "android.permission.ACCESS_FINE_LOCATION";
     private static final String SELECTED_SITE_KEY = MainActivity.class.getName() + ".SELECTED_SITE_KEY";
     /**
-     * The executor that runs asynchronous layer site updates
-     */
-    private final ExecutorService mLayerUpdateExecutor = Executors.newSingleThreadExecutor();
-    /**
      * The map view
      */
     private MapView mMap;
@@ -138,9 +143,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Database mDatabase;
 
-    // For testing
     private TileServer mTileServer;
     private RouteLayer mRouteLayer;
+    private PermissionsManager mLocationPermissions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -219,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
 
         mPreferences = getSharedPreferences(TAG, MODE_PRIVATE);
         try {
-            setUpMap();
+            setUpMap(savedInstanceState);
         } catch (IOException e) {
             new AlertDialog.Builder(this)
                     .setTitle(R.string.failed_to_load_map)
@@ -288,24 +293,18 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == LOCATION_PERMISSION_CODE) {
-            for (int i = 0; i < permissions.length; i++) {
-                final String permission = permissions[i];
-                final int result = grantResults[i];
-                // If location access was granted, start location finding
-                if (permission.equals(
-                        LOCATION_PERMISSION) && result == PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Request location
-                }
-            }
+        if (mLocationPermissions != null) {
+            mLocationPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
     /**
      * Sets up the map view in {@link #mMap}
      */
-    private void setUpMap() throws IOException {
+    @SuppressLint("MissingPermission")
+    private void setUpMap(@Nullable Bundle savedInstanceState) throws IOException {
         mMap = findViewById(R.id.map);
+        mMap.onCreate(savedInstanceState);
         mMap.getMapAsync(map -> {
             mRouteLayer = new RouteLayer(new ObservationDatabase(this), mRoutes, mSelectionManager);
             mSelectionManager.addSelectionListener(mRouteLayer);
@@ -332,29 +331,52 @@ public class MainActivity extends AppCompatActivity {
             map.getUiSettings().setAttributionEnabled(false);
             map.getUiSettings().setLogoEnabled(false);
             map.addOnMapClickListener(mSelectionManager);
+            // TODO: Restore selected site and map position
         });
 
-        // Location layer
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+            onLocationPermissionGranted();
+        } else {
+            mLocationPermissions = new PermissionsManager(new PermissionsListener() {
+                @Override
+                public void onExplanationNeeded(List<String> permissionsToExplain) {
+                    Toast.makeText(MainActivity.this,
+                            getString(R.string.request_location_explanation,
+                                    getString(R.string.app_name)),
+                            Toast.LENGTH_LONG).show();
+                }
 
+                @Override
+                public void onPermissionResult(boolean granted) {
+                    if (granted) {
+                        onLocationPermissionGranted();
+                    }
+                }
+            });
+        }
+    }
 
-//
-//        // If a selected site was saved, restore it
-//        if (routes != null && mPreferences.contains(SELECTED_SITE_KEY)) {
-//            final int selectedSiteId = mPreferences.getInt(SELECTED_SITE_KEY, 0);
-//            for (Route route : routes) {
-//                for (Site site : route.getSites()) {
-//                    if (site.getId() == selectedSiteId) {
-//                        Log.d(TAG, "Restoring selected site " + selectedSiteId);
-//                        mSelectionManager.setSelectedSite(site, route);
-//                    }
-//                }
-//            }
-//        }
-//
-//        // Add layers to the map
-//        mMap.getLayerManager().getLayers().add(routeLineLayer);
-//        mMap.getLayerManager().getLayers().addAll(routeLayers);
-//        mMap.getLayerManager().getLayers().add(locationLayer);
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION})
+    private void onLocationPermissionGranted() {
+        mMap.getMapAsync(map -> {
+            map.getStyle(style -> {
+                final LocationComponent location = map.getLocationComponent();
+                location.activateLocationComponent(LocationComponentActivationOptions.builder(this,
+                                style)
+                        .locationEngineRequest(new LocationEngineRequest.Builder(1000).setPriority(
+                                        LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                                .setFastestInterval(1000)
+                                .build())
+                        .locationComponentOptions(LocationComponentOptions.builder(this)
+                                .accuracyAnimationEnabled(true)
+                                .pulseEnabled(true)
+                                .build())
+                        .locationEngine(new GpsLocationEngine(this))
+                        .build());
+                location.setLocationComponentEnabled(true);
+            });
+        });
     }
 
     @Override
@@ -490,8 +512,7 @@ public class MainActivity extends AppCompatActivity {
             // Deselect the site so that the user does not accidentally enter an observation
             // for it after moving to another site
             mSelectionManager.setSelectedSite(null, null);
-
-            mLayerUpdateExecutor.submit(() -> mRouteLayer.updateVisitedSites());
+            mRouteLayer.updateVisitedSites();
         }
         if (requestCode == REQUEST_CODE_OBSERVATION_LIST) {
             // Observation list has closed, clear selection

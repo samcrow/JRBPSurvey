@@ -110,10 +110,14 @@ public class RouteLayer implements SelectionManager.SelectionListener {
      * Updates the visited state of each site from the database
      */
     public void updateVisitedSites() {
+        Log.d(TAG, "updateVisitedSites()");
         for (List<VisitedSite> sites : mRoutes.values()) {
             for (VisitedSite site : sites) {
                 final IdentifiedObservation observation = mDatabase.getObservationForSite(site.getSite().getId());
                 site.setVisited(observation != null);
+                if (observation != null) {
+                    Log.d(TAG, "Site " + site.mSite.getId() + " visited");
+                }
             }
         }
         mSource.setGeoJson(makeFeatures(mRoutes, mSelectedSite));
@@ -198,14 +202,9 @@ public class RouteLayer implements SelectionManager.SelectionListener {
                 final Feature siteFeature = site.getSite().asGeoJson();
                 siteFeature.addStringProperty("route", routeName);
                 siteFeature.addBooleanProperty("visited", site.isVisited());
-                siteFeature.addStringProperty("visited_s", Boolean.toString(site.isVisited()));
                 siteFeature.addBooleanProperty("selected",
                         selectedSite != null && selectedSite.getId() == site.getSite().getId());
                 points.add(siteFeature);
-
-                if (site.isVisited()) {
-                    Log.d(TAG, siteFeature.toJson());
-                }
             }
         }
         return points;
