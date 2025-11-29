@@ -31,4 +31,6 @@
     <!-- Map colors -->
     <color name="map_route_line">#CCC</color>
     <color name="selected_circle">#86FFFFFF</color>
+    <color name="visited_site">#222</color>
+    <color name="route_casing">#000000</color>
 </resources>
