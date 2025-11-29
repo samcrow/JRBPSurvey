@@ -18,16 +18,16 @@
 package org.samcrow.ridgesurvey;
 
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.content.ContentResolver;
+import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.DrawableRes;
-import androidx.core.app.NotificationCompat.Builder;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +35,15 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationChannelCompat;
+import androidx.core.app.NotificationCompat.Builder;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.fragment.app.Fragment;
 
 import org.joda.time.Duration;
 import org.joda.time.ReadableDuration;
@@ -51,6 +60,8 @@ public class TimerFragment extends Fragment {
 
     private static final int NOTIFICATION_HALF_PERIOD = 3;
     private static final int NOTIFICATION_FULL_PERIOD = 4;
+    private static final String CHANNEL_HALF = "timer_half";
+    private static final String CHANNEL_FULL = "timer_full";
 
     /**
      * The duration to count up to
@@ -91,6 +102,7 @@ public class TimerFragment extends Fragment {
     private final PeriodFormatter mFormatter;
 
     private NotificationManagerCompat mNotificationManager;
+    private ActivityResultLauncher<String> mPermissionLauncher;
 
     TextView mTimeView;
 
@@ -111,7 +123,32 @@ public class TimerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mNotificationManager = NotificationManagerCompat.from(getContext());
+        mNotificationManager = NotificationManagerCompat.from(requireContext());
+        final AudioAttributes audioAttributes =
+                new AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                        .build();
+        final NotificationChannelCompat halfChannel = new NotificationChannelCompat.Builder(
+                CHANNEL_HALF,
+                NotificationManagerCompat.IMPORTANCE_HIGH).setName(requireContext().getString(R.string.app_name))
+                .setSound(getSingleSound(), audioAttributes)
+                .build();
+        mNotificationManager.createNotificationChannel(halfChannel);
+        final NotificationChannelCompat fullChannel = new NotificationChannelCompat.Builder(
+                CHANNEL_FULL,
+                NotificationManagerCompat.IMPORTANCE_HIGH).setName(requireContext().getString(R.string.app_name))
+                .setSound(getDoubleSound(), audioAttributes)
+                .build();
+        mNotificationManager.createNotificationChannel(fullChannel);
+
+        mPermissionLauncher = registerForActivityResult(new RequestPermission(), granted -> {
+            if (granted != Boolean.TRUE) {
+                new AlertDialog.Builder(requireContext()).setTitle(R.string.notification_permission_denied_title)
+                        .setMessage(R.string.notification_permission_denied_message)
+                        .setNeutralButton(android.R.string.ok, null)
+                        .show();
+            }
+        });
     }
 
     @Override
@@ -139,55 +176,62 @@ public class TimerFragment extends Fragment {
     }
 
     private void startTimer() {
-        if (!mRunning) {
-            showTime(Duration.ZERO);
-            mStartStopButton.setImageResource(ICON_STOP);
-            mRunning = true;
-            mTimer = new Timer();
-            mNotificationManager.cancelAll();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                requireContext().checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                        PackageManager.PERMISSION_GRANTED) {
+            mPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+        }
+        if (mRunning) {
+            return;
+        }
+        showTime(Duration.ZERO);
+        mStartStopButton.setImageResource(ICON_STOP);
+        mRunning = true;
+        mTimer = new Timer();
+        mNotificationManager.cancelAll();
 
-            mCurrentDuration = Duration.ZERO;
-            mTimer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    final Activity activity = getActivity();
-                    if (activity == null) {
-                        Log.w(TAG, "Activity gone, canceling timer");
-                        mTimer.cancel();
-                        return;
+        mCurrentDuration = Duration.ZERO;
+        mTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                final Activity activity = getActivity();
+                if (activity == null) {
+                    Log.w(TAG, "Activity gone, canceling timer");
+                    mTimer.cancel();
+                    return;
+                }
+                final Duration newDuration = mCurrentDuration.plus(Duration.standardSeconds(1));
+                mCurrentDuration = newDuration;
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showTime(newDuration);
                     }
-                    final Duration newDuration = mCurrentDuration.plus(Duration.standardSeconds(1));
-                    mCurrentDuration = newDuration;
+                });
 
+                if (newDuration.isEqual(HALF_PERIOD)) {
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            showTime(newDuration);
+                            notifyHalfPeriod();
                         }
                     });
-
-                    if (newDuration.isEqual(HALF_PERIOD)) {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyHalfPeriod();
-                            }
-                        });
-                    }
-
-                    if (newDuration.isEqual(COUNT_UP_PERIOD) || newDuration.isLongerThan(COUNT_UP_PERIOD)) {
-                        mTimer.cancel();
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyStopped();
-                                stopTimer();
-                            }
-                        });
-                    }
                 }
-            }, 1000, 1000);
-        }
+
+                if (newDuration.isEqual(COUNT_UP_PERIOD) ||
+                        newDuration.isLongerThan(COUNT_UP_PERIOD)) {
+                    mTimer.cancel();
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            notifyStopped();
+                            stopTimer();
+                        }
+                    });
+                }
+            }
+        }, 1000, 1000);
     }
 
     private void stopTimer() {
@@ -204,26 +248,45 @@ public class TimerFragment extends Fragment {
     }
 
     private void notifyHalfPeriod() {
-        final Notification notification = new Builder(getContext())
-                .setContentTitle(getString(R.string.title_2_30_elapsed))
-                .setContentText(getString(R.string.content_2_30_elapsed))
+        final Notification notification = new Builder(requireContext(),
+                CHANNEL_HALF).setContentTitle(getString(R.string.title_half_elapsed,
+                        mFormatter.print(HALF_PERIOD.toPeriod())))
+                .setContentText(getString(R.string.content_half_elapsed))
                 .setSmallIcon(R.drawable.ic_timer_white_18dp)
-                .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getActivity().getPackageName() + "/raw/sound_notification_single"))
                 .setAutoCancel(true)
+                .setSound(getSingleSound())
                 .build();
-        mNotificationManager.notify(NOTIFICATION_HALF_PERIOD, notification);
+        try {
+            mNotificationManager.notify(NOTIFICATION_HALF_PERIOD, notification);
+        } catch (SecurityException e) {
+            Log.w(TAG, "Missing permission to send notification", e);
+        }
     }
 
     private void notifyStopped() {
-        final Notification notification = new Builder(getContext())
-                .setContentTitle(getString(R.string.title_5_elapsed))
-                .setContentText(getString(R.string.content_5_elapsed))
+        final Notification notification = new Builder(requireContext(),
+                CHANNEL_FULL).setContentTitle(getString(R.string.title_full_elapsed,
+                        mFormatter.print(COUNT_UP_PERIOD.toPeriod())))
+                .setContentText(getString(R.string.content_full_elapsed))
                 .setSmallIcon(R.drawable.ic_timer_white_18dp)
                 .setAutoCancel(true)
-                .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getActivity().getPackageName() + "/raw/sound_notification_double"))
+                .setSound(getDoubleSound())
                 .build();
         mNotificationManager.cancel(NOTIFICATION_HALF_PERIOD);
-        mNotificationManager.notify(NOTIFICATION_FULL_PERIOD, notification);
+        try {
+            mNotificationManager.notify(NOTIFICATION_FULL_PERIOD, notification);
+        } catch (SecurityException e) {
+            Log.w(TAG, "Missing permission to send notification", e);
+        }
     }
 
+    private @NonNull Uri getSingleSound() {
+        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                requireContext().getPackageName() + "/raw/sound_notification_single");
+    }
+
+    private @NonNull Uri getDoubleSound() {
+        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                requireContext().getPackageName() + "/raw/sound_notification_double");
+    }
 }

@@ -32,6 +32,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Location for navigation -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Timer notifications and sounds -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="false"

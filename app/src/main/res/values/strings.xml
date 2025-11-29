@@ -37,11 +37,13 @@
     <string name="record_observation">Record observation</string>
     <string name="force_upload">Force upload</string>
     <string name="question_load_all_observations">Upload all observations?</string>
-    <string name="title_2_30_elapsed">2:30 elapsed</string>
-    <string name="content_2_30_elapsed">Two-person search time has ended</string>
-    <string name="title_5_elapsed">5:00 elapsed</string>
-    <string name="content_5_elapsed">One-person search time has ended</string>
+    <string name="title_half_elapsed">%s elapsed</string>
+    <string name="content_half_elapsed">Two-person search time has ended</string>
+    <string name="title_full_elapsed">%s elapsed</string>
+    <string name="content_full_elapsed">One-person search time has ended</string>
     <string name="no_previous_route">No previous route</string>
     <string name="observed">Observed</string>
     <string name="request_location_explanation">%s needs location permissions to show your location on the map.</string>
+    <string name="notification_permission_denied_title">No notification permission</string>
+    <string name="notification_permission_denied_message">You have not granted permission to show notifications, so the timer will not be able to play sounds.</string>
 </resources>
