@@ -19,6 +19,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.sensor.compass"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen.multitouch "
+        android:required="false" />
+    <!-- Internet access for data upload -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Location for navigation -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="false"
@@ -26,7 +39,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="DataExtractionRules,GoogleAppIndexingWarning">
 
         <activity
             android:name=".WelcomeActivity"
@@ -50,7 +63,7 @@
 
         <receiver
             android:name=".data.NetworkBroadcastReceiver"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <!-- Try uploading/deleting when the network status changed -->
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
@@ -60,23 +73,5 @@
     </application>
 
 
-    <!-- Internet access for data upload -->
-    <uses-feature
-        android:name="android.hardware.location.gps"
-        android:required="false" />
-
-    <!-- Location for navigation -->
-    <uses-feature
-        android:name="android.hardware.sensor.compass"
-        android:required="false" />
-
-    <uses-feature
-        android:name="android.hardware.touchscreen.multitouch "
-        android:required="false" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Write external storage for tile cache -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>
