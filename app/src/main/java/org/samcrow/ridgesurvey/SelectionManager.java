@@ -126,6 +126,19 @@ public class SelectionManager implements MapLibreMap.OnMapClickListener {
     }
 
     /**
+     * Looks for a site with the provided ID in the known routes and marks it as selected
+     * @param id the site ID
+     */
+    public void setSelectedSiteById(int id) {
+        for (RawSite site : mSites) {
+            if (site.site.getId() == id) {
+                setSelectedSite(site.site, site.route);
+                return;
+            }
+        }
+    }
+
+    /**
      * Adds a selection listener to be notified when the selection changes
      * @param listener
      */

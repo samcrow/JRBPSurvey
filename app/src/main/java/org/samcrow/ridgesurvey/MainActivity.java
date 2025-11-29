@@ -25,8 +25,6 @@ import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -59,6 +57,7 @@ import org.maplibre.android.location.LocationComponentOptions;
 import org.maplibre.android.location.engine.LocationEngineRequest;
 import org.maplibre.android.location.permissions.PermissionsListener;
 import org.maplibre.android.location.permissions.PermissionsManager;
+import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.style.layers.Layer;
@@ -76,6 +75,7 @@ import org.samcrow.ridgesurvey.map.RouteLayer;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -87,10 +87,6 @@ public class MainActivity extends AppCompatActivity {
      * A tag that identifies this class, used for logging and preferences
      */
     private static final String TAG = MainActivity.class.getSimpleName();
-    /**
-     * A permission request code used when requesting location permission
-     */
-    private static final int LOCATION_PERMISSION_CODE = 136;
     /**
      * A code used when starting a DataEntryActivity to get a result from it
      */
@@ -105,14 +101,13 @@ public class MainActivity extends AppCompatActivity {
      */
     public static final LatLngBounds START_POSITION = new LatLngBounds(37.4175457, -122.1919819, 37.3909509, -122.2600484);
     /**
-     * The permission that allows the application to access the user's location
-     */
-    private static final String LOCATION_PERMISSION = "android.permission.ACCESS_FINE_LOCATION";
-    private static final String SELECTED_SITE_KEY = MainActivity.class.getName() + ".SELECTED_SITE_KEY";
-    /**
      * The map view
      */
-    private MapView mMap;
+    private MapView mMapView;
+    /**
+     * The map in the map view
+     */
+    private MapLibreMap mMap;
 
     /**
      * An immutable list of all routes, with their sites
@@ -123,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * The preferences interface
      */
-    private SharedPreferences mPreferences;
+    private Preferences mPreferences;
     /**
      * The selection manager
      */
@@ -189,7 +184,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mRoutes = readRoutes(this);
+        mPreferences = new Preferences(this);
         mSelectionManager = new SelectionManager(mRoutes);
+        final @Nullable Integer selectedSiteId = mPreferences.getSelectedSiteId();
+        if (selectedSiteId != null) {
+            mSelectionManager.setSelectedSiteById(selectedSiteId);
+        }
 
         // Set up upload status tracker
         mUploadStatusTracker = new UploadStatusTracker(this);
@@ -209,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
         tickFilter.addAction(Intent.ACTION_TIME_TICK);
         registerReceiver(new NetworkBroadcastReceiver(), tickFilter);
 
-        mPreferences = getSharedPreferences(TAG, MODE_PRIVATE);
         try {
             setUpMap(savedInstanceState);
         } catch (IOException e) {
@@ -230,48 +229,50 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        mMap.onStart();
+        mMapView.onStart();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mMap.onPause();
+        mMapView.onPause();
+        savePreferences();
+    }
 
-        if (mSelectionManager != null && mPreferences != null) {
-            // Save selected colony
+    private void savePreferences() {
+        final Preferences.Editor editor = mPreferences.edit();
+        if (mSelectionManager != null) {
             final Site selectedSite = mSelectionManager.getSelectedSite();
-            if (selectedSite != null) {
-                Log.d(TAG, "Saving selected site " + selectedSite.getId());
-                final Editor prefsEditor = mPreferences.edit();
-                prefsEditor.putInt(SELECTED_SITE_KEY, selectedSite.getId());
-                prefsEditor.apply();
-            }
+            editor.setSelectedSiteId(selectedSite != null ? selectedSite.getId() : null);
         }
+        if (mMap != null) {
+            editor.setCamera(mMap.getCameraPosition());
+        }
+        editor.apply();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mMap.onResume();
+        mMapView.onResume();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mMap.onStop();
+        mMapView.onStop();
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mMap.onLowMemory();
+        mMapView.onLowMemory();
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        mMap.onSaveInstanceState(outState);
+        mMapView.onSaveInstanceState(outState);
     }
 
     @Override
@@ -284,13 +285,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up the map view in {@link #mMap}
+     * Sets up the map view in {@link #mMapView}
      */
     @SuppressLint("MissingPermission")
     private void setUpMap(@Nullable Bundle savedInstanceState) throws IOException {
-        mMap = findViewById(R.id.map);
-        mMap.onCreate(savedInstanceState);
-        mMap.getMapAsync(map -> {
+        mMapView = findViewById(R.id.map);
+        mMapView.onCreate(savedInstanceState);
+        mMapView.getMapAsync(map -> {
+            mMap = map;
             mRouteLayer = new RouteLayer(new ObservationDatabase(this), mRoutes, mSelectionManager);
             mSelectionManager.addSelectionListener(mRouteLayer);
 
@@ -301,14 +303,21 @@ public class MainActivity extends AppCompatActivity {
             }
             map.setStyle(style);
 
-            final CameraPosition initialCamera = map.getCameraForLatLngBounds(START_POSITION);
-            assert initialCamera != null;
-            map.setCameraPosition(initialCamera);
+            if (savedInstanceState == null) {
+                final CameraPosition savedCamera = mPreferences.getCamera();
+                if (savedCamera != null) {
+                    map.setCameraPosition(savedCamera);
+                } else {
+                    final CameraPosition initialCamera =
+                            Objects.requireNonNull(map.getCameraForLatLngBounds(START_POSITION));
+                    map.setCameraPosition(initialCamera);
+                }
+            }
             map.getUiSettings().setRotateGesturesEnabled(false);
+            map.getUiSettings().setTiltGesturesEnabled(false);
             map.getUiSettings().setAttributionEnabled(false);
             map.getUiSettings().setLogoEnabled(false);
             map.addOnMapClickListener(mSelectionManager);
-            // TODO: Restore selected site and map position
         });
 
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -337,7 +346,7 @@ public class MainActivity extends AppCompatActivity {
     @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION})
     private void onLocationPermissionGranted() {
-        mMap.getMapAsync(map -> {
+        mMapView.getMapAsync(map -> {
             map.getStyle(style -> {
                 final LocationComponent location = map.getLocationComponent();
                 location.activateLocationComponent(LocationComponentActivationOptions.builder(this,
@@ -449,8 +458,7 @@ public class MainActivity extends AppCompatActivity {
                         startUpload();
 
                         final String timeString = DateTimeFormat.shortTime().print(selectedDateTime);
-                        final Snackbar bar = Snackbar.make(
-                                mMap,
+                        final Snackbar bar = Snackbar.make(mMapView,
                                 String.format("Recorded \"%s\" at %s", eventName, timeString),
                                 BaseTransientBottomBar.LENGTH_LONG
                         );
@@ -501,7 +509,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mMap.onDestroy();
+        mMapView.onDestroy();
     }
 
     /**
