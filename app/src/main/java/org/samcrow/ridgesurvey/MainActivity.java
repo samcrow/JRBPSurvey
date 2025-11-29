@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,7 +42,6 @@ import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.room.Room;
 
@@ -172,13 +170,6 @@ public class MainActivity extends AppCompatActivity {
             setTitle("Map - Test Mode");
         } else {
             setTitle(String.format("%s - %s", getString(R.string.map), mRouteState.getRouteName()));
-        }
-
-        // Check location permission
-        final int permission = ActivityCompat.checkSelfPermission(this, LOCATION_PERMISSION);
-        if (permission == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this, new String[]{LOCATION_PERMISSION},
-                    LOCATION_PERMISSION_CODE);
         }
 
         // Set up map graphics
@@ -339,6 +330,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+            mLocationPermissions.requestLocationPermissions(this);
         }
     }
 
