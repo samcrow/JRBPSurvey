@@ -152,6 +152,13 @@ public class TimerFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        mNotificationManager.cancel(NOTIFICATION_HALF_PERIOD);
+        mNotificationManager.cancel(NOTIFICATION_FULL_PERIOD);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -188,7 +195,8 @@ public class TimerFragment extends Fragment {
         mStartStopButton.setImageResource(ICON_STOP);
         mRunning = true;
         mTimer = new Timer();
-        mNotificationManager.cancelAll();
+        mNotificationManager.cancel(NOTIFICATION_HALF_PERIOD);
+        mNotificationManager.cancel(NOTIFICATION_FULL_PERIOD);
 
         mCurrentDuration = Duration.ZERO;
         mTimer.scheduleAtFixedRate(new TimerTask() {
