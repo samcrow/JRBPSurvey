@@ -7,7 +7,8 @@
     "smco_2022_tiles": {
       "type": "raster",
       "tiles": ["asset://tiles-smco-2022/{z}/{x}/{y}.webp"],
-      "maxzoom": 19
+      "maxzoom": 19,
+      "tileSize": 256
     },
     "streams": {
       "type": "geojson",
