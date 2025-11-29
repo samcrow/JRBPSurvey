@@ -151,28 +151,42 @@ private fun lookUpRoute(siteNames: List<Int>, sites: MutableMap<Int, Point>): Li
 }
 
 internal fun createRouteLayers(context: Context): List<Layer> {
-    val selectedCircle = CircleLayer("route_selected_circle", RouteLayer.SOURCE_NAME)
-    selectedCircle.setProperties(
-        circleRadius(literal(16)),
-        circleColor(context.getColor(R.color.selected_circle))
-    )
-    selectedCircle.setFilter(eq(get("selected"), literal(true)))
+    val resources = context.resources
+    val selectedCircle = CircleLayer("route_selected_circle", RouteLayer.SOURCE_NAME).withFilter(
+            eq(
+                get("selected"),
+                true
+            )
+        ).withProperties(
+            circleRadius(resources.getDimension(R.dimen.map_site_selected_circle_diameter)),
+            circleColor(context.getColor(R.color.selected_circle))
+        )
 
     val color = createRouteColor(context)
 
-    val lineLayer = LineLayer("per_route_lines", RouteLayer.SOURCE_NAME)
-    lineLayer.setProperties(
-        lineWidth(literal(3)),
-        lineColor(color)
-    )
+    val lineLayer = LineLayer("per_route_lines", RouteLayer.SOURCE_NAME).withProperties(
+            lineWidth(resources.getDimension(R.dimen.map_route_line_width)), lineColor(color)
+        )
 
-    val circleLayer = CircleLayer("per_route_circles", RouteLayer.SOURCE_NAME)
-    circleLayer.setProperties(
-        circleRadius(literal(8)),
-        circleColor(color)
-    )
+    val circleLayerNonVisited = CircleLayer("per_route_circles", RouteLayer.SOURCE_NAME).withFilter(
+            eq(
+                get("visited"),
+                false
+            )
+        ).withProperties(
+            circleRadius(resources.getDimension(R.dimen.map_site_circle_diameter)),
+            circleColor(color)
+        )
 
-    return listOf(selectedCircle, lineLayer, circleLayer)
+    val circleLayerVisited = CircleLayer(
+        "per_route_circles_visited",
+        RouteLayer.SOURCE_NAME
+    ).withFilter(eq(get("visited"), true)).withProperties(
+            circleRadius(resources.getDimension(R.dimen.map_site_circle_diameter)),
+            circleColor(Color.BLACK)
+        )
+
+    return listOf(selectedCircle, lineLayer, circleLayerNonVisited, circleLayerVisited)
 }
 
 private fun createRouteColor(context: Context): Expression {

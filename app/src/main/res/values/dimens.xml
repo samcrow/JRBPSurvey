@@ -26,4 +26,9 @@
     <dimen name="welcome_divider_height">2dp</dimen>
     <dimen name="welcome_divider_v_margin">20dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+    <!-- Map-related dimensions -->
+    <dimen name="map_site_circle_diameter">4dp</dimen>
+    <dimen name="map_route_line_width">2dp</dimen>
+    <dimen name="map_site_selected_circle_diameter">8dp</dimen>
 </resources>

@@ -18,7 +18,6 @@
 package org.samcrow.ridgesurvey;
 
 import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.createRouteLayers;
-import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.createRouteLines;
 import static org.samcrow.ridgesurvey.map.RouteGraphicsKt.readRoutes;
 
 import android.content.DialogInterface;
@@ -27,10 +26,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
-import android.graphics.Picture;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.PictureDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -57,9 +53,7 @@ import org.maplibre.android.geometry.LatLngBounds;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.style.layers.Layer;
-import org.maplibre.android.style.sources.GeoJsonSource;
 import org.maplibre.android.style.sources.RasterSource;
-import org.maplibre.geojson.FeatureCollection;
 import org.samcrow.ridgesurvey.data.Database;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
@@ -146,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
     // For testing
     private TileServer mTileServer;
+    private RouteLayer mRouteLayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -312,8 +307,8 @@ public class MainActivity extends AppCompatActivity {
     private void setUpMap() throws IOException {
         mMap = findViewById(R.id.map);
         mMap.getMapAsync(map -> {
-            final RouteLayer routeLayer = new RouteLayer(new ObservationDatabase(this), mRoutes, mSelectionManager);
-            mSelectionManager.addSelectionListener(routeLayer);
+            mRouteLayer = new RouteLayer(new ObservationDatabase(this), mRoutes, mSelectionManager);
+            mSelectionManager.addSelectionListener(mRouteLayer);
             final String tileJsonUrl;
             try {
                 tileJsonUrl = mTileServer.getTileJsonUrl().get();
@@ -324,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
 
             final Style.Builder style = new Style.Builder()
                     .fromUri("asset://map_style.json")
-                    .withSources(imagery, routeLayer.getSource());
+                    .withSources(imagery, mRouteLayer.getSource());
             for (Layer layer : createRouteLayers(this)) {
                 style.withLayer(layer);
             }
@@ -496,18 +491,7 @@ public class MainActivity extends AppCompatActivity {
             // for it after moving to another site
             mSelectionManager.setSelectedSite(null, null);
 
-            mLayerUpdateExecutor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    // Tell all route layers to update the visited sites
-//                    for (Layer layer : mMap.getLayerManager().getLayers()) {
-//                        if (layer instanceof RouteLayer) {
-//                            ((RouteLayer) layer).updateVisitedSites();
-//                        }
-//                    }
-//                    mMap.getLayerManager().redrawLayers();
-                }
-            });
+            mLayerUpdateExecutor.submit(() -> mRouteLayer.updateVisitedSites());
         }
         if (requestCode == REQUEST_CODE_OBSERVATION_LIST) {
             // Observation list has closed, clear selection

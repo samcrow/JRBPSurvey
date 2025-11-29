@@ -227,20 +227,20 @@ public final class ObservationDatabase {
      * @throws SQLException if an error occurs
      */
     public IdentifiedObservation getObservationForSite(int siteId) throws SQLException {
-        final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        try {
-            final Cursor result = db.query(TABLE_NAME, null, "site = ?", new String[]{Integer.toString(siteId)}, null, null, "time DESC");
-            try {
+        try (SQLiteDatabase db = mOpenHelper.getReadableDatabase()) {
+            try (Cursor result = db.query(TABLE_NAME,
+                    null,
+                    "site = ?",
+                    new String[]{Integer.toString(siteId)},
+                    null,
+                    null,
+                    "time DESC")) {
                 if (result.moveToNext()) {
                     return createObservation(result);
                 } else {
                     return null;
                 }
-            } finally {
-                result.close();
             }
-        } finally {
-            db.close();
         }
     }
 

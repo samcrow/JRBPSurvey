@@ -17,6 +17,8 @@
 
 package org.samcrow.ridgesurvey.map;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -57,6 +59,7 @@ import java.util.TreeMap;
  * <ul><li>route, string: The route name</li></ul>
  */
 public class RouteLayer implements SelectionManager.SelectionListener {
+    private static final String TAG = "RouteLayer";
     public static final String SOURCE_NAME = "sites_routes_dynamic";
 
     /**
@@ -195,9 +198,14 @@ public class RouteLayer implements SelectionManager.SelectionListener {
                 final Feature siteFeature = site.getSite().asGeoJson();
                 siteFeature.addStringProperty("route", routeName);
                 siteFeature.addBooleanProperty("visited", site.isVisited());
+                siteFeature.addStringProperty("visited_s", Boolean.toString(site.isVisited()));
                 siteFeature.addBooleanProperty("selected",
                         selectedSite != null && selectedSite.getId() == site.getSite().getId());
                 points.add(siteFeature);
+
+                if (site.isVisited()) {
+                    Log.d(TAG, siteFeature.toJson());
+                }
             }
         }
         return points;
