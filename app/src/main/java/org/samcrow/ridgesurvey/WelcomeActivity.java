@@ -20,18 +20,22 @@ package org.samcrow.ridgesurvey;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentActivity;
-
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
+import org.samcrow.ridgesurvey.about.AboutActivity;
 import org.samcrow.ridgesurvey.data.RouteState;
 
-public class WelcomeActivity extends FragmentActivity {
+public class WelcomeActivity extends AppCompatActivity {
 
     private TextView resumeRouteDescription = null;
     private Button startButton = null;
@@ -82,6 +86,24 @@ public class WelcomeActivity extends FragmentActivity {
                 startActivity(mapIntent);
             }
         });
+
+        final ActionBar bar = getSupportActionBar();
+        if (bar != null) {
+            bar.show();
+            bar.setTitle(R.string.app_name);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        final MenuItem about = menu.add(R.string.menu_item_about);
+        about.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        about.setOnMenuItemClickListener(item -> {
+            startActivity(new Intent(WelcomeActivity.this, AboutActivity.class));
+            return true;
+        });
+        return true;
     }
 
     @Override

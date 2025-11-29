@@ -1,21 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ Copyright (c) 2025 Sam Crow
-  ~
-  ~ This file is part of JRBPSurvey.
-  ~
-  ~ JRBPSurvey is free software: you can redistribute it and/or modify it under the terms of the
-  ~ GNU General Public License as published by the Free Software Foundation, either version 3
-  ~ of the License, or (at your option) any later version.
-  ~
-  ~ JRBPSurvey is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-  ~ without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-  ~ PURPOSE. See the GNU General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU General Public License along with Foobar.
-  ~ If not, see <https://www.gnu.org/licenses/>.
-  -->
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -27,12 +10,9 @@
         android:required="false" />
     <uses-feature
         android:name="android.hardware.touchscreen.multitouch "
-        android:required="false" />
-    <!-- Internet access for data upload -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Location for navigation -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!-- Timer notifications and sounds -->
+        android:required="false" /> <!-- Internet access for data upload -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Location for navigation -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Timer notifications and sounds -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -42,12 +22,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="DataExtractionRules,GoogleAppIndexingWarning">
-
         <activity
             android:name=".WelcomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -58,13 +38,13 @@
         -->
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity android:name=".DataEntryActivity" />
-        <activity android:name=".ObservationListActivity" />
-        <activity android:name=".ObservationEditActivity" />
+            android:configChanges="orientation|keyboardHidden|screenSize" android:exported="false" />
+        <activity android:name=".DataEntryActivity" android:exported="false" />
+        <activity android:name=".ObservationListActivity" android:exported="false" />
+        <activity android:name=".ObservationEditActivity" android:exported="false" />
+        <activity android:name=".about.AboutActivity" android:exported="false" />
+
         <service android:name=".data.UploadService" />
     </application>
-
-
 
 </manifest>

@@ -33,4 +33,7 @@
     <dimen name="map_site_selected_circle_diameter">8dp</dimen>
     <!-- Thickness to add on each side of a route line/circle for the casing -->
     <dimen name="route_line_casing_width">0.7dp</dimen>
+
+    <!-- Miscellaneous -->
+    <dimen name="welcome_large_text_size">34sp</dimen>
 </resources>

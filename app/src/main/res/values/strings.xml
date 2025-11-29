@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (c) 2025 Sam Crow
   ~
@@ -15,7 +16,7 @@
   ~ If not, see <https://www.gnu.org/licenses/>.
   -->
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">JRBP Survey</string>
     <string name="map">Map</string>
     <string name="failed_to_load_map">Failed to load map</string>
@@ -46,4 +47,36 @@
     <string name="request_location_explanation">%s needs location permissions to show your location on the map.</string>
     <string name="notification_permission_denied_title">No notification permission</string>
     <string name="notification_permission_denied_message">You have not granted permission to show notifications, so the timer will not be able to play sounds.</string>
+    <string name="start_new_route">Start new route</string>
+    <string name="start">Start</string>
+    <string name="resume_route">Resume route</string>
+    <string name="route_information">Route information</string>
+    <string name="resume">Resume</string>
+    <string name="test_mode">Test mode</string>
+    <string name="test">Test</string>
+    <string name="menu_item_about">About</string>
+
+    <string name="about_heading">%1$s %2$s (%3$d)</string>
+    <string name="about_text_start"><![CDATA[
+<p>Copyright © 2025 Sam Crow</p>
+<p>Jasper Ridge Survey is free software: you can redistribute it and/or modify it under the terms of the
+GNU General Public License as published by the Free Software Foundation, either version 3
+of the License, or (at your option) any later version.</p>
+<p>Jasper Ridge Survey is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE. See the GNU General Public License for more details.</p>
+<br />
+    ]]></string>
+    <string name="about_text_appcompat"><![CDATA[
+<h1>Google libraries</h1>
+<p>This application includes various AndroidX, layout, and design libraries that Google has released
+under the Apache License 2.0.</p>
+<br />
+]]></string>
+    <string name="about_text_maplibre"><![CDATA[
+<h1>MapLibre</h1>
+<p>This application includes the <a href="https://github.com/maplibre/maplibre-native">MapLibre Native</a>
+library.</p>
+<br />
+]]></string>
 </resources>
