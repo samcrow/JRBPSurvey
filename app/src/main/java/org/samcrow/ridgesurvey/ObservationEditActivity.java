@@ -89,8 +89,7 @@ public class ObservationEditActivity extends ObservationActivity {
         final Map<String, Boolean> species = mObservation.getSpecies();
         for (int i = 0; i < mSpeciesContainer.getChildCount(); i++) {
             final View child = mSpeciesContainer.getChildAt(i);
-            if (child instanceof SpeciesView && !isNoSpeciesView((SpeciesView) child)) {
-                final SpeciesView speciesView = (SpeciesView) child;
+            if (child instanceof SpeciesView speciesView && !isNoSpeciesView((SpeciesView) child)) {
                 final Boolean speciesSeen = species.get(speciesView.getSpecies().getColumn());
                 if (speciesSeen != null) {
                     speciesView.setChecked(speciesSeen);
@@ -126,8 +125,7 @@ public class ObservationEditActivity extends ObservationActivity {
         if (observed) {
             for (int i = 0; i < mSpeciesContainer.getChildCount(); i++) {
                 final View view = mSpeciesContainer.getChildAt(i);
-                if (view instanceof SpeciesView && !isNoSpeciesView((SpeciesView) view)) {
-                    final SpeciesView speciesView = (SpeciesView) view;
+                if (view instanceof SpeciesView speciesView && !isNoSpeciesView((SpeciesView) view)) {
                     speciesData.put(speciesView.getSpecies().getColumn(), speciesView.isChecked());
                 }
             }

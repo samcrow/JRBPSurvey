@@ -27,7 +27,8 @@ import androidx.annotation.NonNull;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.samcrow.ridgesurvey.Objects;
+
+import java.util.Objects;
 
 /**
  * Stores route-start events in a database

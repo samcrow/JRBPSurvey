@@ -31,6 +31,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Objects;
+
 /**
  * Displays a species name check box and an optional image.
  * <p/>
@@ -43,33 +45,31 @@ public class SpeciesView extends LinearLayout {
      * The context
      */
     @NonNull
-    private Context mContext;
+    private final Context mContext;
 
     /**
      * The species being displayed
      */
     @NonNull
-    private Species mSpecies;
+    private final Species mSpecies;
 
     /**
      * The check box that the user can use to select the species
      */
     @NonNull
-    private CheckBox mCheckBox;
+    private final CheckBox mCheckBox;
 
     public SpeciesView(@NonNull Context context, @NonNull Species species) {
         super(context);
         setOrientation(HORIZONTAL);
 
-        Objects.requireNonNull(context);
-        Objects.requireNonNull(species);
-        mContext = context;
-        mSpecies = species;
+        mContext = Objects.requireNonNull(context);
+        mSpecies = Objects.requireNonNull(species);
 
         // Inflate the large checkbox and add it to the layout
         final LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.large_checkbox, this, true);
-        mCheckBox = (CheckBox) findViewById(R.id.species_check_box);
+        mCheckBox = findViewById(R.id.species_check_box);
 
         final TextView textView = new TextView(mContext);
         textView.setTextAppearance(mContext, android.R.style.TextAppearance_Large);

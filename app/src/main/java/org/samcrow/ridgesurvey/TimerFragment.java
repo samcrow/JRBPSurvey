@@ -164,9 +164,9 @@ public class TimerFragment extends Fragment {
         // Inflate the layout for this fragment
         final View root = inflater.inflate(R.layout.fragment_timer, container, false);
 
-        mTimeView = (TextView) root.findViewById(R.id.time_view);
+        mTimeView = root.findViewById(R.id.time_view);
 
-        mStartStopButton = (ImageButton) root.findViewById(R.id.start_stop_button);
+        mStartStopButton = root.findViewById(R.id.start_stop_button);
         mStartStopButton.setImageResource(ICON_START);
         mStartStopButton.setOnClickListener(new OnClickListener() {
             @Override

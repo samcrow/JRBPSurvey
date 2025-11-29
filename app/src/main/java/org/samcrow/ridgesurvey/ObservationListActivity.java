@@ -80,7 +80,7 @@ public class ObservationListActivity extends AppCompatActivity {
             final List<IdentifiedObservation> observations = db.getObservationsByTime();
             final ObservationListAdapter adapter = new ObservationListAdapter(observations);
 
-            final ListView list = (ListView) findViewById(R.id.observation_list);
+            final ListView list = findViewById(R.id.observation_list);
             if (list != null) {
                 list.setAdapter(adapter);
             }

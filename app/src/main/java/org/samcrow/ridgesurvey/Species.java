@@ -21,6 +21,8 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.Objects;
+
 /**
  * Represents a species of ant that can be marked present
  *
@@ -60,10 +62,9 @@ public class Species {
      * @param image an image to represent the species, or null if no image is available
      */
     public Species(@NonNull String name, @NonNull String column, @Nullable String description, @DrawableRes int image) {
-        Objects.requireAllNonNull(name, column);
-        mName = name;
+        mName = Objects.requireNonNull(name);
         mDescription = description;
-        mColumn = column;
+        mColumn = Objects.requireNonNull(column);
         mImageResource = image;
     }
 
@@ -131,8 +132,7 @@ public class Species {
         if (!mName.equals(species.mName)) {
             return false;
         }
-        if (mDescription != null ? !mDescription.equals(
-                species.mDescription) : species.mDescription != null) {
+        if (!Objects.equals(mDescription, species.mDescription)) {
             return false;
         }
         return mColumn.equals(species.mColumn);

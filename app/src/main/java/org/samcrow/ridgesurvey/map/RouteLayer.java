@@ -28,7 +28,6 @@ import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.FeatureCollection;
 import org.maplibre.geojson.LineString;
 import org.maplibre.geojson.Point;
-import org.samcrow.ridgesurvey.Objects;
 import org.samcrow.ridgesurvey.Route;
 import org.samcrow.ridgesurvey.SelectionManager;
 import org.samcrow.ridgesurvey.Site;
@@ -39,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Objects;
 
 /**
  * A dynamic data source for routes and sites
@@ -89,8 +89,9 @@ public class RouteLayer implements SelectionManager.SelectionListener {
      */
     public RouteLayer(@NonNull ObservationDatabase database, @NonNull List<Route> routes,
                       @NonNull SelectionManager selectionManager) {
-        Objects.requireAllNonNull(database, routes, selectionManager);
-        mDatabase = database;
+        mDatabase = Objects.requireNonNull(database);
+        Objects.requireNonNull(routes);
+        Objects.requireNonNull(selectionManager);
 
         // Copy sites in, initially not visited
         mRoutes = new TreeMap<>();

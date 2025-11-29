@@ -22,8 +22,9 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import android.view.MenuItem;
 
-import org.samcrow.ridgesurvey.Objects;
 import org.samcrow.ridgesurvey.R;
+
+import java.util.Objects;
 
 /**
  * Controls a menu item that displays and controls the upload process
@@ -53,9 +54,8 @@ public class UploadMenuItemController implements UploadStatusListener {
     @DrawableRes
     private static final int ICON_IN_PROGRESS = R.drawable.ic_cloud_queue_white_24dp;
 
-    public UploadMenuItemController(@NonNull Context context, @NonNull MenuItem item) {
-        Objects.requireAllNonNull(context, item);
-        mItem = item;
+    public UploadMenuItemController(@NonNull MenuItem item) {
+        mItem = Objects.requireNonNull(item);
 
         // Set up
         mItem.setIcon(ICON_DONE);

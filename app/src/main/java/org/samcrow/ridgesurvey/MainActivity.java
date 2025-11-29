@@ -64,7 +64,7 @@ import org.maplibre.android.maps.Style;
 import org.maplibre.android.style.layers.Layer;
 import org.samcrow.ridgesurvey.data.Database;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
-import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
+import org.samcrow.ridgesurvey.data.UploadTrigger;
 import org.samcrow.ridgesurvey.data.ObservationDatabase;
 import org.samcrow.ridgesurvey.data.RouteState;
 import org.samcrow.ridgesurvey.data.SimpleTimedEvent;
@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
     private Database mDatabase;
     private RouteLayer mRouteLayer;
     private PermissionsManager mLocationPermissions;
+    private UploadTrigger mUploadTrigger;
     private ActivityResultLauncher<DataEntryActivity.Arguments> mDataEntryLauncher;
     private ActivityResultLauncher<IdentifiedObservation> mObservationEditLauncher;
     private ActivityResultLauncher<Void> mObservationListLauncher;
@@ -169,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
                         this::onDataEntryClosed);
         mObservationListLauncher = registerForActivityResult(new ObservationListActivity.Contract(),
                 (unused) -> onObservationListClosed());
+        mUploadTrigger = new UploadTrigger(this);
 
         // Set up map graphics
         MapLibre.getInstance(this);
@@ -206,11 +208,6 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction(UploadStatusTracker.ACTION_UPLOAD_SUCCESS);
         filter.addAction(UploadStatusTracker.ACTION_UPLOAD_FAILED);
         manager.registerReceiver(mUploadStatusTracker, filter);
-
-        // Check for upload/delete every minute
-        final IntentFilter tickFilter = new IntentFilter();
-        tickFilter.addAction(Intent.ACTION_TIME_TICK);
-        registerReceiver(new NetworkBroadcastReceiver(), tickFilter);
 
         try {
             setUpMap(savedInstanceState);
@@ -422,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-        final UploadMenuItemController controller = new UploadMenuItemController(this, uploadItem);
+        final UploadMenuItemController controller = new UploadMenuItemController(uploadItem);
         if (mUploadStatusTracker != null) {
             mUploadStatusTracker.addListener(controller);
         }
@@ -499,6 +496,7 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
+        mUploadTrigger.close();
     }
 
     /**

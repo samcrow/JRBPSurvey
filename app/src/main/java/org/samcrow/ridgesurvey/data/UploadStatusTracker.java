@@ -23,12 +23,12 @@ import android.content.Intent;
 import android.database.SQLException;
 import androidx.annotation.NonNull;
 
-import org.samcrow.ridgesurvey.Objects;
 import org.samcrow.ridgesurvey.data.UploadStatusListener.UploadState;
 
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Objects;
 
 /**
  * Keeps track of the status of uploads and updates user interface elements

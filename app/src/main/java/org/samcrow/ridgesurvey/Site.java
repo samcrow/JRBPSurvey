@@ -26,6 +26,8 @@ import org.maplibre.android.geometry.LatLng;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Point;
 
+import java.util.Objects;
+
 /**
  * Represents a site that can be visited
  * <p>
@@ -48,8 +50,7 @@ public final class Site implements Parcelable {
      * @param position the position
      */
     public Site(@NonNull LatLng position, int id) {
-        Objects.requireNonNull(position);
-        mPosition = position;
+        mPosition = Objects.requireNonNull(position);
         mId = id;
     }
 

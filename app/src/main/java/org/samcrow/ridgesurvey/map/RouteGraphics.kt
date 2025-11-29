@@ -69,7 +69,7 @@ internal fun readRoutes(context: Context): List<Route> {
     if (sites.isNotEmpty()) {
         Log.w(TAG, "Sites are not in any route: ${sites.keys}")
     }
-    return Collections.unmodifiableList(routes);
+    return Collections.unmodifiableList(routes)
 }
 
 /**

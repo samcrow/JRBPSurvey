@@ -22,8 +22,9 @@ import androidx.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.view.View;
 
-import org.samcrow.ridgesurvey.Objects;
 import org.samcrow.ridgesurvey.R;
+
+import java.util.Objects;
 
 /**
  * Displays the status of uploads, and allows them to be triggered

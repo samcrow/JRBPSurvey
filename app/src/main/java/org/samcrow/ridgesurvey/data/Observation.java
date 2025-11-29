@@ -20,10 +20,10 @@ package org.samcrow.ridgesurvey.data;
 import androidx.annotation.NonNull;
 
 import org.joda.time.DateTime;
-import org.samcrow.ridgesurvey.Objects;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * An observation made by a user
@@ -79,16 +79,15 @@ public class Observation {
 
     public Observation(@NonNull DateTime time, boolean uploaded, int siteId, @NonNull String routeName,
                        @NonNull Map<String, Boolean> species, @NonNull String notes, boolean observed, boolean test) {
-        Objects.requireAllNonNull(time, routeName, species, notes);
         for (Boolean value : species.values()) {
             Objects.requireNonNull(value);
         }
-        mTime = time;
+        mTime = Objects.requireNonNull(time);
         mUploaded = uploaded;
         mSiteId = siteId;
-        mRouteName = routeName;
-        mSpecies = new HashMap<>(species);
-        mNotes = notes;
+        mRouteName = Objects.requireNonNull(routeName);
+        mSpecies = new HashMap<>(Objects.requireNonNull(species));
+        mNotes = Objects.requireNonNull(notes);
         mObserved = observed;
         mTest = test;
     }

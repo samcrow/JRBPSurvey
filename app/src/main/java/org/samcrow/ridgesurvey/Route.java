@@ -25,6 +25,7 @@ import org.maplibre.geojson.Point;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An immutable set of {@link Site sites} with a name

@@ -36,7 +36,6 @@ import org.joda.time.Duration;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.samcrow.ridgesurvey.Objects;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -47,6 +46,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A service that uploads observations to a server and deletes observations that have been
@@ -95,7 +95,8 @@ public class UploadService extends IntentService {
      */
     private static void writeFormEncodedData(@NonNull Map<String, String> data,
                                              @NonNull PrintStream out) {
-        Objects.requireAllNonNull(data, out);
+        Objects.requireNonNull(data);
+        Objects.requireNonNull(out);
         int i = 0;
         for (Map.Entry<String, String> entry : data.entrySet()) {
             out.print(Uri.encode(entry.getKey()));

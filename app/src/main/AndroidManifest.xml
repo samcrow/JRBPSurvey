@@ -62,15 +62,6 @@
         <activity android:name=".DataEntryActivity" />
         <activity android:name=".ObservationListActivity" />
         <activity android:name=".ObservationEditActivity" />
-
-        <receiver
-            android:name=".data.NetworkBroadcastReceiver"
-            android:exported="true">
-            <intent-filter>
-                <!-- Try uploading/deleting when the network status changed -->
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
         <service android:name=".data.UploadService" />
     </application>
 

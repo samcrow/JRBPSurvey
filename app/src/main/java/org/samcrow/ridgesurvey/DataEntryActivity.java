@@ -149,8 +149,7 @@ public class DataEntryActivity extends ObservationActivity {
         if (observed) {
             for (int i = 0; i < mSpeciesContainer.getChildCount(); i++) {
                 final View view = mSpeciesContainer.getChildAt(i);
-                if (view instanceof SpeciesView && !isNoSpeciesView((SpeciesView) view)) {
-                    final SpeciesView speciesView = (SpeciesView) view;
+                if (view instanceof SpeciesView speciesView && !isNoSpeciesView((SpeciesView) view)) {
                     speciesData.put(speciesView.getSpecies().getColumn(), speciesView.isChecked());
                 }
             }

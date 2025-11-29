@@ -24,7 +24,8 @@ import androidx.annotation.NonNull;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.ReadableDateTime;
-import org.samcrow.ridgesurvey.Objects;
+
+import java.util.Objects;
 
 /**
  * Information about the route that the user is currently surveying
