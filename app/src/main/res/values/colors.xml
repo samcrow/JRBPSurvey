@@ -33,4 +33,28 @@
     <color name="selected_circle">#86FFFFFF</color>
     <color name="visited_site">#222</color>
     <color name="route_casing">#000000</color>
+
+    <!-- 20 colors for routes -->
+    <array name="route_colors">
+        <item>#1F77B4</item>
+        <item>#98DF8A</item>
+        <item>#8C564B</item>
+        <item>#C7C7C7</item>
+        <item>#AEC7E8</item>
+        <item>#D62728</item>
+        <item>#C49C94</item>
+        <item>#BCBD22</item>
+        <item>#FF7F0E</item>
+        <item>#FF9896</item>
+        <item>#E377C2</item>
+        <item>#DBDB8D</item>
+        <item>#FFBB78</item>
+        <item>#9467BD</item>
+        <item>#F7B6D2</item>
+        <item>#17BECF</item>
+        <item>#2CA02C</item>
+        <item>#C5B0D5</item>
+        <item>#7F7F7F</item>
+        <item>#9EDAE5</item>
+    </array>
 </resources>

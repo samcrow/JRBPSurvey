@@ -18,6 +18,7 @@
 package org.samcrow.ridgesurvey.map
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
 import android.util.Log
 import com.google.gson.Gson
@@ -38,9 +39,6 @@ import org.maplibre.android.style.layers.PropertyFactory.circleColor
 import org.maplibre.android.style.layers.PropertyFactory.circleRadius
 import org.maplibre.android.style.layers.PropertyFactory.lineColor
 import org.maplibre.android.style.layers.PropertyFactory.lineWidth
-import org.maplibre.geojson.Feature
-import org.maplibre.geojson.FeatureCollection
-import org.maplibre.geojson.LineString
 import org.maplibre.geojson.Point
 import org.samcrow.ridgesurvey.R
 import org.samcrow.ridgesurvey.Route
@@ -52,29 +50,6 @@ import java.util.TreeMap
 /** Asset path to a GeoJSON file containing the sites */
 private const val SITES_PATH = "map_vectors/sites_wgs84.geojson"
 private const val TAG = "RouteGraphics"
-
-/**
- * Reads the sites_wgs84.geojson and route_order.json files and creates a line string for each
- * route that connects the points in the order defined in route_order.json
- */
-internal fun createRouteLines(context: Context): FeatureCollection {
-    val sites = parseSites(context)
-    val routeOrders = parseRouteOrders(context)
-    val features: MutableList<Feature> = ArrayList(routeOrders.size)
-
-    for ((routeName, siteNames) in routeOrders) {
-        val lineString = lookUpRoute(siteNames, sites)
-        val properties = JsonObject().apply { addProperty("route", routeName) }
-        val feature = Feature.fromGeometry(lineString, properties)
-        features.add(feature)
-    }
-
-    if (sites.isNotEmpty()) {
-        Log.w(TAG, "Sites are not in any route: ${sites.keys}")
-    }
-
-    return FeatureCollection.fromFeatures(features)
-}
 
 /**
  * Reads routes from embedded resources/assets and returns an immutable list of routes
@@ -142,28 +117,27 @@ private fun parseSites(context: Context): MutableMap<Int, Point> {
     return sites
 }
 
-private fun lookUpRoute(siteNames: List<Int>, sites: MutableMap<Int, Point>): LineString {
-    val sitePoints = siteNames.map { name ->
-        sites.remove(name)
-            ?: throw IllegalStateException("Site $name missing or already used in another route")
+internal fun createRouteLayers(context: Context): List<Layer> {
+    return ArrayList<Layer>().apply {
+        add(createSelectionLayer(context.resources))
+        addAll(createCasingLayers(context.resources))
+        addAll(createLineAndCircleLayers(context))
     }
-    return LineString.fromLngLats(sitePoints)
 }
 
-internal fun createRouteLayers(context: Context): List<Layer> {
-    val resources = context.resources
-    val selectedCircle = CircleLayer("route_selected_circle", RouteLayer.SOURCE_NAME).withFilter(
-            eq(
-                get("selected"),
-                true
-            )
-        ).withProperties(
-            circleRadius(resources.getDimension(R.dimen.map_site_selected_circle_diameter)),
-            circleColor(context.getColor(R.color.selected_circle))
+private fun createSelectionLayer(resources: Resources): Layer {
+    return CircleLayer("route_selected_circle", RouteLayer.SOURCE_NAME).withFilter(
+        eq(
+            get("selected"),
+            true
         )
+    ).withProperties(
+        circleRadius(resources.getDimension(R.dimen.map_site_selected_circle_diameter)),
+        circleColor(resources.getColor(R.color.selected_circle, null))
+    )
+}
 
-    val color = createRouteColor(context)
-
+private fun createCasingLayers(resources: Resources): List<Layer> {
     val lineWidth = resources.getDimension(R.dimen.map_route_line_width)
     val casingLineWidth = lineWidth + 2 * resources.getDimension(R.dimen.route_line_casing_width)
     val casingColor = resources.getColor(R.color.route_casing, null)
@@ -171,10 +145,6 @@ internal fun createRouteLayers(context: Context): List<Layer> {
         lineWidth(casingLineWidth),
         lineColor(casingColor)
     )
-    val lines = LineLayer("per_route_lines", RouteLayer.SOURCE_NAME).withProperties(
-            lineWidth(lineWidth), lineColor(color)
-        )
-
     val circleRadius = resources.getDimension(R.dimen.map_site_circle_diameter)
     val casingCircleRadius = circleRadius + resources.getDimension(R.dimen.route_line_casing_width)
     val circleCasing = CircleLayer("per_route_circle_casings", RouteLayer.SOURCE_NAME)
@@ -182,37 +152,39 @@ internal fun createRouteLayers(context: Context): List<Layer> {
             circleRadius(casingCircleRadius),
             circleColor(casingColor)
         )
-    val circlesNonVisited = CircleLayer("per_route_circles", RouteLayer.SOURCE_NAME).withFilter(
-            eq(
-                get("visited"),
-                false
-            )
-        ).withProperties(
-            circleRadius(circleRadius),
-            circleColor(color)
-        )
+    return listOf(lineCasing, circleCasing)
+}
 
+private fun createLineAndCircleLayers(context: Context): List<Layer> {
+    val color = createRouteColor(context)
+    val lineWidth = context.resources.getDimension(R.dimen.map_route_line_width)
+    val lines = LineLayer("per_route_lines", RouteLayer.SOURCE_NAME).withProperties(
+        lineWidth(lineWidth), lineColor(color)
+    )
+    val circleRadius = context.resources.getDimension(R.dimen.map_site_circle_diameter)
+
+    val circlesNonVisited = CircleLayer("per_route_circles", RouteLayer.SOURCE_NAME).withFilter(
+        eq(
+            get("visited"),
+            false
+        )
+    ).withProperties(
+        circleRadius(circleRadius),
+        circleColor(color)
+    )
     val circlesVisited = CircleLayer(
         "per_route_circles_visited",
         RouteLayer.SOURCE_NAME
     ).withFilter(eq(get("visited"), true)).withProperties(
-            circleRadius(circleRadius),
-            circleColor(resources.getColor(R.color.visited_site, null))
-        )
-
-    return listOf(
-        selectedCircle,
-        lineCasing,
-        circleCasing,
-        lines,
-        circlesNonVisited,
-        circlesVisited
+        circleRadius(circleRadius),
+        circleColor(context.resources.getColor(R.color.visited_site, null))
     )
+    return listOf(lines, circlesNonVisited, circlesVisited)
 }
 
 private fun createRouteColor(context: Context): Expression {
     val routeNames = parseRouteOrders(context).keys
-    val colors = Palette.getColorsRepeating()
+    val colors = Palette.getColorsRepeating(context)
     val colorStops = routeNames.map { name ->
         val routeColor = colors.next()
         stop(literal(name), color(routeColor))
