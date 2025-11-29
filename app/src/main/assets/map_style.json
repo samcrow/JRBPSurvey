@@ -4,6 +4,11 @@
   "metadata": {},
   "glyphs": "asset://font/{fontstack}/{range}.pbf",
   "sources": {
+    "smco_2022_tiles": {
+      "type": "raster",
+      "tiles": ["asset://tiles-smco-2022/{z}/{x}/{y}.webp"],
+      "maxzoom": 19
+    },
     "streams": {
       "type": "geojson",
       "data": "asset://map_vectors/streams.geojson"

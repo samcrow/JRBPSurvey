@@ -64,7 +64,6 @@ import org.maplibre.android.location.permissions.PermissionsManager;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.style.layers.Layer;
-import org.maplibre.android.style.sources.RasterSource;
 import org.samcrow.ridgesurvey.data.Database;
 import org.samcrow.ridgesurvey.data.IdentifiedObservation;
 import org.samcrow.ridgesurvey.data.NetworkBroadcastReceiver;
@@ -79,7 +78,6 @@ import org.samcrow.ridgesurvey.map.RouteLayer;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -142,8 +140,6 @@ public class MainActivity extends AppCompatActivity {
     private RouteState mRouteState;
 
     private Database mDatabase;
-
-    private TileServer mTileServer;
     private RouteLayer mRouteLayer;
     private PermissionsManager mLocationPermissions;
 
@@ -238,8 +234,6 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         startUpload();
-
-        mTileServer = new TileServer(this, "tiles-smco-2022");
     }
 
     @Override
@@ -308,17 +302,9 @@ public class MainActivity extends AppCompatActivity {
         mMap.getMapAsync(map -> {
             mRouteLayer = new RouteLayer(new ObservationDatabase(this), mRoutes, mSelectionManager);
             mSelectionManager.addSelectionListener(mRouteLayer);
-            final String tileJsonUrl;
-            try {
-                tileJsonUrl = mTileServer.getTileJsonUrl().get();
-            } catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            final RasterSource imagery = new RasterSource("smco_2022_tiles", tileJsonUrl);
 
             final Style.Builder style = new Style.Builder()
-                    .fromUri("asset://map_style.json")
-                    .withSources(imagery, mRouteLayer.getSource());
+                    .fromUri("asset://map_style.json").withSources(mRouteLayer.getSource());
             for (Layer layer : createRouteLayers(this)) {
                 style.withLayerBelow(layer, "all_site_labels");
             }
@@ -524,7 +510,6 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         mMap.onDestroy();
-        mTileServer.close();
     }
 
     /**
