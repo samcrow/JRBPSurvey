@@ -6,7 +6,7 @@
         "name": "Linepithema humile (Argentine ant)",
         "column": "Linepithema humile",
         "description": "Triangular head, brown. Moves fast, can forage in big groups.",
-        "image": "org.samcrow.jrbpsurvey:drawable/linepithema"
+        "image": "linepithema"
       },
       {
         "name": "Tapinoma sessile",
@@ -17,7 +17,7 @@
         "name": "Liometopum occidentale",
         "column": "Liometopum occidentale",
         "description": "Not shiny, 2 colors, short legs and antennae. Walks slowly. Can forage in groups. Smells good.",
-        "image": "org.samcrow.jrbpsurvey:drawable/liometopum"
+        "image": "liometopum"
       }
     ]
   },
@@ -28,12 +28,12 @@
         "name": "Crematogaster coarctata (acrobat ant)",
         "column": "Crematogaster coarctata",
         "description": "Black and shiny. The abdomen is flat and heart shaped. Head is big and round. Can forage in groups.",
-        "image": "org.samcrow.jrbpsurvey:drawable/crematogaster"
+        "image": "crematogaster"
       },
       {
         "name": "Messor andrei (harvester ant)",
         "column": "Messor andrei",
-        "image": "org.samcrow.jrbpsurvey:drawable/messor"
+        "image": "messor"
       },
       {
         "name": "Temnothorax sp.",
@@ -43,12 +43,12 @@
       {
         "name": "Aphaenogaster occidentalis",
         "column": "Aphaenogaster occidentalis",
-        "image": "org.samcrow.jrbpsurvey:drawable/aphaenogaster"
+        "image": "aphaenogaster"
       },
       {
         "name": "Pheidole californica",
         "column": "Pheidole californica",
-        "image": "org.samcrow.jrbpsurvey:drawable/pheidole"
+        "image": "pheidole"
       },
       {
         "name": "Cardiocondyla mauritanica (introduced)",
@@ -67,13 +67,13 @@
         "name": "Prenolepis imparis (winter ant)",
         "column": "Prenolepis imparis",
         "description": "Black and shiny, legs and antennae lighter. Small head. Can forage in big groups.",
-        "image": "org.samcrow.jrbpsurvey:drawable/prenolepis"
+        "image": "prenolepis"
       },
       {
         "name": "Formica sp.",
         "column": "Formica sp.",
         "description": "Not shiny, 2 colors, 2 humps on the thorax, long legs and antennae. Run fast, very hard to catch. Usually 1-2 workers.",
-        "image": "org.samcrow.jrbpsurvey:drawable/formica"
+        "image": "formica"
       },
       {
         "name": "Formica moki",
@@ -87,7 +87,7 @@
         "name": "Camponotus sp. (carpenter ant)",
         "column": "Camponotus sp.",
         "description": "Very big, different sizes of workers. Brown/ amber/ or black, shiny. One hump on the thorax. Can forage in small groups.",
-        "image": "org.samcrow.jrbpsurvey:drawable/camponotus"
+        "image": "camponotus"
       }
     ]
   },
@@ -97,17 +97,17 @@
       {
         "name": "Solenopsis molesta",
         "column": "Solenopsis molesta",
-        "image": "org.samcrow.jrbpsurvey:drawable/solenopsis"
+        "image": "solenopsis"
       },
       {
         "name": "Stenamma sp.",
         "column": "Stenamma sp.",
-        "image": "org.samcrow.jrbpsurvey:drawable/stenamma"
+        "image": "stenamma"
       },
       {
         "name": "Neivamyrmex",
         "column": "Neivamyrmex",
-        "image": "org.samcrow.jrbpsurvey:drawable/neivamyrmex"
+        "image": "neivamyrmex"
       }
     ]
   },

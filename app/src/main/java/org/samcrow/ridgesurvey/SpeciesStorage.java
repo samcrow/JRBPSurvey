@@ -18,8 +18,9 @@
 package org.samcrow.ridgesurvey;
 
 import android.content.Context;
-import androidx.annotation.DrawableRes;
 import android.util.Log;
+
+import androidx.annotation.DrawableRes;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -57,9 +58,7 @@ public class SpeciesStorage {
      * It must have a "column" key corresponding to a string that contains the column name used
      * to submit data on the species.
      * <p/>
-     * If the "image" value is present, it must be a string in the form package:type/name.
-     * package must be the name of a package that contains resources. type must be "drawable"
-     * or "mipmap". name must be the name of a drawable or mipmap resource in the package.
+     * If the "image" value is present, it must be the name of a drawable resource in the package.
      *
      * @param context a context. Must not be null.
      * @param source  the stream to read from. Must not be null. The stream will not be closed.
@@ -95,7 +94,15 @@ public class SpeciesStorage {
                             @DrawableRes
                             int speciesImage = 0;
                             if (resourceName != null && !resourceName.equals(JSONObject.NULL)) {
-                                speciesImage = context.getResources().getIdentifier(resourceName, null, null);
+                                speciesImage = context.getResources()
+                                        .getIdentifier(resourceName,
+                                                "drawable",
+                                                context.getPackageName());
+                                if (speciesImage == 0) {
+                                    Log.w(TAG,
+                                            "Failed to find resource " + resourceName +
+                                                    " for species " + speciesName);
+                                }
                             }
                             speciesList.add(
                                     new Species(speciesName, column, description, speciesImage));
