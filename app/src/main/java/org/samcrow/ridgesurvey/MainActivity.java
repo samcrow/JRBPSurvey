@@ -91,7 +91,8 @@ public class MainActivity extends AppCompatActivity {
     /**
      * The initial position of the map
      */
-    public static final LatLngBounds START_POSITION = new LatLngBounds(37.4175457, -122.1919819, 37.3909509, -122.2600484);
+    public static final LatLngBounds START_POSITION =
+            new LatLngBounds(37.42, -122.205, 37.39, -122.25);
     /**
      * The map view
      */
@@ -313,6 +314,10 @@ public class MainActivity extends AppCompatActivity {
                     map.setCameraPosition(initialCamera);
                 }
             }
+            // Prevent accidentally zooming out too far or moving outside the map area
+            map.setMinZoomPreference(13);
+            map.setLatLngBoundsForCameraTarget(START_POSITION);
+
             map.getUiSettings().setRotateGesturesEnabled(false);
             map.getUiSettings().setTiltGesturesEnabled(false);
             map.getUiSettings().setAttributionEnabled(false);
